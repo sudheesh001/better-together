@@ -4,6 +4,7 @@
 build/
 captures/
 
+.idea/*
 .idea/workspace.xml
 .idea/libraries
 

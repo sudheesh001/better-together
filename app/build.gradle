@@ -40,4 +40,5 @@ dependencies {
     // include sample plugins
     compile project(path: ':plugin-video-base')
     compile project(path: ':plugin-shopping-base')
+    compile project(path: ':plugin-cardgame-base')
 }
