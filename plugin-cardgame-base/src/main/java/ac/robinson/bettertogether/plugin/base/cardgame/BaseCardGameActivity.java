@@ -19,6 +19,8 @@ package ac.robinson.bettertogether.plugin.base.cardgame;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.CardDeck;
+
 public class BaseCardGameActivity extends AppCompatActivity {
 
     @Override

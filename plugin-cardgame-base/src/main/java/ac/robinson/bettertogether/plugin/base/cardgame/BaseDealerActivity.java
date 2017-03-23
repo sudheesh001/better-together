@@ -21,6 +21,9 @@ import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import ac.robinson.bettertogether.plugin.base.cardgame.CardDeck;
 
 public class BaseDealerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
@@ -75,7 +78,10 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        mOpenDeckImage.setImageResource(R.drawable.ace_of_diamonds);
+        if (e.getAction() == 1) {
+            Toast.makeText(getApplicationContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
+            mOpenDeckImage.setImageResource(R.drawable.ace_of_diamonds);
+        }
         return false;
     }
 
