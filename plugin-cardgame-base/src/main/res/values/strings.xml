@@ -15,5 +15,7 @@
   -->
 
 <resources>
-    <string name="cardgame_plugin_name">Better Together plugin: Card Game</string>
+    <string name="cardgame_plugin_name">Card Game</string>
+    <string name="dealer_plugin_name">Dealer</string>
+    <string name="player_plugin_name">Player</string>
 </resources>

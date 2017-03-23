@@ -13,10 +13,15 @@
   ~ or implied. See the License for the specific language governing
   ~ permissions and limitations under the License.
 -->
-<manifest
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="ac.robinson.bettertogether.plugin.base.cardgame">
 
     <uses-sdk tools:overrideLibrary="jp.wasabeef.recyclerview" />
+
+    <application>
+        <activity android:name=".BaseDealerActivity" />
+        <activity android:name=".BasePlayerActivity"></activity>
+    </application>
 
 </manifest>
