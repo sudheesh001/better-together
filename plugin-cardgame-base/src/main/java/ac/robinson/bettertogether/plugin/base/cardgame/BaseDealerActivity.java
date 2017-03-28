@@ -16,6 +16,7 @@
 
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -29,6 +30,9 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 
     ImageView mDeckImage, mOpenDeckImage, mDiscardedDeckImage;
 
+
+    private GestureDetectorCompat mDetector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +43,18 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
         mDiscardedDeckImage = (ImageView) findViewById(R.id.discardedDeckImage);
 
         mDeckImage.setImageResource(R.drawable.card_back);
+
+        mDetector = new GestureDetectorCompat(this,this);
+        // Set the gesture detector as the double tap
+        // listener.
+        mDetector.setOnDoubleTapListener(this);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        this.mDetector.onTouchEvent(event);
+        // Be sure to call the superclass implementation
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -78,15 +94,14 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        if (e.getAction() == 1) {
-            Toast.makeText(getApplicationContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
-            mOpenDeckImage.setImageResource(R.drawable.ace_of_diamonds);
-        }
+        Toast.makeText(getApplicationContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
+        mOpenDeckImage.setImageResource(R.drawable.ace_of_diamonds);
         return false;
     }
 
     @Override
     public boolean onDoubleTapEvent(MotionEvent e) {
+
         return false;
     }
 }

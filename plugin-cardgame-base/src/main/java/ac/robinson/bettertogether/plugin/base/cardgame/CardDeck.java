@@ -28,7 +28,7 @@ public class CardDeck {
 
     // Mention the entire suite of cards.
     private String[] mCardSuit = {"clubs", "diamonds", "hearts", "spades"};
-    private String[] mCards = {"ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"};
+    private String[] mCards = {"ace", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "jack", "queen", "king"};
     private String[] mSpecialCards =  {"black_joker", "red_joker"};
 
     private String CONNECTOR = "_of_";
