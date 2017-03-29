@@ -39,7 +39,8 @@ public class CardDeck {
     protected List<String> mCardNames;
 
     public Map<Integer, String> mCardDeck;
-    public List<Integer> mCardValues;
+    public List<Integer> mCardValues;          // This contains the list of cards available.
+    public List<Integer> mDiscardedCardValues; // Add card number to this list when the card is picked.
 
     // Generate the card names using mCards + '_of_' + mCardSuit + '.png' and assign
     CardDeck() {
@@ -66,13 +67,30 @@ public class CardDeck {
         }
     }
 
+    // Fisher-Yates shuffle
+
+    public static <T> void shuffleList(List<T> a) {
+        int n = a.size();
+        for (int i = 0; i < n; i++) {
+            int change = i + Random.nextInt(n - i);
+            swap(a, i, change);
+        }
+    }
+
+    private static <T> void swap(List<T> a, int i, int change) {
+        T helper = a.get(i);
+        a.set(i, a.get(change));
+        a.set(change, helper);
+    }
+
     public void cardShuffle() {
         // Shuffle the List<Integers>
         // Pick top[0]
+        shuffleList(mCardValues);
     }
 
     public Integer getRandomCardFromDeck() {
-            return 1; // Sample
+        return 1; // Sample
     }
 
     public Integer getTopCardFromDeck() {
