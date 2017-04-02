@@ -16,6 +16,8 @@
 
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
+import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,19 +26,27 @@ import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.CardUtils.Card;
+import ac.robinson.bettertogether.plugin.base.cardgame.CardUtils.CardDeck;
 
 public class BaseDealerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     ImageView mDeckImage, mOpenDeckImage, mDiscardedDeckImage;
 
+    private Context mContext;
 
     private GestureDetectorCompat mDetector;
+
+    private CardDeck cardDeck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_dealer);
+
+        mContext = this;
+
+        cardDeck = new CardDeck(mContext);
 
         mDeckImage = (ImageView) findViewById(R.id.deckImage);
         mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);
@@ -95,7 +105,8 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
     @Override
     public boolean onDoubleTap(MotionEvent e) {
         Toast.makeText(getApplicationContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
-        mOpenDeckImage.setImageResource(R.drawable.ace_of_diamonds);
+        Card card = cardDeck.drawCard(0,false);
+        mDeckImage.setImageBitmap(BitmapFactory.decodeResource(getResources(), card.getBitmap()));
         return false;
     }
 
