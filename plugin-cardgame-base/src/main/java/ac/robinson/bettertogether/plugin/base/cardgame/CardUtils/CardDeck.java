@@ -24,6 +24,8 @@ import android.content.Context;
 
 import java.lang.String;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -39,6 +41,48 @@ public class CardDeck implements CardActions{
     private List<Card> mDiscardedCardDeck;
 
     private final Integer deckCount = 1; // TODO Hardcoded to a single deck for now
+
+    // get each of the decks.
+    public List<Card> getClosedCardDeck() {
+        return mClosedCardDeck;
+    }
+
+    public List<Card> getOpenCardDeck() {
+        return mOpenedCardDeck;
+    }
+
+    public List<Card> getDiscardedCardDeck() {
+        return mDiscardedCardDeck;
+    }
+
+    // Method to add card to deck.
+    public void addCardToDeck(String deck, Card mCard) {
+        switch(deck) {
+            case "open":
+                mOpenedCardDeck.add(mCard);
+                break;
+            case "discarded":
+                mOpenedCardDeck.add(mCard);
+                break;
+            case "closed":
+                mDiscardedCardDeck.add(mCard);
+                break;
+        }
+    }
+
+    public void removeCardFromDeck(String deck, Card mCard) {
+        switch(deck) {
+            case "open":
+                mOpenedCardDeck.remove(0);
+                break;
+            case "discarded":
+                mDiscardedCardDeck.remove(0);
+                break;
+            case "closed":
+                mClosedCardDeck.remove(0);
+                break;
+        }
+    }
     
     public CardDeck(Context mContext) {
 
@@ -70,27 +114,6 @@ public class CardDeck implements CardActions{
 
     // Fisher-Yates shuffle
 
-    public static <T> void shuffleList(List<T> a) {
-        Random r = new Random();
-        int n = a.size();
-        for (int i = 0; i < n; i++) {
-            int change = i + r.nextInt(n - i);
-            swap(a, i, change);
-        }
-    }
-
-    private static <T> void swap(List<T> a, int i, int change) {
-        T helper = a.get(i);
-        a.set(i, a.get(change));
-        a.set(change, helper);
-    }
-
-    public void cardShuffle() {
-        // Shuffle the List<Integers>
-        // Pick top[0]
-//        shuffleList(mCardValues);
-    }
-
     public String getRandomCardFromDeck() {
 
 //        return mCardDeck.get(mCardValues.get(0)); // Sample
@@ -104,6 +127,10 @@ public class CardDeck implements CardActions{
                 return mClosedCardDeck.get(0);
         }
         return null;
+    }
+
+    public void shuffleCardDeck(List<Card> deck) {
+        Collections.shuffle(deck);
     }
 
     @Override
