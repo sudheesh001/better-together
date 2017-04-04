@@ -94,11 +94,12 @@ public class PluginHostActivity extends BaseHotspotActivity implements PluginCli
 
 		String requestedHotspotUrl = intent.getStringExtra(EXTRA_HOTSPOT_URL);
 
-		if (TextUtils.isEmpty(requestedHotspotUrl)) {
-			Log.e(TAG, "NO PLUGIN SPECIFIED"); // TODO: fix this - show a Toast?
-			finish();
-			return;
-		}
+		//FIXME commented to bypass connection
+//		if (TextUtils.isEmpty(requestedHotspotUrl)) {
+//			Log.e(TAG, "NO PLUGIN SPECIFIED"); // TODO: fix this - show a Toast?
+//			finish();
+//			return;
+//		}
 
 		if (savedInstanceState != null) {
 			mIsConnectionHost = savedInstanceState.getBoolean("mIsConnectionHost");
@@ -165,7 +166,9 @@ public class PluginHostActivity extends BaseHotspotActivity implements PluginCli
 		mPluginViewAdapter.clearPlugins();
 		mPluginActivityViewAdapter.clearActivities();
 
-		final String currentPluginPackage = ConnectionOptions.getPackageFromHotspotUrl(getHotspotUrl());
+//		FIXME For connection shortcut
+//		final String currentPluginPackage = ConnectionOptions.getPackageFromHotspotUrl(getHotspotUrl());
+		final String currentPluginPackage = "ac.robinson.bettertogether.plugin.base.cardgame";
 		boolean currentPluginFound = false;
 
 		for (Plugin plugin : plugins.values()) {
@@ -255,17 +258,17 @@ public class PluginHostActivity extends BaseHotspotActivity implements PluginCli
 				break;
 
 			case HotspotManagerService.EVENT_LOCAL_CLIENT_ERROR:
-			case HotspotManagerService.EVENT_DEVICE_DISCONNECTED:
-				if (!isFinishing()) {
-					Intent intent = new Intent(PluginHostActivity.this, ConnectionSetupActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(ConnectionSetupActivity.RECONNECT_EXISTING_HOTSPOT, getHotspotUrl());
-					startActivity(intent);
-					finish(); // TODO: on slower devices do we need to wait until activity is definitely connected before this?
-					Log.d(TAG, "Local client error - re-showing connection activity");
-					// our connection to the server failed - will attempt to reconnect automatically, but close current plugin
-				}
-				break;
+//			case HotspotManagerService.EVENT_DEVICE_DISCONNECTED: FIXME For connection shortcircuit
+//				if (!isFinishing()) {
+//					Intent intent = new Intent(PluginHostActivity.this, ConnectionSetupActivity.class);
+//					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//					intent.putExtra(ConnectionSetupActivity.RECONNECT_EXISTING_HOTSPOT, getHotspotUrl());
+//					startActivity(intent);
+//					finish(); // TODO: on slower devices do we need to wait until activity is definitely connected before this?
+//					Log.d(TAG, "Local client error - re-showing connection activity");
+//					// our connection to the server failed - will attempt to reconnect automatically, but close current plugin
+//				}
+//				break;
 			default:
 				break;
 		}
