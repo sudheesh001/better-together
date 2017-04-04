@@ -58,6 +58,7 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
         // Set the gesture detector as the double tap
         // listener.
         mDetector.setOnDoubleTapListener(this);
+        cardDeck.shuffleCardDeck(cardDeck.getClosedCardDeck());
     }
 
     @Override
@@ -107,6 +108,11 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
         Toast.makeText(getApplicationContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
         Card card = cardDeck.drawCard(0,false);
         mDeckImage.setImageBitmap(BitmapFactory.decodeResource(getResources(), card.getBitmap()));
+        // This opens up the card and its available. Now
+        // Step 1: Move it to open deck.
+        cardDeck.addCardToDeck("open", card);
+        // Step 2: Remove card from ClosedDeck.
+        cardDeck.removeCardFromDeck("closed", card);
         return false;
     }
 
