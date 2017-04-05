@@ -17,9 +17,9 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -28,8 +28,12 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckType;
 
 public class BaseDealerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
@@ -41,7 +45,9 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 
     private GestureDetectorCompat mDetector;
 
-    private CardDeck cardDeck;
+    private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 3 but later we want any number of decks as possible in line with NUI
+
+    List<CardDeck> mCardsDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +56,7 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 //
         mContext = this;
 //
-        cardDeck = new CardDeck(mContext);
+        cardDeck = new CardDeck(mContext, CardDeckType.CLOSED);
 //
 //        mDeckImage = (ImageView) findViewById(R.id.deckImage);
 //        mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);
@@ -64,12 +70,15 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 //        mDetector.setOnDoubleTapListener(this);
 //        cardDeck.shuffleCardDeck(cardDeck.getClosedCardDeck());
 
+        mCardsDisplay = new ArrayList<>();
+
+        mCardsDisplay.add(cardDeck);
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         // set our MainGamePanel as the View
-        setContentView(new DealerPanel(this, cardDeck.drawCard(0,false)));
+        setContentView(new DealerPanel(this, mCardsDisplay));
         Log.d(TAG, "View added");
     }
 
@@ -122,9 +131,9 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
         mDeckImage.setImageBitmap(card.getBitmap());
         // This opens up the card and its available. Now
         // Step 1: Move it to open deck.
-        cardDeck.addCardToDeck("open", card);
+        cardDeck.addCardToDeck(card);
         // Step 2: Remove card from ClosedDeck.
-        cardDeck.removeCardFromDeck("closed", card);
+        cardDeck.removeCardFromDeck(card);
         return false;
     }
 

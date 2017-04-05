@@ -21,75 +21,59 @@ package ac.robinson.bettertogether.plugin.base.cardgame.models;
  */
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.view.MotionEvent;
 
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
-public class CardDeck implements CardActions{
+public class CardDeck extends Renderable implements CardActions{
 
     private Context mContext;
     // Mention the entire suite of cards.
 
-    private List<Card> mClosedCardDeck;
-    private List<Card> mOpenedCardDeck;
-    private List<Card> mDiscardedCardDeck;
+    private Bitmap bitmap;
+    private boolean hidden;
 
-    private final Integer deckCount = 1; // TODO Hardcoded to a single deck for now
 
-    // get each of the decks.
-    public List<Card> getClosedCardDeck() {
-        return mClosedCardDeck;
-    }
+    private List<Card> mCards;
+    private CardDeckType deckType;
+    private Integer deckCount = 1;
 
-    public List<Card> getOpenCardDeck() {
-        return mOpenedCardDeck;
-    }
-
-    public List<Card> getDiscardedCardDeck() {
-        return mDiscardedCardDeck;
-    }
 
     // Method to add card to deck.
-    public void addCardToDeck(String deck, Card mCard) {
-        switch(deck) {
-            case "open":
-                mOpenedCardDeck.add(mCard);
-                break;
-            case "discarded":
-                mOpenedCardDeck.add(mCard);
-                break;
-            case "closed":
-                mDiscardedCardDeck.add(mCard);
-                break;
-        }
+    public void addCardToDeck(Card mCard) {
+        this.mCards.add(mCard);
     }
 
-    public void removeCardFromDeck(String deck, Card mCard) {
-        switch(deck) {
-            case "open":
-                mOpenedCardDeck.remove(0);
-                break;
-            case "discarded":
-                mDiscardedCardDeck.remove(0);
-                break;
-            case "closed":
-                mClosedCardDeck.remove(0);
-                break;
-        }
+    public Card removeCardFromDeck(Card card) {
+        return mCards.remove(0);
     }
     
-    public CardDeck(Context mContext) {
+    public CardDeck(Context mContext, CardDeckType deckType) {
 
         this.mContext  = mContext;
-        this.mClosedCardDeck = new ArrayList<>();
-        this.mOpenedCardDeck = new ArrayList<>();
-        this.mDiscardedCardDeck = new ArrayList<>();
+        this.deckType = deckType;
 
+        switch (this.deckType){
+            case CLOSED:
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back_stack);break;
+            case OPEN:
+                break;
+            case DISCARDED:
+                break;
+        }
+
+        this.mCards = new ArrayList<>();
+
+        // TODO currently fixed to one but a deck can have more than one deck of cards
         for (int i = 0, cardId = 1; i < deckCount ; i++) {
 
             for (Suits suit: Suits.values()) {
@@ -104,7 +88,7 @@ public class CardDeck implements CardActions{
                     card.setBitmap(BitmapFactory.decodeResource(mContext.getResources(),
                             mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName()
                             )));
-                    mClosedCardDeck.add(card);
+                    mCards.add(card);
                 }
             }
         }
@@ -123,10 +107,10 @@ public class CardDeck implements CardActions{
 
     public Card getTopCardFromDeck(Integer deckCode) {
 
-        switch (deckCode) {
-            case 0:
-                return mClosedCardDeck.get(0);
+        if( mCards.size() > 0) {
+            return mCards.get(0);
         }
+
         return null;
     }
 
@@ -155,4 +139,30 @@ public class CardDeck implements CardActions{
     public boolean showCard(Card card) {
         return false;
     }
+
+    public void draw(Canvas canvas) {
+        canvas.drawBitmap(bitmap, this.x - (bitmap.getWidth() / 2), this.y - (bitmap.getHeight() / 2), null);
+    }
+
+    /**
+     * Handles the {@link MotionEvent.ACTION_DOWN} event. If the event happens on the
+     * bitmap surface then the touched state is set to <code>true</code> otherwise to <code>false</code>
+     * @param eventX - the event's X coordinate
+     * @param eventY - the event's Y coordinate
+     */
+    @SuppressWarnings("JavadocReference")
+    public void handleActionDown(int eventX, int eventY) {
+        if (eventX >= (x - bitmap.getWidth() / 2) && (eventX <= (x + bitmap.getWidth()/2))) {
+            if (eventY >= (y - bitmap.getHeight() / 2) && (y <= (y + bitmap.getHeight() / 2))) {
+                // droid touched
+                setTouched(true);
+            } else {
+                setTouched(false);
+            }
+        } else {
+            setTouched(false);
+        }
+
+    }
+
 }

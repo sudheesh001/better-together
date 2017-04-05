@@ -2,14 +2,19 @@ package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import java.util.List;
+
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
 /**
  * Created by t-apmehr on 4/5/2017.
@@ -20,20 +25,39 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = DealerPanel.class.getSimpleName();
 
     private DealerThread thread;
-    private Card mCard;
+    private List<? extends Renderable> mCards;
 
-    public DealerPanel(Context context, Card card) {
+    public DealerPanel(Context context, List<? extends Renderable> cards) {
         super(context);
         // adding the callback (this) to the surface holder to intercept events
         getHolder().addCallback(this);
 
-        this.mCard = card;
+        this.mCards = cards;
 
         // create the game loop thread
         thread = new DealerThread(getHolder(), this);
 
-        // make the GamePanel focusable so it can handle events
+        // make the Panel focusable so it can handle events
         setFocusable(true);
+
+    }
+
+    private void setupPanel(Canvas canvas) {
+
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        int screenWidth = (metrics.widthPixels);
+        int screenHeight = ((int) (metrics.heightPixels*0.9))+80;
+        //  Set paint options
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(3);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.WHITE);
+
+        canvas.drawLine(0,(screenHeight/3)*2,screenWidth,(screenHeight/3)*2,paint);
+        canvas.drawLine(0,(screenHeight/3),screenWidth,(screenHeight/3),paint);
+
+
     }
 
     @Override
@@ -47,6 +71,8 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback {
         // we can safely start the game loop
         thread.setRunning(true);
         thread.start();
+
+
     }
 
     @Override
@@ -70,7 +96,9 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback {
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             // delegating event handling to the droid
-            mCard.handleActionDown((int)event.getX(), (int)event.getY());
+            for( Renderable r : mCards) {
+                r.handleActionDown((int) event.getX(), (int) event.getY());
+            }
 
             // check if in the lower part of the screen we exit
             if (event.getY() > getHeight() - 50) {
@@ -80,16 +108,24 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback {
                 Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
             }
         } if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
             // the gestures
-            if (mCard.isTouched()) {
-                // the droid was picked up and is being dragged
-                mCard.setX((int)event.getX());
-                mCard.setY((int)event.getY());
+            for( Renderable r : mCards) {
+                if (r.isTouched()) {
+                    // the droid was picked up and is being dragged
+                    r.setX((int) event.getX());
+                    r.setY((int) event.getY());
+                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
+                }
             }
         } if (event.getAction() == MotionEvent.ACTION_UP) {
             // touch was released
-            if (mCard.isTouched()) {
-                mCard.setTouched(false);
+            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
+            for( Renderable r : mCards) {
+                if (r.isTouched()) {
+                    r.setTouched(false);
+                    Log.d(TAG, "Setting to False "+ r.toString()+"Coords: x=" + event.getX() + ",y=" + event.getY());
+                }
             }
         }
         return true;
@@ -97,7 +133,13 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback {
 
     public void render(Canvas canvas) {
         canvas.drawColor(Color.BLACK);
-        mCard.draw(canvas);
+
+        setupPanel(canvas);
+
+        for (Renderable r: mCards) {
+            r.draw(canvas);
+        }
+
     }
 
 }

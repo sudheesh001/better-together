@@ -8,7 +8,7 @@ import android.view.MotionEvent;
  * Created by t-apmehr on 4/2/2017.
  */
 
-public class Card {
+public class Card extends Renderable{
 
     private Integer cardId;
 
@@ -19,10 +19,6 @@ public class Card {
     private boolean hidden;
 
 // variable for moving the view
-
-    private int x; // X cooridnate
-    private int y; // Y coordinate
-    private boolean touched; // if it has been touched or picked up
 
     public Integer getCardId() {
         return cardId;
@@ -71,30 +67,6 @@ public class Card {
         this.hidden = hidden;
     }
 
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public boolean isTouched() {
-        return touched;
-    }
-
-    public void setTouched(boolean touched) {
-        this.touched = touched;
-    }
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x - (bitmap.getWidth() / 2), y - (bitmap.getHeight() / 2), null);
