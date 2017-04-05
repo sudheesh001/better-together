@@ -12,6 +12,9 @@ public abstract class Renderable {
     public int y; // Y coordinate
     private boolean touched; // if it has been touched or picked up
 
+    protected final int scaledWidth = 300;
+    protected final int scaledHeight = 375;
+
     public abstract void handleActionDown(int eventX, int eventY);
 
     public abstract void draw(Canvas canvas);

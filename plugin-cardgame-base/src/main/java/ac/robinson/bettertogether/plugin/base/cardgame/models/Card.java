@@ -2,7 +2,6 @@ package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.view.MotionEvent;
 
 /**
@@ -20,10 +19,6 @@ public class Card extends Renderable{
     private boolean hidden;
 
 // variable for moving the view
-
-
-    private final int scaledWidth = 200;
-    private final int scaledHeight = 250;
 
     public Integer getCardId() {
         return cardId;
@@ -62,6 +57,8 @@ public class Card extends Renderable{
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
+        setX(x + (bitmap.getWidth()/2));
+        setY(y + (bitmap.getHeight()/2));
     }
 
     public boolean isHidden() {
@@ -74,7 +71,7 @@ public class Card extends Renderable{
 
 
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, x + (bitmap.getWidth() / 2), y + (bitmap.getHeight()/4), null);
+        canvas.drawBitmap(bitmap, x, y , null);
     }
 
 

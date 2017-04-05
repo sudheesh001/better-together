@@ -64,12 +64,17 @@ public class CardDeck extends Renderable implements CardActions{
 
         switch (this.deckType){
             case CLOSED:
-                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back_stack);break;
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back_stack);
+                this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
+                break;
             case OPEN:
                 break;
             case DISCARDED:
                 break;
         }
+
+        setX(x + (bitmap.getWidth()/ 2));
+        setY(y + (bitmap.getHeight()/2));
 
         this.mCards = new ArrayList<>();
 
@@ -141,7 +146,7 @@ public class CardDeck extends Renderable implements CardActions{
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, this.x - (bitmap.getWidth() / 2), this.y - (bitmap.getHeight() / 2), null);
+        canvas.drawBitmap(bitmap, x, y , null);
     }
 
     /**
