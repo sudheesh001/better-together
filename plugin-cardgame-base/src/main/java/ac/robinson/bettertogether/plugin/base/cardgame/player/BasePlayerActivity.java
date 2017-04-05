@@ -14,10 +14,12 @@
  * permissions and limitations under the License.
  */
 
-package ac.robinson.bettertogether.plugin.base.cardgame;
+package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import ac.robinson.bettertogether.plugin.base.cardgame.R;
 
 public class BasePlayerActivity extends AppCompatActivity {
 

@@ -14,20 +14,19 @@
  * permissions and limitations under the License.
  */
 
-package ac.robinson.bettertogether.plugin.base.cardgame.CardUtils;
+package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 /**
  * Created by t-sus on 3/23/2017.
  */
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 
 import java.lang.String;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
@@ -102,7 +101,9 @@ public class CardDeck implements CardActions{
                     card.setRank(rank);
                     card.setName(rank + Constants.CONNECTOR + suit);
                     card.setHidden(true);
-                    card.setBitmap(mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName()));
+                    card.setBitmap(BitmapFactory.decodeResource(mContext.getResources(),
+                            mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName()
+                            )));
                     mClosedCardDeck.add(card);
                 }
             }

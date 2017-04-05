@@ -20,7 +20,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ac.robinson.bettertogether.plugin.base.cardgame.BaseDealerActivity">
+    tools:context="ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity">
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">

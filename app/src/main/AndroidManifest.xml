@@ -284,7 +284,7 @@
 		</activity>
 
 		<activity
-			android:name="ac.robinson.bettertogether.plugin.base.cardgame.BaseDealerActivity"
+			android:name="ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity"
 			android:exported="true"
 			android:icon="@mipmap/ic_dealer"
 			android:label="@string/dealer_plugin_name"
@@ -313,7 +313,7 @@
 		</activity>
 
 		<activity
-			android:name="ac.robinson.bettertogether.plugin.base.cardgame.BasePlayerActivity"
+			android:name="ac.robinson.bettertogether.plugin.base.cardgame.player.BasePlayerActivity"
 			android:exported="true"
 			android:icon="@mipmap/ic_player"
 			android:label="@string/player_plugin_name"

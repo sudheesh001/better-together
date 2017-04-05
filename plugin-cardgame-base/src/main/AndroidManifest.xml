@@ -20,8 +20,8 @@
     <uses-sdk tools:overrideLibrary="jp.wasabeef.recyclerview" />
 
     <application>
-        <activity android:name=".BaseDealerActivity" />
-        <activity android:name=".BasePlayerActivity"></activity>
+        <activity android:name=".dealer.BaseDealerActivity" />
+        <activity android:name=".player.BasePlayerActivity"></activity>
     </application>
 
 </manifest>

@@ -20,6 +20,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ac.robinson.bettertogether.plugin.base.cardgame.BasePlayerActivity">
+    tools:context="ac.robinson.bettertogether.plugin.base.cardgame.player.BasePlayerActivity">
 
 </android.support.constraint.ConstraintLayout>
