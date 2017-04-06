@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -31,6 +32,9 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
     private SurfaceView surfaceView;
     private GestureDetectorCompat mDetector;
     private Context mContext;
+    private long startTime;
+
+    private static final int MAX_DURATION = 200;
 
     public DealerPanel(Context context, List<? extends Renderable> cards) {
         super(context);
@@ -116,8 +120,11 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             // delegating event handling to the droid
-            for( Renderable r : mCards) {
-                r.handleActionDown((int) event.getX(), (int) event.getY());
+            if (System.currentTimeMillis() - startTime <= MAX_DURATION) {
+                Toast.makeText(getContext(), "Double Tapped Found. Checking.", Toast.LENGTH_SHORT).show();
+                for( Renderable r : mCards) {
+                    r.handleActionDown((int) event.getX(), (int) event.getY());
+                }
             }
 
             // check if in the lower part of the screen we exit
@@ -141,6 +148,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
         } if (event.getAction() == MotionEvent.ACTION_UP) {
             // touch was released
             Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
+            startTime = System.currentTimeMillis();
             for( Renderable r : mCards) {
                 if (r.isTouched()) {
                     r.setTouched(false);

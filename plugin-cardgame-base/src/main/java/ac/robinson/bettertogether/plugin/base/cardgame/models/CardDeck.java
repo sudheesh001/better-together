@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import java.lang.String;
 import java.util.ArrayList;
@@ -160,6 +161,7 @@ public class CardDeck extends Renderable implements CardActions{
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 // droid touched
+                Toast.makeText(mContext, "Double Tapped On Card.", Toast.LENGTH_SHORT).show();
                 setTouched(true);
             } else {
                 setTouched(false);

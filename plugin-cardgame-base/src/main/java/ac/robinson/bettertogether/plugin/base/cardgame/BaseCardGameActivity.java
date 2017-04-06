@@ -16,10 +16,13 @@
 
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 public class BaseCardGameActivity extends AppCompatActivity {
+
+    private String mUser = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

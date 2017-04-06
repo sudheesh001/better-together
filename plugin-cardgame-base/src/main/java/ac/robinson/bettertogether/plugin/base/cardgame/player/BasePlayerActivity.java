@@ -17,6 +17,7 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.content.Context;
+import android.provider.Settings.Secure;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,8 +37,6 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 public class BasePlayerActivity extends BasePluginActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     private static final String TAG = BasePlayerActivity.class.getSimpleName();
-    // Can we also get a user identifier string?
-    private String mUser;
 
     ImageView mPlayerDeck;
 
