@@ -120,6 +120,10 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             // delegating event handling to the droid
+            for( Renderable r : mCards) {
+                r.handleActionDown((int) event.getX(), (int) event.getY());
+            }
+
             if (System.currentTimeMillis() - startTime <= MAX_DURATION) {
                 Toast.makeText(getContext(), "Double Tapped Found. Checking.", Toast.LENGTH_SHORT).show();
                 for( Renderable r : mCards) {
@@ -132,17 +136,17 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
                 thread.setRunning(false);
                 ((Activity)getContext()).finish();
             } else {
-                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
+//                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
             }
         } if (event.getAction() == MotionEvent.ACTION_MOVE) {
-            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
+//            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
             // the gestures
             for( Renderable r : mCards) {
                 if (r.isTouched()) {
                     // the droid was picked up and is being dragged
                     r.setX((int) event.getX());
                     r.setY((int) event.getY());
-                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
+//                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
                 }
             }
         } if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -152,7 +156,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
             for( Renderable r : mCards) {
                 if (r.isTouched()) {
                     r.setTouched(false);
-                    Log.d(TAG, "Setting to False "+ r.toString()+"Coords: x=" + event.getX() + ",y=" + event.getY());
+//                    Log.d(TAG, "Setting to False "+ r.toString()+"Coords: x=" + event.getX() + ",y=" + event.getY());
                 }
             }
         }

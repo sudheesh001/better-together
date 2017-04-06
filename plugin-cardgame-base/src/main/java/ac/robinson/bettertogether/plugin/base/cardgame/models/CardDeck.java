@@ -161,7 +161,9 @@ public class CardDeck extends Renderable implements CardActions{
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 // droid touched
-                Toast.makeText(mContext, "Double Tapped On Card.", Toast.LENGTH_SHORT).show();
+                if( isTouched() ) {
+                    Toast.makeText(mContext, "Double Tapped On Card.", Toast.LENGTH_SHORT).show();
+                }
                 setTouched(true);
             } else {
                 setTouched(false);
