@@ -9,24 +9,19 @@ import android.graphics.Paint;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.widget.Toast;
 
 import java.util.List;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.common.MyGestureListener;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
 /**
  * Created by t-apmehr, t-sus on 4/5/2017.
  */
 
-public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
 
     private static final String TAG = DealerPanel.class.getSimpleName();
 
@@ -43,19 +38,19 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         getHolder().addCallback(this);
         surfaceView = this;
         mContext = context;
-        mDetector = new GestureDetectorCompat(mContext, new MyGestureListener());
-
-        mDetector.setIsLongpressEnabled(true);
-
-        mDetector.setOnDoubleTapListener(this);
-
-        surfaceView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mDetector.onTouchEvent(event);
-                return true;
-            }
-        });
+//        mDetector = new GestureDetectorCompat(mContext, this);
+//
+//        mDetector.setIsLongpressEnabled(true);
+//
+//        mDetector.setOnDoubleTapListener(this);
+//
+//        surfaceView.setOnTouchListener(new OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                mDetector.onTouchEvent(event);
+//                return true;
+//            }
+//        });
 
         this.mCards = cards;
 
@@ -167,49 +162,4 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     }
 
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTap(MotionEvent e) {
-        Toast.makeText(getContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        return false;
-    }
 }

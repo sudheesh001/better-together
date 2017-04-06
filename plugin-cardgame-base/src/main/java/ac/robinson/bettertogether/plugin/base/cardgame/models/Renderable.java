@@ -24,7 +24,7 @@ public abstract class Renderable {
     }
 
     public void setX(int x){
-        this.x = x;
+        this.x = x-scaledWidth/2;
     }
 
     public int getY(){
@@ -32,7 +32,7 @@ public abstract class Renderable {
     }
 
     public void setY(int y){
-        this.y = y;
+        this.y = y-scaledHeight/2;
     }
 
     public boolean isTouched(){
