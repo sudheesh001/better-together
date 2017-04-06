@@ -17,6 +17,7 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -27,10 +28,12 @@ import android.widget.ImageView;
 
 import java.util.List;
 
+import ac.robinson.bettertogether.api.BasePluginActivity;
+import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 
-public class BasePlayerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+public class BasePlayerActivity extends BasePluginActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     private static final String TAG = BasePlayerActivity.class.getSimpleName();
     // Can we also get a user identifier string?
@@ -52,6 +55,13 @@ public class BasePlayerActivity extends AppCompatActivity implements GestureDete
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(new PlayerPanel(this, cardDeck));
         // setContentView(R.layout.activity_base_player);
+    }
+
+    @Override
+    protected void onMessageReceived(@NonNull BroadcastMessage message) {
+        // The identifier is the Card that has been selected.
+        // This is the card that the user performs an action on.
+
     }
 
     @Override

@@ -35,7 +35,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckType;
 
-public class BaseDealerActivity extends AppCompatActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+public class BaseDealerActivity extends AppCompatActivity {
 
     private static final String TAG = BaseDealerActivity.class.getSimpleName();
 
@@ -43,7 +43,7 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
 
     private Context mContext;
 
-    private GestureDetectorCompat mDetector;
+    private GestureDetector mDetector;
 
     private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 3 but later we want any number of decks as possible in line with NUI
 
@@ -80,66 +80,5 @@ public class BaseDealerActivity extends AppCompatActivity implements GestureDete
         // set our MainGamePanel as the View
         setContentView(new DealerPanel(this, mCardsDisplay));
         Log.d(TAG, "View added");
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event){
-        this.mDetector.onTouchEvent(event);
-        // Be sure to call the superclass implementation
-        return super.onTouchEvent(event);
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTap(MotionEvent e) {
-        Toast.makeText(getApplicationContext(), "DOUBLE TAP",Toast.LENGTH_SHORT).show();
-        Card card = cardDeck.drawCard(0,false);
-        mDeckImage.setImageBitmap(card.getBitmap());
-        // This opens up the card and its available. Now
-        // Step 1: Move it to open deck.
-        cardDeck.addCardToDeck(card);
-        // Step 2: Remove card from ClosedDeck.
-        cardDeck.removeCardFromDeck(card);
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent e) {
-
-        return false;
     }
 }
