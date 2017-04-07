@@ -19,9 +19,6 @@
 
     <uses-sdk tools:overrideLibrary="jp.wasabeef.recyclerview" />
 
-    <application>
-        <activity android:name=".BaseDealerActivity" />
-        <activity android:name=".BasePlayerActivity"></activity>
-    </application>
+    <application></application>
 
 </manifest>

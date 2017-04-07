@@ -1,7 +1,4 @@
-package ac.robinson.bettertogether.plugin.base.cardgame.CardUtils;
-
-import ac.robinson.bettertogether.plugin.base.cardgame.CardUtils.Card;
-import ac.robinson.bettertogether.plugin.base.cardgame.CardUtils.CardDeck;
+package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 /**
  * Created by t-apmehr on 4/2/2017.
