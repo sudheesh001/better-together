@@ -18,20 +18,15 @@ package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckType;
 
@@ -55,6 +50,7 @@ public class BaseDealerActivity extends AppCompatActivity {
         mContext = this;
 //
         cardDeck = new CardDeck(mContext, CardDeckType.CLOSED);
+        mOpenDeck = new CardDeck(mContext, CardDeckType.OPEN);
 //
 //        mDeckImage = (ImageView) findViewById(R.id.deckImage);
 //        mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);
@@ -71,6 +67,7 @@ public class BaseDealerActivity extends AppCompatActivity {
         mCardsDisplay = new ArrayList<>();
 
         mCardsDisplay.add(cardDeck);
+        mCardsDisplay.add(mOpenDeck);
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen

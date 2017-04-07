@@ -74,6 +74,11 @@ public class Card extends Renderable{
         canvas.drawBitmap(bitmap, x, y , null);
     }
 
+    @Override
+    public boolean isOverlapping(Renderable image) {
+        return false;
+    }
+
 
     /**
      * Handles the {@link MotionEvent.ACTION_DOWN} event. If the event happens on the

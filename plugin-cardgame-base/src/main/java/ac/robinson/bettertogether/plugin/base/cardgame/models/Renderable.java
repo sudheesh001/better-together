@@ -42,4 +42,6 @@ public abstract class Renderable {
     public void setTouched(boolean touched){
         this.touched = touched;
     }
+
+    public abstract boolean isOverlapping(Renderable image);
 }

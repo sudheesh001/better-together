@@ -157,6 +157,13 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
                 if (r.isTouched()) {
                     r.setTouched(false);
 //                    Log.d(TAG, "Setting to False "+ r.toString()+"Coords: x=" + event.getX() + ",y=" + event.getY());
+                    for (Renderable r2: mCards
+                            ) {
+                        if( r2.equals(r)){
+                            continue;
+                        }
+                        r2.isOverlapping(r);
+                    }
                 }
             }
         }

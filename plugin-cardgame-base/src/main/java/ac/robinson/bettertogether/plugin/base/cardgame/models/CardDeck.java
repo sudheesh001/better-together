@@ -31,6 +31,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
@@ -69,13 +70,16 @@ public class CardDeck extends Renderable implements CardActions{
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 break;
             case OPEN:
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ace_of_spades);
+                this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 break;
             case DISCARDED:
                 break;
         }
 
-        setX(x + (bitmap.getWidth()/ 2));
-        setY(y + (bitmap.getHeight()/2));
+        Random rand = new Random();
+        setX(x + rand.nextInt(500) + (bitmap.getWidth()/ 2));
+        setY(y + rand.nextInt(1000)+ (bitmap.getHeight()/2));
 
         this.mCards = new ArrayList<>();
 
@@ -148,6 +152,19 @@ public class CardDeck extends Renderable implements CardActions{
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y , null);
+    }
+
+    @Override
+    public boolean isOverlapping(Renderable image) {
+
+        if (image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
+            if (image.getY() >= (getY() - bitmap.getHeight() ) && (image.getY() <= (getY() + bitmap.getHeight() ))) {
+                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
