@@ -31,6 +31,7 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
@@ -69,13 +70,16 @@ public class CardDeck extends Renderable implements CardActions{
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 break;
             case OPEN:
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ace_of_spades);
+                this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 break;
             case DISCARDED:
                 break;
         }
 
-        setX(x + (bitmap.getWidth()/ 2));
-        setY(y + (bitmap.getHeight()/2));
+        Random rand = new Random();
+        setX(x + rand.nextInt(500) + (bitmap.getWidth()/ 2));
+        setY(y + rand.nextInt(1000) + (bitmap.getHeight()/2));
 
         this.mCards = new ArrayList<>();
 
@@ -150,6 +154,19 @@ public class CardDeck extends Renderable implements CardActions{
         canvas.drawBitmap(bitmap, x, y , null);
     }
 
+    @Override
+    public boolean isOverlapping(Renderable image) {
+
+        if (image.getX() >= (getX() - bitmap.getWidth()) && (image.getX() <= (getX() + bitmap.getWidth()))) {
+            if (image.getY() >= (getY() - bitmap.getHeight()) && (image.getY() <= (getY() + bitmap.getHeight()))) {
+                Toast.makeText(mContext, "Overlap detected !!", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Handles the {@link MotionEvent.ACTION_DOWN} event. If the event happens on the
      * bitmap surface then the touched state is set to <code>true</code> otherwise to <code>false</code>
@@ -161,7 +178,9 @@ public class CardDeck extends Renderable implements CardActions{
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 // droid touched
-                Toast.makeText(mContext, "Double Tapped On Card.", Toast.LENGTH_SHORT).show();
+                if (isTouched()) {
+                    Toast.makeText(mContext, "Double Tapped On Card.", Toast.LENGTH_SHORT).show();
+                }
                 setTouched(true);
             } else {
                 setTouched(false);

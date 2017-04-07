@@ -58,6 +58,7 @@ public class BaseDealerActivity extends BasePluginActivity {
         mContext = this;
 //
         cardDeck = new CardDeck(mContext, CardDeckType.CLOSED);
+        mOpenDeck = new CardDeck(mContext, CardDeckType.OPEN);
 //
 //        mDeckImage = (ImageView) findViewById(R.id.deckImage);
 //        mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);
@@ -74,6 +75,7 @@ public class BaseDealerActivity extends BasePluginActivity {
         mCardsDisplay = new ArrayList<>();
 
         mCardsDisplay.add(cardDeck);
+        mCardsDisplay.add(mOpenDeck);
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen
