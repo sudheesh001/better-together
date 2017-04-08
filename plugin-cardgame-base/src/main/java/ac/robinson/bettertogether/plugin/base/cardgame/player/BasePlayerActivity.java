@@ -17,6 +17,7 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.provider.Settings.Secure;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 
@@ -56,6 +58,12 @@ public class BasePlayerActivity extends BasePluginActivity implements GestureDet
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(new PlayerPanel(this, cardDeck));
         // setContentView(R.layout.activity_base_player);
+
+        MessageHelper m = MessageHelper.getInstance();
+        SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+        String mName = prefs.getString("Name", null);
+        MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+        sendMessage(m.Discovery(mName, mPlayerType));
     }
 
     @Override
@@ -63,6 +71,23 @@ public class BasePlayerActivity extends BasePluginActivity implements GestureDet
         // The identifier is the Card that has been selected.
         // This is the card that the user performs an action on.
         Log.d(TAG, "Player Gets: " + message.getMessage());
+        MessageHelper m = MessageHelper.getInstance();
+
+        if (message.getType() == 999) {
+            // This is the discover protocol message received.
+            // 1. Update connectionMap and broadcast again.
+            m.ReceivedDiscoveryMessage(message.getMessage());
+            SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+            String mName = prefs.getString("Name", null);
+            MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+            sendMessage(m.Discovery(mName, mPlayerType));
+
+            // TODO: Will this cause a network flood?
+        }
+        else {
+            m.parse(message);
+            m.PlayerReceivedMessage();
+        }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
 

@@ -36,6 +36,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:recyclerview-v7:25.3.0'
     compile 'jp.wasabeef:recyclerview-animators:2.0.0'
+    compile 'com.google.code.gson:gson:2.8.0'
     compile 'ac.robinson.bettertogether:api:1.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }

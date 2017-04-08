@@ -16,6 +16,7 @@
 
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
+import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,5 +29,11 @@ public class BaseCardGameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_card_game);
+
+        // save the player to shared preferences
+        SharedPreferences.Editor prefs = this.getSharedPreferences("Details", MODE_PRIVATE).edit();
+        prefs.putString("Name", mUser);
+        prefs.commit();
+
     }
 }
