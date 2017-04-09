@@ -27,7 +27,6 @@ import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +43,7 @@ public class CardDeck extends Renderable implements CardActions{
     private Bitmap bitmap;
     private boolean hidden;
 
+    private boolean touched;
 
     private List<Card> mCards;
     private CardDeckType deckType;
@@ -155,6 +155,16 @@ public class CardDeck extends Renderable implements CardActions{
     }
 
     @Override
+    public boolean isTouched() {
+        return this.touched;
+    }
+
+    @Override
+    public void setTouched(boolean touched) {
+        this.touched = touched;
+    }
+
+    @Override
     public boolean isOverlapping(Renderable image) {
 
         if (image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
@@ -174,20 +184,24 @@ public class CardDeck extends Renderable implements CardActions{
      * @param eventY - the event's Y coordinate
      */
     @SuppressWarnings("JavadocReference")
-    public void handleActionDown(int eventX, int eventY) {
+    public Gesture handleActionDown(int eventX, int eventY) {
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 // droid touched
-                if( isTouched() ) {
-                    Toast.makeText(mContext, "Double Tapped On Card.", Toast.LENGTH_SHORT).show();
+                if (System.currentTimeMillis() - startTime <= MAX_DURATION) {
+                    Toast.makeText(mContext, "Double Tapped on Card !!", Toast.LENGTH_SHORT).show();
+                    return Gesture.DOUBLE_TAP;
                 }
                 setTouched(true);
+                startTime = System.currentTimeMillis();
+                return Gesture.SINGLE_TAP;
             } else {
                 setTouched(false);
             }
         } else {
             setTouched(false);
         }
+        return Gesture.NONE;
 
     }
 

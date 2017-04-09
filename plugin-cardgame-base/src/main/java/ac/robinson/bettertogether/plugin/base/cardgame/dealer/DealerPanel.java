@@ -12,10 +12,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
 /**
@@ -27,36 +30,26 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
     private static final String TAG = DealerPanel.class.getSimpleName();
 
     private DealerThread thread;
-    private List<? extends Renderable> mCards;
+    private List<Renderable> mCards = new ArrayList<>();
 
     private SurfaceView surfaceView;
     private GestureDetectorCompat mDetector;
     private Context mContext;
-    private long startTime;
 
-    private static final int MAX_DURATION = 200;
 
-    public DealerPanel(Context context, List<? extends Renderable> cards) {
+    public DealerPanel(Context context, List<Renderable> cards, List<CardDeck> cardDecks) {
         super(context);
         // adding the callback (this) to the surface holder to intercept events
         getHolder().addCallback(this);
         surfaceView = this;
         mContext = context;
-//        mDetector = new GestureDetectorCompat(mContext, this);
-//
-//        mDetector.setIsLongpressEnabled(true);
-//
-//        mDetector.setOnDoubleTapListener(this);
-//
-//        surfaceView.setOnTouchListener(new OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                mDetector.onTouchEvent(event);
-//                return true;
-//            }
-//        });
 
-        this.mCards = cards;
+        if(cards !=  null) {
+            this.mCards.addAll(cards);
+        }
+        if(cardDecks != null) {
+            this.mCards.addAll(cardDecks);
+        }
 
         // create the game loop thread
         thread = new DealerThread(getHolder(), this);
@@ -120,59 +113,58 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             // delegating event handling to the droid
-            for( Renderable r : mCards) {
-                r.handleActionDown((int) event.getX(), (int) event.getY());
-            }
-
-            if (System.currentTimeMillis() - startTime <= MAX_DURATION) {
-                Toast.makeText(getContext(), "Double Tapped Found. Checking.", Toast.LENGTH_SHORT).show();
-                for( Renderable r : mCards) {
-                    r.handleActionDown((int) event.getX(), (int) event.getY());
+            for (int i = 0; i < mCards.size(); i++) {
+                Renderable r = mCards.get(i);
+                if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.SINGLE_TAP)) {
+                    Log.d(TAG, r.toString() + " Single Tap " + r.getX() + "," + r.getY());
+                    Collections.swap(mCards, i, mCards.size() - 1);
                 }
-            }
 
-            // check if in the lower part of the screen we exit
-            if (event.getY() > getHeight() - 50) {
-                thread.setRunning(false);
-                ((Activity)getContext()).finish();
-            } else {
+
+                // check if in the lower part of the screen we exit
+                if (event.getY() > getHeight() - 50) {
+                    thread.setRunning(false);
+                    ((Activity) getContext()).finish();
+                } else {
 //                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
-            }
-        } if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
-            // the gestures
-            for( Renderable r : mCards) {
-                if (r.isTouched()) {
-                    // the droid was picked up and is being dragged
-                    r.setX((int) event.getX());
-                    r.setY((int) event.getY());
-//                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
-                }
-            }
-        } if (event.getAction() == MotionEvent.ACTION_UP) {
-            // touch was released
-            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
-            startTime = System.currentTimeMillis();
-            for( Renderable r : mCards) {
-                if (r.isTouched()) {
-                    r.setTouched(false);
-//                    Log.d(TAG, "Setting to False "+ r.toString()+"Coords: x=" + event.getX() + ",y=" + event.getY());
-                    for (Renderable r2: mCards
-                            ) {
-                        if( r2.equals(r)){
-                            continue;
-                        }
-                        r2.isOverlapping(r);
-                    }
                 }
             }
         }
-        return true;
-    }
+            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+//            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
+                // the gestures
+                for (Renderable r : mCards) {
+                    if (r.isTouched()) {
+                        // the droid was picked up and is being dragged
+                        r.setX((int) event.getX());
+                        r.setY((int) event.getY());
+//                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
+                    }
+                }
+            }
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // touch was released
+//            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
+                for (Renderable r : mCards) {
+                    if (r.isTouched()) {
+                        r.setTouched(false);
+                        Log.d(TAG, "Setting to False " + r.toString() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
+                        for (Renderable r2 : mCards
+                                ) {
+                            if (r2.equals(r)) {
+                                continue;
+                            }
+                            r2.isOverlapping(r);
+                        }
+                    }
+                }
+            }
+            return true;
+        }
 
     public void render(Canvas canvas) {
-        canvas.drawColor(Color.BLACK);
 
+        canvas.drawColor(Color.BLACK);
         setupPanel(canvas);
 
         for (Renderable r: mCards) {

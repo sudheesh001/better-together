@@ -15,7 +15,10 @@ public abstract class Renderable {
     protected final int scaledWidth = 300;
     protected final int scaledHeight = 375;
 
-    public abstract void handleActionDown(int eventX, int eventY);
+    protected static final int MAX_DURATION = 200;
+    protected long startTime;
+
+    public abstract Gesture handleActionDown(int eventX, int eventY);
 
     public abstract void draw(Canvas canvas);
 
@@ -35,13 +38,9 @@ public abstract class Renderable {
         this.y = y-scaledHeight/2;
     }
 
-    public boolean isTouched(){
-        return this.touched;
-    }
+    public abstract boolean isTouched();
 
-    public void setTouched(boolean touched){
-        this.touched = touched;
-    }
+    public abstract void setTouched(boolean touched);
 
     public abstract boolean isOverlapping(Renderable image);
 }

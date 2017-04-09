@@ -73,7 +73,7 @@ public class BaseDealerActivity extends AppCompatActivity {
         // making it full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         // set our MainGamePanel as the View
-        setContentView(new DealerPanel(this, mCardsDisplay));
+        setContentView(new DealerPanel(this, null, mCardsDisplay));
         Log.d(TAG, "View added");
     }
 }

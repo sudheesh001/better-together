@@ -17,6 +17,7 @@ public class Card extends Renderable{
     private Suits suit;
     private Bitmap bitmap;
     private boolean hidden;
+    private boolean touched;
 
 // variable for moving the view
 
@@ -69,6 +70,15 @@ public class Card extends Renderable{
         this.hidden = hidden;
     }
 
+    @Override
+    public boolean isTouched() {
+        return this.touched;
+    }
+
+    @Override
+    public void setTouched(boolean touched) {
+        this.touched = touched;
+    }
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y , null);
@@ -87,17 +97,19 @@ public class Card extends Renderable{
      * @param eventY - the event's Y coordinate
      */
     @SuppressWarnings("JavadocReference")
-    public void handleActionDown(int eventX, int eventY) {
+    public Gesture handleActionDown(int eventX, int eventY) {
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 // droid touched
                 setTouched(true);
+                return Gesture.SINGLE_TAP;
             } else {
                 setTouched(false);
             }
         } else {
             setTouched(false);
         }
+        return Gesture.NONE;
 
     }
 
