@@ -38,7 +38,7 @@ public class BaseDealerActivity extends AppCompatActivity {
 
     private Context mContext;
 
-    private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 3 but later we want any number of decks as possible in line with NUI
+    private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 4 but later we want any number of decks as possible in line with NUI
 
     List<CardDeck> mCardsDisplay;
 

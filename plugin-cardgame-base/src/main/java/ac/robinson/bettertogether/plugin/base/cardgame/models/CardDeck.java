@@ -24,8 +24,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +36,8 @@ import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
 public class CardDeck extends Renderable implements CardActions{
+
+    private static final String TAG = CardDeck.class.getSimpleName();
 
     private Context mContext;
     // Mention the entire suite of cards.
@@ -48,6 +50,11 @@ public class CardDeck extends Renderable implements CardActions{
     private List<Card> mCards;
     private CardDeckType deckType;
     private Integer deckCount = 1;
+
+    protected long startTime;
+
+    private String name;
+
 
 
     // Method to add card to deck.
@@ -68,12 +75,15 @@ public class CardDeck extends Renderable implements CardActions{
             case CLOSED:
                 this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back_stack);
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
+                this.name = "Closed Deck";
                 break;
             case OPEN:
                 this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ace_of_spades);
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
+                this.name = "Open Deck";
                 break;
             case DISCARDED:
+                this.name  = "Discarded Deck";
                 break;
         }
 
@@ -96,7 +106,9 @@ public class CardDeck extends Renderable implements CardActions{
                     card.setName(rank + Constants.CONNECTOR + suit);
                     card.setHidden(true);
                     card.setBitmap(BitmapFactory.decodeResource(mContext.getResources(),
-                            mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName()
+                            mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName())),
+                                   BitmapFactory.decodeResource(mContext.getResources(),
+                                            mContext.getResources().getIdentifier("card_back","drawable",mContext.getPackageName()
                             )));
                     mCards.add(card);
                 }
@@ -104,7 +116,6 @@ public class CardDeck extends Renderable implements CardActions{
         }
 
         // TODO Adding the special cards if required
-
     }
 
     // Fisher-Yates shuffle
@@ -169,12 +180,37 @@ public class CardDeck extends Renderable implements CardActions{
 
         if (image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
             if (image.getY() >= (getY() - bitmap.getHeight() ) && (image.getY() <= (getY() + bitmap.getHeight() ))) {
-                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Overlapp between " + this.name + " and " + image.getName());
                 return true;
             }
         }
 
         return false;
+    }
+
+    @Override
+    public Card handleDoubleTap(MotionEvent event) {
+
+        if( mCards.size() > 1){
+            Card card =  getTopCardFromDeck(0);
+            mCards.remove(card);
+            card.randomizeScreenLocation(this.getX(), this.getY());
+            return card;
+        }
+
+        mCards.get(0).toggleHidden();
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -187,14 +223,8 @@ public class CardDeck extends Renderable implements CardActions{
     public Gesture handleActionDown(int eventX, int eventY) {
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
-                // droid touched
-                if (System.currentTimeMillis() - startTime <= MAX_DURATION) {
-                    Toast.makeText(mContext, "Double Tapped on Card !!", Toast.LENGTH_SHORT).show();
-                    return Gesture.DOUBLE_TAP;
-                }
                 setTouched(true);
-                startTime = System.currentTimeMillis();
-                return Gesture.SINGLE_TAP;
+                return Gesture.TOUCHED;
             } else {
                 setTouched(false);
             }

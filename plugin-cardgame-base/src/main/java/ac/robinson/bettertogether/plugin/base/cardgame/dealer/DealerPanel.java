@@ -9,14 +9,17 @@ import android.graphics.Paint;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
@@ -25,12 +28,13 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
  * Created by t-apmehr, t-sus on 4/5/2017.
  */
 
-public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
+public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback , GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener{
 
     private static final String TAG = DealerPanel.class.getSimpleName();
 
     private DealerThread thread;
-    private List<Renderable> mCards = new ArrayList<>();
+    private List<Renderable> mCards = Collections.synchronizedList(new ArrayList<Renderable>());
 
     private SurfaceView surfaceView;
     private GestureDetectorCompat mDetector;
@@ -57,9 +61,28 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
         // make the Panel focusable so it can handle events
         setFocusable(true);
 
+        mDetector = new GestureDetectorCompat(mContext ,this);
+
+        surfaceView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mDetector.onTouchEvent(event);
+                return true;
+            }
+
+
+        });
+        // Set the gesture detector as the double tap
+        // listener.
+        mDetector.setOnDoubleTapListener(this);
+
+
+
     }
 
     private void setupPanel(Canvas canvas) {
+
+        // right now just providing assisting lines on the screen to demarcate regions.
 
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         int screenWidth = (metrics.widthPixels);
@@ -111,16 +134,86 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            // delegating event handling to the droid
-            for (int i = 0; i < mCards.size(); i++) {
+//        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//            // delegating event handling to the droid
+//            for (int i = 0; i < mCards.size(); i++) {
+//                Renderable r = mCards.get(i);
+//                if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
+//                    Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
+//                    Collections.swap(mCards, i, mCards.size() - 1);
+//                }
+//
+//
+//                // check if in the lower part of the screen we exit
+//                if (event.getY() > getHeight() - 50) {
+//                    thread.setRunning(false);
+//                    ((Activity) getContext()).finish();
+//                } else {
+////                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
+//                }
+//            }
+//        }
+//            if (event.getAction() == MotionEvent.ACTION_MOVE) {
+////            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
+//                // the gestures
+//                for (Renderable r : mCards) {
+//                    if (r.isTouched()) {
+//                        // the image was picked up and is being dragged
+//                        Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
+//                        r.setX((int) event.getX());
+//                        r.setY((int) event.getY());
+////                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
+//                    }
+//                }
+//            }
+//            if (event.getAction() == MotionEvent.ACTION_UP) {
+//                // touch was released
+////            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
+//                for (Renderable r : mCards) {
+//                    if (r.isTouched()) {
+//                        r.setTouched(false);
+//                        Log.d(TAG, r.getName()+ " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
+//                        for (Renderable r2 : mCards
+//                                ) {
+//                            if (r2.equals(r)) {
+//                                continue;
+//                            }
+//                            r2.isOverlapping(r);
+//                        }
+//                    }
+//                }
+//            }
+//            return true;
+            this.mDetector.onTouchEvent(event);
+            // Be sure to call the superclass implementation
+            return super.onTouchEvent(event);
+
+        }
+
+    public void render(Canvas canvas) {
+
+        canvas.drawColor(Color.BLACK);
+        setupPanel(canvas);
+
+//        for (Renderable r: mCards) {
+//            r.draw(canvas);
+//        }
+
+        for (int i = 0; i < mCards.size(); i++) {
+            mCards.get(i).draw(canvas);
+        }
+
+    }
+
+    @Override
+    public boolean onDown(MotionEvent event) {
+        Log.d(TAG,"onDown: " + event.toString());
+        for (int i = 0; i < mCards.size(); i++) {
                 Renderable r = mCards.get(i);
-                if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.SINGLE_TAP)) {
-                    Log.d(TAG, r.toString() + " Single Tap " + r.getX() + "," + r.getY());
+                if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
+                    Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
                     Collections.swap(mCards, i, mCards.size() - 1);
                 }
-
-
                 // check if in the lower part of the screen we exit
                 if (event.getY() > getHeight() - 50) {
                     thread.setRunning(false);
@@ -129,48 +222,100 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback{
 //                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
                 }
             }
-        }
-            if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
-                // the gestures
-                for (Renderable r : mCards) {
-                    if (r.isTouched()) {
-                        // the droid was picked up and is being dragged
-                        r.setX((int) event.getX());
-                        r.setY((int) event.getY());
-//                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
+        return true;
+    }
+
+    @Override
+    public boolean onFling(MotionEvent event1, MotionEvent event2,
+                           float velocityX, float velocityY) {
+        Log.d(TAG, "onFling: " + event1.toString()+event2.toString());
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent event) {
+        Log.d(TAG, "onLongPress: " + event.toString());
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        Log.d(TAG, "onScroll: " + e1.toString()+e2.toString());
+
+        Log.d(TAG, "Move: x=" + e2.getX() + ",y=" + e2.getY());
+//                // the gestures
+        for (Renderable r : mCards) {
+            if (r.isTouched()) {
+            // the image was picked up and is being dragged
+                Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + e2.getX() + ",y=" + e2.getY());
+                r.setX((int) e2.getX());
+                r.setY((int) e2.getY());
+
+                // TODO it's N2 .. change it find the nearest cards because we know all centre and their heights and widths so can bring it down to N maybe lower
+                for (Renderable r2 : mCards) {
+                    if (r2.equals(r)) {
+                        continue;
                     }
+                    r2.isOverlapping(r);
+                    // TODO merge the two decks is they are of similar type
+                }
+
+                break; // only moce the top card
                 }
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                // touch was released
-//            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
+
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent event) {
+        Log.d(TAG, "onShowPress: " + event.toString());
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent event) {
+//        Log.d(TAG, "onSingleTapUp: " + event.toString());
+//        Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
                 for (Renderable r : mCards) {
                     if (r.isTouched()) {
                         r.setTouched(false);
-                        Log.d(TAG, "Setting to False " + r.toString() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
-                        for (Renderable r2 : mCards
-                                ) {
-                            if (r2.equals(r)) {
-                                continue;
-                            }
-                            r2.isOverlapping(r);
-                        }
+//                        Log.d(TAG, r.getName()+ " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
                     }
                 }
-            }
-            return true;
-        }
-
-    public void render(Canvas canvas) {
-
-        canvas.drawColor(Color.BLACK);
-        setupPanel(canvas);
-
-        for (Renderable r: mCards) {
-            r.draw(canvas);
-        }
-
+        return true;
     }
 
+    @Override
+    public boolean onDoubleTap(MotionEvent event) {
+        Log.d(TAG, "onDoubleTap: " + event.toString());
+
+        Card card = null;
+        for (int i = 0; i < mCards.size(); i++) {
+            Renderable r = mCards.get(i);
+            if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
+                Collections.swap(mCards, i, mCards.size() - 1);
+                // TODO toggle if its a card and open the top card if it's a deck
+                card = r.handleDoubleTap(event);
+                Log.d(TAG, " Double tap on card " +  r.getName());
+                break;
+            }
+
+        }
+
+        if( card != null)
+            mCards.add(card);
+
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent event) {
+//        Log.d(TAG, "onDoubleTapEvent: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent event) {
+        Log.d(TAG, "onSingleTapConfirmed: " + event.toString());
+        return true;
+    }
 }

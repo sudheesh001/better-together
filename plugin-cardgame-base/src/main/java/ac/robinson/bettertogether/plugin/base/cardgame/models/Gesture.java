@@ -5,5 +5,5 @@ package ac.robinson.bettertogether.plugin.base.cardgame.models;
  */
 
 public enum Gesture {
-    SINGLE_TAP, DOUBLE_TAP, NONE
+    TOUCHED, DOUBLE_TAP, NONE
 }
