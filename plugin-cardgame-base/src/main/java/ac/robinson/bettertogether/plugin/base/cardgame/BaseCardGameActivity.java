@@ -19,10 +19,18 @@ package ac.robinson.bettertogether.plugin.base.cardgame;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MarketplaceAPI;
+import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class BaseCardGameActivity extends AppCompatActivity {
 
     private String mUser = null;
+    MarketplaceAPI apiInterface; // TODO: Temporary for testing
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,5 +38,21 @@ public class BaseCardGameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_base_card_game);
 
         mUser = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        // TODO: Uncomment this when moving the client out.
+        apiInterface = APIClient.getClient().create(MarketplaceAPI.class);
+        Call call = apiInterface.getDecksFromMarketplace();
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                Log.d("API", "Get Decks from Marketplace: " + response.toString());
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.d("API", "Get Decks from Marketplace Failed");
+            }
+        });
     }
 }
