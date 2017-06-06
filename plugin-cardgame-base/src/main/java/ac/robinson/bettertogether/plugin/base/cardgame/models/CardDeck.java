@@ -83,7 +83,7 @@ public class CardDeck extends Renderable implements CardActions{
 
         switch (super.status){
             case CLOSED:
-                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.black_joker);
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back);
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 this.name = "Closed Deck";
                 card_hidden = true;
@@ -99,6 +99,18 @@ public class CardDeck extends Renderable implements CardActions{
                 break;
         }
         setHidden(card_hidden);
+
+        if (facadeBitmap1 == null || facadeBitmap2 == null || facadeBitmap3 == null) {
+            facadeBitmap1 = Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(), R.drawable.deck_facade_1),
+                    FACADE_SCALED_WIDTH, scaledHeight, true);
+            facadeBitmap2 = Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(), R.drawable.deck_facade_2),
+                    FACADE_SCALED_WIDTH, scaledHeight, true);
+            facadeBitmap3 = Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(), R.drawable.deck_facade_3),
+                    FACADE_SCALED_WIDTH, scaledHeight, true);
+        }
 
         Random rand = new Random();
         setX(x + rand.nextInt(500) + (scaledWidth));
@@ -157,6 +169,9 @@ public class CardDeck extends Renderable implements CardActions{
         Collections.shuffle(deck);
     }
 
+    private static Bitmap facadeBitmap1 = null;
+    private static Bitmap facadeBitmap2 = null;
+    private static Bitmap facadeBitmap3 = null;
 
     @Override
     public boolean discardCard(Card card) {
@@ -170,6 +185,14 @@ public class CardDeck extends Renderable implements CardActions{
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y , null);
+        if (this.mCards != null && this.mCards.size() > 1) {
+            Bitmap facadeBitmap = facadeBitmap3;
+            switch (mCards.size()) {
+                case 2: facadeBitmap = facadeBitmap1; break;
+                case 3: facadeBitmap = facadeBitmap2; break;
+            }
+            canvas.drawBitmap(facadeBitmap, x-facadeBitmap.getWidth(), y, null);
+        }
     }
 
     @Override
@@ -238,5 +261,4 @@ public class CardDeck extends Renderable implements CardActions{
         return Gesture.NONE;
 
     }
-
 }

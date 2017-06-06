@@ -26,6 +26,7 @@ public abstract class Renderable {
 
     protected boolean hidden;
 
+    protected final int FACADE_SCALED_WIDTH = 30;
     protected final int scaledWidth = 300;
     protected final int scaledHeight = 375;
 
