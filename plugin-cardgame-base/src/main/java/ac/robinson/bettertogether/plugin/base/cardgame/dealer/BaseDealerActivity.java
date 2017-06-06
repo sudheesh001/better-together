@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckType;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
 public class BaseDealerActivity extends AppCompatActivity {
 
@@ -49,8 +49,8 @@ public class BaseDealerActivity extends AppCompatActivity {
 //
         mContext = this;
 //
-        cardDeck = new CardDeck(mContext, CardDeckType.CLOSED);
-        mOpenDeck = new CardDeck(mContext, CardDeckType.OPEN);
+        cardDeck = new CardDeck(mContext, CardDeckStatus.CLOSED, true);
+        mOpenDeck = new CardDeck(mContext, CardDeckStatus.OPEN, true);
 //
 //        mDeckImage = (ImageView) findViewById(R.id.deckImage);
 //        mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);

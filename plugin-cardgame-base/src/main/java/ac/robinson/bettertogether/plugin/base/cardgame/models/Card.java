@@ -1,6 +1,8 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -15,21 +17,31 @@ public class Card extends Renderable{
 
     private static final String TAG = Card.class.getSimpleName();
 
+    private Context mContext;
+
     private Integer cardId;
 
     private String name;
     private CardRank rank;
     private Suits suit;
 
-    private Bitmap bitmap;
+    private Bitmap bitmap = null;
     private Bitmap openBitmap;
     private Bitmap hiddenBitmap;
 
-    private boolean hidden;
     private boolean touched;
     protected long startTime;
 
 // variable for moving the view
+
+
+    public Context getmContext() {
+        return mContext;
+    }
+
+    public void setmContext(Context mContext) {
+        this.mContext = mContext;
+    }
 
     public Integer getCardId() {
         return cardId;
@@ -44,7 +56,7 @@ public class Card extends Renderable{
 
     public void randomizeScreenLocation(int x, int y){
         Random rand = new Random();
-        setX(x + rand.nextInt(500) + (bitmap.getWidth()/ 2)); // TODO fix that it should not go out of screen
+        setX(x + rand.nextInt(500) + (scaledWidth)); // TODO fix that it should not go out of screen
         setY(y);
     }
 
@@ -72,20 +84,32 @@ public class Card extends Renderable{
         return bitmap;
     }
 
+    public Bitmap getBitmap(boolean forceLoad) {
+        if( bitmap == null && forceLoad) {
+            setBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(),
+                            mContext.getResources().getIdentifier(this.getName(), "drawable", mContext.getPackageName())),
+                    BitmapFactory.decodeResource(mContext.getResources(),
+                            mContext.getResources().getIdentifier("card_back", "drawable", mContext.getPackageName()))
+            );
+        }
+        return bitmap;
+    }
+
     public void setBitmap(Bitmap openBitmap, Bitmap hiddenBitmap) {
         this.openBitmap = Bitmap.createScaledBitmap(openBitmap, scaledWidth, scaledHeight, true);;
         this.hiddenBitmap = Bitmap.createScaledBitmap(hiddenBitmap, scaledWidth, scaledHeight, true);;
-        this.bitmap = this.openBitmap;
+        this.bitmap = hidden ? this.hiddenBitmap : this.openBitmap ;
         setX(x + (bitmap.getWidth()/2));
         setY(y + (bitmap.getHeight()/2));
     }
 
     public boolean isHidden() {
-        return hidden;
+        return super.hidden;
     }
 
     public void setHidden(boolean hidden) {
-        this.hidden = hidden;
+        super.hidden = hidden;
     }
 
     @Override
@@ -99,11 +123,28 @@ public class Card extends Renderable{
     }
 
     public void draw(Canvas canvas) {
+        if( bitmap == null ){
+            setBitmap(
+            BitmapFactory.decodeResource(mContext.getResources(),
+                    mContext.getResources().getIdentifier(this.getName(),"drawable",mContext.getPackageName())),
+            BitmapFactory.decodeResource(mContext.getResources(),
+                            mContext.getResources().getIdentifier("card_back","drawable",mContext.getPackageName()))
+            );
+        }
         canvas.drawBitmap(bitmap, x, y , null);
     }
 
     @Override
     public boolean isOverlapping(Renderable image) {
+
+        if (bitmap != null && image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
+            if (image.getY() >= (getY() - bitmap.getHeight() ) && (image.getY() <= (getY() + bitmap.getHeight() ))) {
+//                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Overlapp between " + this.name + " and " + image.getName());
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -124,10 +165,7 @@ public class Card extends Renderable{
     public Gesture handleActionDown(int eventX, int eventY) {
         if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
-                if ((System.currentTimeMillis() - startTime <= MAX_DURATION) && isTouched()) {
-                    Log.d(TAG, this.getName() + " double touched " + isTouched() + " diff = " + (System.currentTimeMillis() - startTime)  );
-                    return Gesture.DOUBLE_TAP;
-                }
+
                 setTouched(true);
                 startTime = System.currentTimeMillis();
                 return Gesture.TOUCHED;

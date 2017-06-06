@@ -15,10 +15,30 @@ public abstract class Renderable {
 
     private String name;
 
+    protected boolean hidden;
+
     protected final int scaledWidth = 300;
     protected final int scaledHeight = 375;
 
+    protected CardDeckStatus status;
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
     protected static final int MAX_DURATION = 200;
+
+    public CardDeckStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CardDeckStatus status) {
+        this.status = status;
+    }
 
     public abstract String getName();
 

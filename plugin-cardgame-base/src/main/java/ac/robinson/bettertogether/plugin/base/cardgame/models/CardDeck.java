@@ -48,69 +48,89 @@ public class CardDeck extends Renderable implements CardActions{
     private boolean touched;
 
     private List<Card> mCards;
-    private CardDeckType deckType;
     private Integer deckCount = 1;
 
     protected long startTime;
 
     private String name;
 
-
+    public List<Card> getmCards() {
+        return mCards;
+    }
 
     // Method to add card to deck.
     public void addCardToDeck(Card mCard) {
+        if (this.mCards.size() == 0) {
+            this.bitmap = mCard.getBitmap(true);
+        }
         this.mCards.add(mCard);
     }
 
-    public Card removeCardFromDeck(Card card) {
-        return mCards.remove(0);
+    public void removeCardFromDeck(Card card) {
+        if (card == mCards.get(0)) {
+            // change the bitmap of the card deck to the next lower card.
+            if (mCards.size() > 1) {
+                this.bitmap = mCards.get(1).getBitmap(true);
+            }
+        }
+        mCards.remove(card);
     }
     
-    public CardDeck(Context mContext, CardDeckType deckType) {
+    public CardDeck(Context mContext, CardDeckStatus deckType, boolean randomInitialize) {
 
         this.mContext  = mContext;
-        this.deckType = deckType;
+        super.setStatus(deckType);
 
-        switch (this.deckType){
+        boolean card_hidden = false;
+
+        switch (super.status){
             case CLOSED:
-                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back_stack);
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.black_joker);
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 this.name = "Closed Deck";
+                card_hidden = true;
                 break;
             case OPEN:
-                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ace_of_spades);
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.red_joker); // TODO top card
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 this.name = "Open Deck";
+                card_hidden = false;
                 break;
             case DISCARDED:
                 this.name  = "Discarded Deck";
                 break;
         }
+        setHidden(card_hidden);
 
         Random rand = new Random();
-        setX(x + rand.nextInt(500) + (bitmap.getWidth()/ 2));
-        setY(y + rand.nextInt(1000)+ (bitmap.getHeight()/2));
+        setX(x + rand.nextInt(500) + (scaledWidth));
+        setY(y + rand.nextInt(1000)+ (scaledHeight));
 
         this.mCards = new ArrayList<>();
 
         // TODO currently fixed to one but a deck can have more than one deck of cards
-        for (int i = 0, cardId = 1; i < deckCount ; i++) {
+        if( randomInitialize ) {
+            for (int i = 0, cardId = 1; i < deckCount; i++) {
 
-            for (Suits suit: Suits.values()) {
+                for (Suits suit : Suits.values()) {
 
-                for (CardRank rank: CardRank.values() ) {
-                    Card card = new Card();
-                    card.setCardId(cardId++);
-                    card.setSuit(suit);
-                    card.setRank(rank);
-                    card.setName(rank + Constants.CONNECTOR + suit);
-                    card.setHidden(true);
-                    card.setBitmap(BitmapFactory.decodeResource(mContext.getResources(),
-                            mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName())),
-                                   BitmapFactory.decodeResource(mContext.getResources(),
-                                            mContext.getResources().getIdentifier("card_back","drawable",mContext.getPackageName()
-                            )));
-                    mCards.add(card);
+                    for (CardRank rank : CardRank.values()) {
+                        Card card = new Card();
+                        card.setmContext(mContext);
+                        card.setCardId(cardId++);
+                        card.setSuit(suit);
+                        card.setRank(rank);
+                        card.setName(rank + Constants.CONNECTOR + suit);
+                        card.setHidden(card_hidden);
+                        card.setStatus(CardDeckStatus.NONE);
+//                    card.setBitmap(BitmapFactory.decodeResource(mContext.getResources(),
+//                            mContext.getResources().getIdentifier(card.getName(),"drawable",mContext.getPackageName())),
+//                                   BitmapFactory.decodeResource(mContext.getResources(),
+//                                            mContext.getResources().getIdentifier("card_back","drawable",mContext.getPackageName()
+//                            )));
+                        addCardToDeck(card);
+//                        mCards.add(card);
+                    }
                 }
             }
         }
@@ -139,17 +159,6 @@ public class CardDeck extends Renderable implements CardActions{
         Collections.shuffle(deck);
     }
 
-    @Override
-    public Card drawCard(Integer deckCode, boolean hidden) {
-        //TODO hardcoding deck code to 0. deckcode for each deck type
-        deckCode = 0;
-
-        Card drawnCard = getTopCardFromDeck(deckCode);
-
-        drawnCard.setHidden(hidden);
-
-        return drawnCard;
-    }
 
     @Override
     public boolean discardCard(Card card) {
@@ -189,16 +198,28 @@ public class CardDeck extends Renderable implements CardActions{
         return false;
     }
 
+
+    @Override
+    public Card drawCard(Integer deckCode, boolean hidden) {
+        //TODO hardcoding deck code to 0. deckcode for each deck type
+        deckCode = 0;
+        Card drawnCard = getTopCardFromDeck(deckCode);
+        drawnCard.setHidden(hidden);
+        return drawnCard;
+    }
+
     @Override
     public Card handleDoubleTap(MotionEvent event) {
 
         if( mCards.size() > 1){
-            Card card =  getTopCardFromDeck(0);
-            mCards.remove(card);
+            Card card =  drawCard(0, false);
+            removeCardFromDeck(card);
             card.randomizeScreenLocation(this.getX(), this.getY());
             return card;
         }
 
+        // delete self and create a new top card if number of cards left in deck is 2.
+        // delete self and create a new top card if number of cards left in deck is 2.
         mCards.get(0).toggleHidden();
         return null;
     }
