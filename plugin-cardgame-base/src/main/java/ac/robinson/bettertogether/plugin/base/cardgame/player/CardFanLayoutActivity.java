@@ -4,14 +4,18 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 
 /**
  * Created by t-apmehr on 6/6/2017.
  */
 
 public class CardFanLayoutActivity extends AppCompatActivity {
+
+    public static final String TAG = CardFanLayoutActivity.class.getSimpleName();
 
     MainFragment mainFragment;
 
@@ -30,6 +34,10 @@ public class CardFanLayoutActivity extends AppCompatActivity {
                 mainFragment = (MainFragment) fragment;
             }
         }
+    }
+
+    public void getSelectedCard(Card card){
+        Log.d(TAG, " Got Card " + card.getName());
     }
 
     @Override

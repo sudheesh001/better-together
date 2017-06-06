@@ -108,7 +108,6 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     private void removeCardFromList(Renderable card) {
-
         mCards.remove(card);
 
     }
@@ -251,13 +250,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public void onLongPress(MotionEvent event) {
         Log.d(TAG, "onLongPress: " + event.toString());
         for (Renderable r : mCards) {
-            if (r.isTouched()) {
-                // the image was picked up and is being dragged
+            if ((r instanceof CardDeck) && r.isTouched()) {
+                // make sure it works only for deck and
                 Log.d(TAG, "Long pressed " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
                 thread.setRunning(false);
                 Intent i = new Intent(mContext, CardFanLayoutActivity.class);
                 i.putExtra(Constants.FAN_LAYOUT_INTENT, 1); // Send the deck of card somehow
-                mContext.startActivity(i);
+                ((Activity)getContext()).startActivityForResult(i, 0);
+//                mContext.startActivity(i);
                 break; // only moce the top card
             }
         }

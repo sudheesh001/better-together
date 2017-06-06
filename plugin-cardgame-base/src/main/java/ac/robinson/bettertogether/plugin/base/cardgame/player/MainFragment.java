@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Fade;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.cleveroad.fanlayoutmanager.FanLayoutManagerSettings;
 import com.cleveroad.fanlayoutmanager.callbacks.FanChildDrawingOrderCallback;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
@@ -133,6 +135,16 @@ public class MainFragment extends Fragment {
 //                .replace(R.id.root, fragment)
 //                .addToBackStack(null)
 //                .commit();
+        Card card = adapter.getModelByPos(pos);
+
+        ((CardFanLayoutActivity)getActivity()).getSelectedCard(card);
+
+        setExitTransition(new Fade());
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .remove(this)
+                .commit();
+
     }
 
     public void onClick(int pos) {

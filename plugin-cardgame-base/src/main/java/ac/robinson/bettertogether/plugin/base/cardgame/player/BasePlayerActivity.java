@@ -62,6 +62,7 @@ public class BasePlayerActivity extends BasePluginActivity {
 
         setContentView(new PlayerPanel(this, null, mCardsDisplay));
         // setContentView(R.layout.activity_base_player);
+
     }
 
     @Override
