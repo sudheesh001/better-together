@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId "ac.robinson.bettertogether.plugin.cardgame"
-        minSdkVersion 9
+        minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"

@@ -17,24 +17,22 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.content.Context;
-import android.provider.Settings.Secure;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
-public class BasePlayerActivity extends BasePluginActivity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+public class BasePlayerActivity extends BasePluginActivity {
 
     private static final String TAG = BasePlayerActivity.class.getSimpleName();
 
@@ -44,7 +42,8 @@ public class BasePlayerActivity extends BasePluginActivity implements GestureDet
     private GestureDetector mDetector;
 
     // Open carddeck available with the player.
-    private List<Card> cardDeck;
+    private CardDeck mClosedDeck, mOpenDeck;
+    List<CardDeck> mCardsDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +51,15 @@ public class BasePlayerActivity extends BasePluginActivity implements GestureDet
         mContext = this;
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(new PlayerPanel(this, cardDeck));
+
+//        cardDeck = new CardDeck(mContext, CardDeckStatus.OPEN, true);
+
+        mCardsDisplay = new ArrayList<>();
+
+        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.OPEN, true));
+        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.CLOSED, true));
+
+        setContentView(new PlayerPanel(this, null, mCardsDisplay));
         // setContentView(R.layout.activity_base_player);
     }
 
@@ -63,48 +70,4 @@ public class BasePlayerActivity extends BasePluginActivity implements GestureDet
 
     }
 
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTap(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        return false;
-    }
 }
