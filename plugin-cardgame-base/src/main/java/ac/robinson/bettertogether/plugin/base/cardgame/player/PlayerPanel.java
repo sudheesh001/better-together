@@ -2,6 +2,7 @@ package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -24,6 +25,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
+import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
 /**
  * Created by t-sus on 4/5/2017.
@@ -203,65 +205,6 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         Log.d(TAG, "Thread was shut down cleanly");
     }
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//            // delegating event handling to the droid
-//            for (int i = 0; i < mCards.size(); i++) {
-//                Renderable r = mCards.get(i);
-//                if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
-//                    Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
-//                    Collections.swap(mCards, i, mCards.size() - 1);
-//                }
-//
-//
-//                // check if in the lower part of the screen we exit
-//                if (event.getY() > getHeight() - 50) {
-//                    thread.setRunning(false);
-//                    ((Activity) getContext()).finish();
-//                } else {
-////                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
-//                }
-//            }
-//        }
-//            if (event.getAction() == MotionEvent.ACTION_MOVE) {
-////            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
-//                // the gestures
-//                for (Renderable r : mCards) {
-//                    if (r.isTouched()) {
-//                        // the image was picked up and is being dragged
-//                        Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
-//                        r.setX((int) event.getX());
-//                        r.setY((int) event.getY());
-////                    Log.d(TAG, "Moving:"+r.toString()+" x=" + event.getX() + ",y=" + event.getY());
-//                    }
-//                }
-//            }
-//            if (event.getAction() == MotionEvent.ACTION_UP) {
-//                // touch was released
-//            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
-//                for (Renderable r : mCards) {
-//                    if (r.isTouched()) {
-//                        r.setTouched(false);
-//                        Log.d(TAG, r.getName()+ " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
-//                        for (Renderable r2 : mCards
-//                                ) {
-//                            if (r2.equals(r)) {
-//                                continue;
-//                            }
-//                            r2.isOverlapping(r);
-//                        }
-//                    }
-//                }
-//            }
-//            return true;
-//            this.mDetector.onTouchEvent(event);
-//            // Be sure to call the superclass implementation
-//            return super.onTouchEvent(event);
-//
-//        }
-
-
     public void render(Canvas canvas) {
 
         canvas.drawColor(Color.BLACK);
@@ -307,6 +250,17 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public void onLongPress(MotionEvent event) {
         Log.d(TAG, "onLongPress: " + event.toString());
+        for (Renderable r : mCards) {
+            if (r.isTouched()) {
+                // the image was picked up and is being dragged
+                Log.d(TAG, "Long pressed " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
+                thread.setRunning(false);
+                Intent i = new Intent(mContext, CardFanLayoutActivity.class);
+                i.putExtra(Constants.FAN_LAYOUT_INTENT, 1); // Send the deck of card somehow
+                mContext.startActivity(i);
+                break; // only moce the top card
+            }
+        }
     }
 
 

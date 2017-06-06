@@ -27,6 +27,7 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,7 @@ import java.util.Random;
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
-public class CardDeck extends Renderable implements CardActions{
+public class CardDeck extends Renderable implements CardActions, Serializable{
 
     private static final String TAG = CardDeck.class.getSimpleName();
 

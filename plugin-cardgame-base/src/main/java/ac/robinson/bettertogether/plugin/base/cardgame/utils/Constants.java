@@ -7,5 +7,6 @@ package ac.robinson.bettertogether.plugin.base.cardgame.utils;
 public class Constants {
 
     public static final String CONNECTOR = "_of_";
+    public static final String FAN_LAYOUT_INTENT = "fan_layout_intent";
 
 }

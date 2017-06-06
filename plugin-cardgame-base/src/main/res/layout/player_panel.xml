@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <ac.robinson.bettertogether.plugin.base.cardgame.player.PlayerPanel
+        android:id="@+id/surface"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+    </ac.robinson.bettertogether.plugin.base.cardgame.player.PlayerPanel>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <LinearLayout
+            android:id="@+id/top_panel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#40808080"
+            android:visibility="visible"
+            android:layout_alignParentTop="true">
+            <AutoCompleteTextView android:id="@+id/address"
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"/>
+            <Button android:id="@+id/go"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="dsahkd"
+                android:enabled="false"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/bottom_panel"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:orientation="horizontal"
+            android:background="#40808080"
+            android:visibility="gone"
+            android:layout_alignParentBottom="true"
+            >
+            <ProgressBar android:id="@+id/timeline"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingLeft="2px"
+                />
+            <ImageButton android:id="@+id/media"
+                style="@style/Base.Theme.AppCompat.Light.Dialog"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/two_of_spades"
+                android:enabled="false"
+                />
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

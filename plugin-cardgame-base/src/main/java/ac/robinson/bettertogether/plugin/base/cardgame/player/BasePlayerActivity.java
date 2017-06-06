@@ -29,6 +29,7 @@ import java.util.List;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
@@ -42,7 +43,7 @@ public class BasePlayerActivity extends BasePluginActivity {
     private GestureDetector mDetector;
 
     // Open carddeck available with the player.
-    private CardDeck mClosedDeck, mOpenDeck;
+    private List<Card> cardDeck;
     List<CardDeck> mCardsDisplay;
 
     @Override
