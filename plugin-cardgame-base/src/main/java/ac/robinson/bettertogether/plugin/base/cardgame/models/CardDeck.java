@@ -24,7 +24,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ public class CardDeck extends Renderable implements CardActions{
     private Context mContext;
     // Mention the entire suite of cards.
 
-    private Bitmap bitmap;
     private boolean hidden;
 
     private boolean touched;
@@ -183,21 +181,6 @@ public class CardDeck extends Renderable implements CardActions{
     public void setTouched(boolean touched) {
         this.touched = touched;
     }
-
-    @Override
-    public boolean isOverlapping(Renderable image) {
-
-        if (image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
-            if (image.getY() >= (getY() - bitmap.getHeight() ) && (image.getY() <= (getY() + bitmap.getHeight() ))) {
-//                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Overlapp between " + this.name + " and " + image.getName());
-                return true;
-            }
-        }
-
-        return false;
-    }
-
 
     @Override
     public Card drawCard(Integer deckCode, boolean hidden) {

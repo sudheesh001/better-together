@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.Random;
@@ -25,7 +24,6 @@ public class Card extends Renderable{
     private CardRank rank;
     private Suits suit;
 
-    private Bitmap bitmap = null;
     private Bitmap openBitmap;
     private Bitmap hiddenBitmap;
 
@@ -132,20 +130,6 @@ public class Card extends Renderable{
             );
         }
         canvas.drawBitmap(bitmap, x, y , null);
-    }
-
-    @Override
-    public boolean isOverlapping(Renderable image) {
-
-        if (bitmap != null && image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
-            if (image.getY() >= (getY() - bitmap.getHeight() ) && (image.getY() <= (getY() + bitmap.getHeight() ))) {
-//                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Overlapp between " + this.name + " and " + image.getName());
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
