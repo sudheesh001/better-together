@@ -16,6 +16,8 @@
 
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -29,8 +31,10 @@ import retrofit2.Response;
 
 public class BaseCardGameActivity extends AppCompatActivity {
 
-    private String mUser = null;
+
     MarketplaceAPI apiInterface; // TODO: Temporary for testing
+
+    private String mUser = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,5 +58,10 @@ public class BaseCardGameActivity extends AppCompatActivity {
                 Log.d("API", "Get Decks from Marketplace Failed");
             }
         });
+        // save the player to shared preferences
+        SharedPreferences.Editor prefs = this.getSharedPreferences("Details", MODE_PRIVATE).edit();
+        prefs.putString("Name", mUser);
+        prefs.commit();
+
     }
 }

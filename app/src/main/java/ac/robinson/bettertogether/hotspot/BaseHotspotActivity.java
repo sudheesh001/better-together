@@ -122,17 +122,17 @@ public abstract class BaseHotspotActivity extends AppCompatActivity implements H
 		try {
 			ConnectionOptions currentConnectionOptions = null;
 			boolean validatedInternalPlugin = isInternalPlugin;
-//			if (isInternalPlugin) {
-//				currentConnectionOptions = ConnectionOptions.fromHotspotUrl(hotspotUrl);
-//				if (currentConnectionOptions != null) {
-//					currentConnectionOptions.mPluginPackage = PluginIntent.HOST_PACKAGE;
-//				} else {
-//					validatedInternalPlugin = false; // TODO: can we do anything better?
-//				}
-//			}
+			if (isInternalPlugin) {
+				currentConnectionOptions = ConnectionOptions.fromHotspotUrl(hotspotUrl);
+				if (currentConnectionOptions != null) {
+					currentConnectionOptions.mPluginPackage = PluginIntent.HOST_PACKAGE;
+				} else {
+					validatedInternalPlugin = false; // TODO: can we do anything better?
+				}
+			}
 
-//			sendSystemMessage(HotspotManagerService.MSG_UPDATE_HOTSPOT, validatedInternalPlugin ? currentConnectionOptions
-//					.getHotspotUrl() : hotspotUrl); // update plugin package in service - for inbuilt plugins need host package
+			sendSystemMessage(HotspotManagerService.MSG_UPDATE_HOTSPOT, validatedInternalPlugin ? currentConnectionOptions
+					.getHotspotUrl() : hotspotUrl); // update plugin package in service - for inbuilt plugins need host package
 			startActivity(intent);
 			finish(); // TODO: on slower devices do we need to wait until the new activity is definitely connected before this?
 		} catch (Exception ignored) {

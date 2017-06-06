@@ -192,15 +192,15 @@ public class ConnectionSetupActivity extends BaseHotspotActivity implements Plug
 			launchGetPluginsActivity();
 		} else {
 			Log.d(TAG, "Plugin clicked: " + plugin.getRawPluginLabel());
-//			ConnectionOptions connectionOptions = new ConnectionOptions();
-//			connectionOptions.mName = ConnectionOptions.formatHotspotName(ConnectionOptions.DEFAULT_HOTSPOT_NAME_FORMAT,
-//					getString(R.string.app_name_short), BetterTogetherUtils.getRandomString(HotspotManagerService
-//							.MESSAGE_ID_SIZE));
-//			connectionOptions.mPassword = BetterTogetherUtils.getRandomString(HotspotManagerService.MESSAGE_ID_SIZE);
-//			connectionOptions.mPluginPackage = plugin.getPackageName();
-//			setHotspotUrl(connectionOptions.getHotspotUrl());
-//
-//			createHotspot();
+			ConnectionOptions connectionOptions = new ConnectionOptions();
+			connectionOptions.mName = ConnectionOptions.formatHotspotName(ConnectionOptions.DEFAULT_HOTSPOT_NAME_FORMAT,
+					getString(R.string.app_name_short), BetterTogetherUtils.getRandomString(HotspotManagerService
+							.MESSAGE_ID_SIZE));
+			connectionOptions.mPassword = BetterTogetherUtils.getRandomString(HotspotManagerService.MESSAGE_ID_SIZE);
+			connectionOptions.mPluginPackage = plugin.getPackageName();
+			setHotspotUrl(connectionOptions.getHotspotUrl());
+
+			createHotspot();
 
 			launchPluginAndFinish(getHotspotUrl(), true);
 		}

@@ -23,6 +23,18 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +42,15 @@ import java.util.List;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
-public class BaseDealerActivity extends AppCompatActivity {
+
+import ac.robinson.bettertogether.api.BasePluginActivity;
+import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckType;
+
+public class BaseDealerActivity extends BasePluginActivity {
 
     private static final String TAG = BaseDealerActivity.class.getSimpleName();
 
@@ -74,6 +94,41 @@ public class BaseDealerActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         // set our MainGamePanel as the View
         setContentView(new DealerPanel(this, null, mCardsDisplay));
+        // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
+        SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+        String mName = prefs.getString("Name", null);
+        MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+        // Now that we have name and type. Send discovery protocol
+        MessageHelper m = MessageHelper.getInstance();
+        sendMessage(m.Discovery(mName, mPlayerType));
+
         Log.d(TAG, "View added");
+    }
+
+
+    @Override
+    protected void onMessageReceived(@NonNull BroadcastMessage message) {
+        Log.d(TAG, "Message: " + message.getMessage());
+
+        // once you get a DR ..
+        // pass it to messaga helper to parse and update the connection map
+        // if you get a action type then pass to MHelper to parse and do appropriate action.
+        MessageHelper m = MessageHelper.getInstance();
+        if (message.getType() == 999) {
+            // This is the discover protocol message received.
+            // 1. Update connectionMap and broadcast again.
+            m.ReceivedDiscoveryMessage(message.getMessage());
+            SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+            String mName = prefs.getString("Name", null);
+            MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+            sendMessage(m.Discovery(mName, mPlayerType));
+
+            // TODO: Will this cause a network flood?
+        }
+        else {
+            m.parse(message);
+            m.ServerReceivedMessage();
+        }
+        Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
 }
