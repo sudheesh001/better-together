@@ -24,11 +24,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.util.Log;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.MotionEvent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -43,7 +45,6 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     private Context mContext;
     // Mention the entire suite of cards.
 
-    private Bitmap bitmap;
     private boolean hidden;
 
     private boolean touched;
@@ -86,7 +87,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
 
         switch (super.status){
             case CLOSED:
-                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.black_joker);
+                this.bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.card_back);
                 this.bitmap = Bitmap.createScaledBitmap(this.bitmap, scaledWidth, scaledHeight, true);
                 this.name = "Closed Deck";
                 card_hidden = true;
@@ -102,6 +103,18 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
                 break;
         }
         setHidden(card_hidden);
+
+        if (facadeBitmap1 == null || facadeBitmap2 == null || facadeBitmap3 == null) {
+            facadeBitmap1 = Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(), R.drawable.deck_facade_1),
+                    FACADE_SCALED_WIDTH, scaledHeight, true);
+            facadeBitmap2 = Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(), R.drawable.deck_facade_2),
+                    FACADE_SCALED_WIDTH, scaledHeight, true);
+            facadeBitmap3 = Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(mContext.getResources(), R.drawable.deck_facade_3),
+                    FACADE_SCALED_WIDTH, scaledHeight, true);
+        }
 
         Random rand = new Random();
         setX(x + rand.nextInt(500) + (scaledWidth));
@@ -160,6 +173,9 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         Collections.shuffle(deck);
     }
 
+    private static Bitmap facadeBitmap1 = null;
+    private static Bitmap facadeBitmap2 = null;
+    private static Bitmap facadeBitmap3 = null;
 
     @Override
     public boolean discardCard(Card card) {
@@ -173,6 +189,32 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
 
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y , null);
+        if (this.mCards != null && this.mCards.size() > 1) {
+            Bitmap facadeBitmap = facadeBitmap3;
+            switch (mCards.size()) {
+                case 2: facadeBitmap = facadeBitmap1; break;
+                case 3: facadeBitmap = facadeBitmap2; break;
+            }
+            canvas.drawBitmap(facadeBitmap, x-facadeBitmap.getWidth(), y, null);
+        }
+        canvas.drawBitmap(bitmap, x, y , null);
+
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.GREEN);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(20);
+        canvas.drawPoint(x, y, paint);
+
+        if (status == CardDeckStatus.CLOSED) {
+            paint.setColor(Color.RED);
+        } else if (status == CardDeckStatus.OPEN) {
+            paint.setColor(Color.GREEN);
+        } else {
+            paint.setColor(Color.BLUE);
+        }
+
+        canvas.drawPoint(x+100, y, paint);
     }
 
     @Override
@@ -186,21 +228,6 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     }
 
     @Override
-    public boolean isOverlapping(Renderable image) {
-
-        if (image.getX() >= (getX() - bitmap.getWidth() ) && (image.getX() <= (getX() + bitmap.getWidth()))) {
-            if (image.getY() >= (getY() - bitmap.getHeight() ) && (image.getY() <= (getY() + bitmap.getHeight() ))) {
-//                Toast.makeText(mContext, "Overlapp Detected !!", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Overlapp between " + this.name + " and " + image.getName());
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
-    @Override
     public Card drawCard(Integer deckCode, boolean hidden) {
         //TODO hardcoding deck code to 0. deckcode for each deck type
         deckCode = 0;
@@ -210,19 +237,26 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     }
 
     @Override
-    public Card handleDoubleTap(MotionEvent event) {
+    public List<Card> handleDoubleTap(MotionEvent event) {
 
-        if( mCards.size() > 1){
+        if( mCards.size() > 2){
             Card card =  drawCard(0, false);
             removeCardFromDeck(card);
             card.randomizeScreenLocation(this.getX(), this.getY());
-            return card;
+            return Collections.singletonList(card);
         }
 
         // delete self and create a new top card if number of cards left in deck is 2.
-        // delete self and create a new top card if number of cards left in deck is 2.
-        mCards.get(0).toggleHidden();
-        return null;
+        this.x = -99999;
+        this.y = -99999;
+        this.safeToDelete = true;
+
+//        mCards.get(0).toggleHidden();
+
+        if (mCards.size() == 2) {
+            return Arrays.asList(mCards.get(0), mCards.get(1));
+        }
+        return Arrays.asList(mCards.get(0));
     }
 
     @Override
@@ -243,8 +277,8 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
      */
     @SuppressWarnings("JavadocReference")
     public Gesture handleActionDown(int eventX, int eventY) {
-        if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
-            if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
+        if (eventX >= (getX()) && (eventX <= (getX() + bitmap.getWidth()))) {
+            if (eventY >= (getY()) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 setTouched(true);
                 return Gesture.TOUCHED;
             } else {
@@ -256,5 +290,4 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         return Gesture.NONE;
 
     }
-
 }
