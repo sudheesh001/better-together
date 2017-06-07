@@ -280,11 +280,17 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public boolean onDown(MotionEvent event) {
         Log.d(TAG, "onDown: " + event.toString());
-        for (int i = 0; i < mCards.size(); i++) {
+        for (int i = mCards.size() - 1; i >= 0; i--) {
             Renderable r = mCards.get(i);
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
                 Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
+
+                for (int currI = i-1; currI >= 0; currI --) {
+                    mCards.get(currI).setTouched(false);
+                }
+
                 Collections.swap(mCards, i, mCards.size() - 1);
+                break;
             }
             // check if in the lower part of the screen we exit
             if (event.getY() > getHeight() - 50) {
@@ -320,8 +326,11 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             if (r.isTouched()) {
                 // the image was picked up and is being dragged
                 Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + e2.getX() + ",y=" + e2.getY());
-                r.setX((int) e2.getX());
-                r.setY((int) e2.getY());
+                r.displaceX(-(int)distanceX);
+                r.displaceY(-(int)distanceY);
+                Log.d(TAG, "onScroll: " + r.getStatus());
+//                r.setX((int) e2.getX());
+//                r.setY((int) e2.getY());
 
                 break; // only moce the top card
             }
@@ -353,21 +362,24 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public boolean onDoubleTap(MotionEvent event) {
         Log.d(TAG, "onDoubleTap: " + event.toString());
 
-        Card card = null;
-        for (int i = 0; i < mCards.size(); i++) {
+        List<Card> cards = null;
+        for (int i = mCards.size() - 1; i >= 0; i--) {
             Renderable r = mCards.get(i);
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
+                for (int currI = i-1; currI >= 0; currI --) {
+                    mCards.get(currI).setTouched(false);
+                }
                 Collections.swap(mCards, i, mCards.size() - 1);
                 // TODO toggle if its a card and open the top card if it's a deck
-                card = r.handleDoubleTap(event);
+                cards = r.handleDoubleTap(event);
                 Log.d(TAG, " Double tap on card " + r.getName());
                 break;
             }
 
         }
 
-        if (card != null)
-            mCards.add(card);
+        if (cards != null)
+            mCards.addAll(cards);
 
         return true;
     }

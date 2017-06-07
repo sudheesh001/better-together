@@ -4,8 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.MotionEvent;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -28,7 +31,7 @@ public class Card extends Renderable{
     private Bitmap hiddenBitmap;
 
     private boolean touched;
-    protected long startTime;
+//    protected long startTime;
 
 // variable for moving the view
 
@@ -129,13 +132,24 @@ public class Card extends Renderable{
                             mContext.getResources().getIdentifier("card_back","drawable",mContext.getPackageName()))
             );
         }
-        canvas.drawBitmap(bitmap, x, y , null);
+
+        if (hidden) {
+            canvas.drawBitmap(hiddenBitmap, x, y , null);
+        } else {
+            canvas.drawBitmap(openBitmap, x, y , null);
+        }
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(20);
+        canvas.drawPoint(x, y, paint);
     }
 
     @Override
-    public Card handleDoubleTap(MotionEvent event) {
+    public List<Card> handleDoubleTap(MotionEvent event) {
         this.toggleHidden();
-        return this;
+        return null;
     }
 
 
@@ -147,11 +161,11 @@ public class Card extends Renderable{
      */
     @SuppressWarnings("JavadocReference")
     public Gesture handleActionDown(int eventX, int eventY) {
-        if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
-            if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
+        if (eventX >= (getX()) && (eventX <= (getX() + bitmap.getWidth()))) {
+            if (eventY >= (getY()) && (eventY <= (getY() + bitmap.getHeight() ))) {
 
                 setTouched(true);
-                startTime = System.currentTimeMillis();
+//                startTime = System.currentTimeMillis();
                 return Gesture.TOUCHED;
             } else {
                 setTouched(false);
@@ -165,11 +179,5 @@ public class Card extends Renderable{
 
     public void toggleHidden() {
         this.hidden = !this.hidden;
-
-        if( isHidden() ){
-            this.bitmap = this.hiddenBitmap;
-        }else {
-            this.bitmap = this.openBitmap;
-        }
     }
 }

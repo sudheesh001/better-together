@@ -24,9 +24,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -193,6 +196,24 @@ public class CardDeck extends Renderable implements CardActions{
             }
             canvas.drawBitmap(facadeBitmap, x-facadeBitmap.getWidth(), y, null);
         }
+        canvas.drawBitmap(bitmap, x, y , null);
+
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.GREEN);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(20);
+        canvas.drawPoint(x, y, paint);
+
+        if (status == CardDeckStatus.CLOSED) {
+            paint.setColor(Color.RED);
+        } else if (status == CardDeckStatus.OPEN) {
+            paint.setColor(Color.GREEN);
+        } else {
+            paint.setColor(Color.BLUE);
+        }
+
+        canvas.drawPoint(x+100, y, paint);
     }
 
     @Override
@@ -215,19 +236,26 @@ public class CardDeck extends Renderable implements CardActions{
     }
 
     @Override
-    public Card handleDoubleTap(MotionEvent event) {
+    public List<Card> handleDoubleTap(MotionEvent event) {
 
-        if( mCards.size() > 1){
+        if( mCards.size() > 2){
             Card card =  drawCard(0, false);
             removeCardFromDeck(card);
             card.randomizeScreenLocation(this.getX(), this.getY());
-            return card;
+            return Collections.singletonList(card);
         }
 
         // delete self and create a new top card if number of cards left in deck is 2.
-        // delete self and create a new top card if number of cards left in deck is 2.
-        mCards.get(0).toggleHidden();
-        return null;
+        this.x = -99999;
+        this.y = -99999;
+        this.safeToDelete = true;
+
+//        mCards.get(0).toggleHidden();
+
+        if (mCards.size() == 2) {
+            return Arrays.asList(mCards.get(0), mCards.get(1));
+        }
+        return Arrays.asList(mCards.get(0));
     }
 
     @Override
@@ -248,8 +276,8 @@ public class CardDeck extends Renderable implements CardActions{
      */
     @SuppressWarnings("JavadocReference")
     public Gesture handleActionDown(int eventX, int eventY) {
-        if (eventX >= (getX() - bitmap.getWidth() ) && (eventX <= (getX() + bitmap.getWidth()))) {
-            if (eventY >= (getY() - bitmap.getHeight() ) && (eventY <= (getY() + bitmap.getHeight() ))) {
+        if (eventX >= (getX()) && (eventX <= (getX() + bitmap.getWidth()))) {
+            if (eventY >= (getY()) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 setTouched(true);
                 return Gesture.TOUCHED;
             } else {

@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import java.util.List;
+
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.MathUtils;
 
 import static android.content.ContentValues.TAG;
@@ -23,6 +25,7 @@ public abstract class Renderable {
     Bitmap bitmap = null;
 
     private String name;
+    public boolean safeToDelete = false; // should this card be deleted.
 
     protected boolean hidden;
 
@@ -58,6 +61,14 @@ public abstract class Renderable {
 
     public abstract void draw(Canvas canvas);
 
+    public void displaceX(int x) {
+        this.x += x;
+    }
+
+    public void displaceY(int y) {
+        this.y += y;
+    }
+
     public int getX(){
         return this.x;
     }
@@ -84,16 +95,16 @@ public abstract class Renderable {
         if (imBmp == null || bitmap == null) return false;
 
         MathUtils.Rectangle imRect = new MathUtils.Rectangle(
-                image.getX() - imBmp.getWidth()/2,
-                image.getY() - imBmp.getHeight()/2,
-                image.getX() + imBmp.getWidth()/2,
-                image.getY() + imBmp.getHeight()/2
+                image.getX(),
+                image.getY(),
+                image.getX() + imBmp.getWidth(),
+                image.getY() + imBmp.getHeight()
         );
         MathUtils.Rectangle selfRect = new MathUtils.Rectangle(
-                getX() - bitmap.getWidth()/2,
-                getY() - bitmap.getHeight()/2,
-                getX() + bitmap.getWidth()/2,
-                getY() + bitmap.getHeight()/2
+                getX(),
+                getY(),
+                getX() + bitmap.getWidth(),
+                getY() + bitmap.getHeight()
         );
 
         int intArea = MathUtils.rectangleIntersectionArea(imRect, selfRect);
@@ -101,7 +112,7 @@ public abstract class Renderable {
         return intArea >= OVERLAP_THRESHOLD_LIMIT;
     }
 
-    public abstract Card handleDoubleTap(MotionEvent event);
+    public abstract List<Card> handleDoubleTap(MotionEvent event);
 
     public Bitmap getBitmap() {
         return bitmap;
