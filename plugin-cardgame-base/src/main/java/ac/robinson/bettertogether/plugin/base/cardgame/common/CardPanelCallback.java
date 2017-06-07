@@ -5,4 +5,7 @@ package ac.robinson.bettertogether.plugin.base.cardgame.common;
  */
 
 public interface CardPanelCallback {
+
+    public BroadcastCardResponses receivedAction(BroadcastCardMessage broadcastCardMessage);
+
 }

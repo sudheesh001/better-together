@@ -17,20 +17,10 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ImageView;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.view.GestureDetectorCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -39,16 +29,12 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
-
-
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckType;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
 public class BaseDealerActivity extends BasePluginActivity {
 
@@ -114,14 +100,16 @@ public class BaseDealerActivity extends BasePluginActivity {
         // pass it to messaga helper to parse and update the connection map
         // if you get a action type then pass to MHelper to parse and do appropriate action.
         MessageHelper m = MessageHelper.getInstance();
-        if (message.getType() == 999) {
+        if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
-            m.ReceivedDiscoveryMessage(message.getMessage());
+            Boolean response = m.ReceivedDiscoveryMessage(message.getMessage());
             SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
             String mName = prefs.getString("Name", null);
             MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
-            sendMessage(m.Discovery(mName, mPlayerType));
+
+            if( response )
+                sendMessage(m.Discovery(mName, mPlayerType));
 
             // TODO: Will this cause a network flood?
         }

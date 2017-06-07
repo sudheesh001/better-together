@@ -33,6 +33,7 @@ import java.util.List;
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
@@ -82,13 +83,15 @@ public class BasePlayerActivity extends BasePluginActivity {
         Log.d(TAG, "Player Gets: " + message.getMessage());
         MessageHelper m = MessageHelper.getInstance();
 
-        if (message.getType() == 999) {
+        if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
             m.ReceivedDiscoveryMessage(message.getMessage());
+
             SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
             String mName = prefs.getString("Name", null);
             MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+
             sendMessage(m.Discovery(mName, mPlayerType));
 
             // TODO: Will this cause a network flood?

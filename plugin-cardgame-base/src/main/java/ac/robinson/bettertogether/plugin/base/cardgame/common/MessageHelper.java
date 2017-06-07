@@ -20,6 +20,7 @@ public class MessageHelper {
 
     private static Map<String,PlayerType> connectionMap = new HashMap<>();
 
+    private static String mUser;
 
     public enum PlayerType{
         PLAYER, DEALER
@@ -44,13 +45,20 @@ public class MessageHelper {
         return mInstance;
     }
 
-    public void ReceivedDiscoveryMessage(String message) {
+    public boolean ReceivedDiscoveryMessage(String message) {
         String[] nameAndType = message.split(";");
         String name = nameAndType[0];
-        PlayerType type = PlayerType.values()[Integer.parseInt(nameAndType[1])];
+        PlayerType type = null;
+        if(nameAndType[1] == "PLAYER") {
+            type = PlayerType.PLAYER;
+        }else if (nameAndType[1] == "DEALER"){
+            type = PlayerType.DEALER;
+        }
         if (!connectionMap.containsKey(name)) {
             connectionMap.put(name, type);
+            return true;
         }
+        return false;
     }
 
     public BroadcastMessage Discovery(String name, PlayerType type) {

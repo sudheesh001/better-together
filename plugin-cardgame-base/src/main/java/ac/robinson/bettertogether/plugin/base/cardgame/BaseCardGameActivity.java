@@ -34,7 +34,7 @@ public class BaseCardGameActivity extends AppCompatActivity {
 
     MarketplaceAPI apiInterface; // TODO: Temporary for testing
 
-    private String mUser = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    private String mUser = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
