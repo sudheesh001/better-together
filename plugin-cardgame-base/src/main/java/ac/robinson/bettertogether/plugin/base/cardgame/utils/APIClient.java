@@ -27,4 +27,8 @@ public class APIClient {
 
         return retrofit;
     }
+
+    public static String getBaseURL() {
+        return BASE_URL;
+    }
 }
