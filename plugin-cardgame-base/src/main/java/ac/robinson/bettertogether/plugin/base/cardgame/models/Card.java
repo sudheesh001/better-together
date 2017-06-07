@@ -123,6 +123,11 @@ public class Card extends Renderable{
         this.touched = touched;
     }
 
+    @Override
+    public boolean isFlinged() {
+        return false;
+    }
+
     public void draw(Canvas canvas) {
         if( bitmap == null ){
             setBitmap(

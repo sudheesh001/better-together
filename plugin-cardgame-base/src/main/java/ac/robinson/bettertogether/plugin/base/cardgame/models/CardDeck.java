@@ -187,6 +187,19 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         return false;
     }
 
+    @Override
+    public boolean drawCardFromDeck(Card card) {
+
+        for (Card localCard: getmCards()) {
+            if(localCard.getName().equals(card.getName())){ // shoudl be uuid
+                removeCardFromDeck(card);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void draw(Canvas canvas) {
         canvas.drawBitmap(bitmap, x, y , null);
         if (this.mCards != null && this.mCards.size() > 1) {
@@ -228,7 +241,12 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     }
 
     @Override
-    public Card drawCard(Integer deckCode, boolean hidden) {
+    public boolean isFlinged() {
+        return false;
+    }
+
+    @Override
+    public Card drawTopCard(Integer deckCode, boolean hidden) {
         //TODO hardcoding deck code to 0. deckcode for each deck type
         deckCode = 0;
         Card drawnCard = getTopCardFromDeck(deckCode);
@@ -240,7 +258,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     public List<Card> handleDoubleTap(MotionEvent event) {
 
         if( mCards.size() > 2){
-            Card card =  drawCard(0, false);
+            Card card =  drawTopCard(0, false);
             removeCardFromDeck(card);
             card.randomizeScreenLocation(this.getX(), this.getY());
             return Collections.singletonList(card);

@@ -2,7 +2,6 @@ package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -20,12 +19,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
-import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
 /**
  * Created by t-sus on 4/5/2017.
@@ -43,6 +42,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     private GestureDetectorCompat mDetector;
     private Context mContext;
 
+    private CardPanelCallback cardPanelCallback;
 
     public PlayerPanel(Context context, List<Renderable> cards, List<CardDeck> cardDecks) {
         super(context);
@@ -105,6 +105,10 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         mDetector.setOnDoubleTapListener(this);
 
 
+    }
+
+    public void setCardPanelCallback(CardPanelCallback callback){
+        this.cardPanelCallback = callback;
     }
 
     private void removeCardFromList(Renderable card) {
@@ -219,6 +223,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     }
 
+    public boolean drawCardFromDeck(CardDeck cardDeck, Card card){
+
+        cardDeck.drawCardFromDeck(card);
+        mCards.add(card);
+
+        return true;
+    }
+
     @Override
     public boolean onDown(MotionEvent event) {
         Log.d(TAG, "onDown: " + event.toString());
@@ -230,7 +242,6 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             }
             // check if in the lower part of the screen we exit
             if (event.getY() > getHeight() - 50) {
-                thread.setRunning(false);
                 ((Activity) getContext()).finish();
             } else {
 //                Log.d(TAG, "Coords: x=" + event.getX() + ",y=" + event.getY());
@@ -243,6 +254,17 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public boolean onFling(MotionEvent event1, MotionEvent event2,
                            float velocityX, float velocityY) {
         Log.d(TAG, "onFling: " + event1.toString() + event2.toString());
+
+        for (Renderable r : mCards) {
+            if ( r.isTouched()) {
+                // make sure it works only for deck and
+                Log.d(TAG, "Flinged " + r.getName() + " to Coords: x=" + event1.getX() + ",y=" + event1.getY());
+                Log.d(TAG, "Flinged E2" + r.getName() + " to Coords: x=" + event2.getX() + ",y=" + event2.getY());
+                ((BasePlayerActivity)getContext()).inflateCardFanView((CardDeck)r, true); // casting it caz we know it's an instance of card deck
+                break; // only moce the top card
+            }
+        }
+
         return true;
     }
 
@@ -253,11 +275,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             if ((r instanceof CardDeck) && r.isTouched()) {
                 // make sure it works only for deck and
                 Log.d(TAG, "Long pressed " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
-                thread.setRunning(false);
-                Intent i = new Intent(mContext, CardFanLayoutActivity.class);
-                i.putExtra(Constants.FAN_LAYOUT_INTENT, 1); // Send the deck of card somehow
-                ((Activity)getContext()).startActivityForResult(i, 0);
-//                mContext.startActivity(i);
+                ((BasePlayerActivity)getContext()).inflateCardFanView((CardDeck)r, true); // casting it caz we know it's an instance of card deck
                 break; // only moce the top card
             }
         }

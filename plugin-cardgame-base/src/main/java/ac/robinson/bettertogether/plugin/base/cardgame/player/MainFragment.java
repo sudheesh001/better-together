@@ -19,7 +19,6 @@ import com.cleveroad.fanlayoutmanager.callbacks.FanChildDrawingOrderCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
 /**
  * Created by t-apmehr on 6/6/2017.
@@ -31,8 +30,12 @@ public class MainFragment extends Fragment {
     private FanLayoutManager fanLayoutManager;
 
     private CardsAdapter adapter;
+    private static CardDeck cardDeck;
 
-    public static MainFragment newInstance() {
+    public static MainFragment newInstance(CardDeck deck) {
+
+        cardDeck = deck;
+
         Bundle args = new Bundle();
         MainFragment fragment = new MainFragment();
         fragment.setArguments(args);
@@ -70,7 +73,7 @@ public class MainFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         adapter = new CardsAdapter(getContext());
-        adapter.addAll(new CardDeck(getContext(), CardDeckStatus.OPEN, true).getmCards());
+        adapter.addAll(cardDeck.getmCards());
 
         adapter.setOnItemClickListener(new CardsAdapter.OnItemClickListener() {
             @Override
@@ -137,7 +140,8 @@ public class MainFragment extends Fragment {
 //                .commit();
         Card card = adapter.getModelByPos(pos);
 
-        ((CardFanLayoutActivity)getActivity()).getSelectedCard(card);
+        ((BasePlayerActivity)getActivity()).getSelectedCard(cardDeck, card);
+        // FIXME send a local broadcast to surface view
 
         setExitTransition(new Fade());
         getActivity().getSupportFragmentManager()
@@ -164,6 +168,7 @@ public class MainFragment extends Fragment {
             return false;
         }
     }
+
 
 }
 

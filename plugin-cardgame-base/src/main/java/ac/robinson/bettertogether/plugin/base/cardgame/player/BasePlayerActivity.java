@@ -19,11 +19,14 @@ package ac.robinson.bettertogether.plugin.base.cardgame.player;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -32,17 +35,25 @@ import java.util.List;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardResponses;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 
-public class BasePlayerActivity extends BasePluginActivity {
+public class BasePlayerActivity extends BasePluginActivity implements CardPanelCallback{
 
 
     private static final String TAG = BasePlayerActivity.class.getSimpleName();
 
     ImageView mPlayerDeck;
+
+    FrameLayout parentFrame = null;
+    PlayerPanel playerPanel = null;
+    MainFragment mainFragment;
 
     private Context mContext;
     private GestureDetector mDetector;
@@ -57,6 +68,9 @@ public class BasePlayerActivity extends BasePluginActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        parentFrame = new FrameLayout(mContext);
+        parentFrame.setId(View.generateViewId());
+
 //        cardDeck = new CardDeck(mContext, CardDeckStatus.OPEN, true);
 
         mCardsDisplay = new ArrayList<>();
@@ -64,7 +78,10 @@ public class BasePlayerActivity extends BasePluginActivity {
         mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.OPEN, true));
         mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.CLOSED, true));
 
-        setContentView(new PlayerPanel(this, null, mCardsDisplay));
+        playerPanel = new PlayerPanel(this, null, mCardsDisplay);
+        playerPanel.setCardPanelCallback(this);
+        parentFrame.addView(playerPanel);
+        setContentView(parentFrame);
         // setContentView(R.layout.activity_base_player);
 
         // setContentView(R.layout.activity_base_player);
@@ -102,5 +119,44 @@ public class BasePlayerActivity extends BasePluginActivity {
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void onBackPressed() {
+        if (mainFragment == null || !mainFragment.isAdded() || !mainFragment.isVisible()) {
+            super.onBackPressed();
+        }else if( mainFragment.isVisible()){
+            getSupportFragmentManager().beginTransaction().remove(mainFragment).commit();
+
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+    }
+
+    public void inflateCardFanView(CardDeck cardDeck, boolean status){
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
+                    .commit();
+    }
+
+    public void getSelectedCard(CardDeck cardDeck, Card card){
+        Log.d(TAG, " Got Card " + card.getName());
+        playerPanel.drawCardFromDeck(cardDeck, card);
+    }
+
+    @Override
+    public BroadcastCardResponses receivedAction(BroadcastCardMessage broadcastCardMessage) {
+        return null;
+    }
+
 
 }

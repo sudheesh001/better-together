@@ -6,8 +6,9 @@ package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 public interface CardActions {
 
-    public Card drawCard(Integer deckCode, boolean hidden);
+    public Card drawTopCard(Integer deckCode, boolean hidden);
     public boolean discardCard(Card card);
     public boolean showCard(Card card);
+    public boolean drawCardFromDeck(Card card);
 
 }

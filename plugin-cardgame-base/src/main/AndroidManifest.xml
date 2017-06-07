@@ -22,7 +22,6 @@
     <application>
         <activity android:name=".dealer.BaseDealerActivity" />
         <activity android:name=".player.BasePlayerActivity"></activity>
-        <activity android:name=".player.CardFanLayoutActivity"></activity>
     </application>
 
 </manifest>

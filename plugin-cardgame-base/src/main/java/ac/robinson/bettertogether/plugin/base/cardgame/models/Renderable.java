@@ -89,6 +89,8 @@ public abstract class Renderable {
 
     public abstract void setTouched(boolean touched);
 
+    public abstract boolean isFlinged();
+
     public boolean isOverlapping(Renderable image) {
         Bitmap imBmp = image.getBitmap();
 

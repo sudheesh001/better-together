@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
-import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardResponses;
-import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
@@ -33,7 +30,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
  */
 
 public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, GestureDetector.OnGestureListener,
-        GestureDetector.OnDoubleTapListener, CardPanelCallback {
+        GestureDetector.OnDoubleTapListener {
 
     private static final String TAG = DealerPanel.class.getSimpleName();
 
@@ -412,10 +409,4 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         return true;
     }
 
-    @Override
-    public BroadcastCardResponses receivedAction(BroadcastCardMessage broadcastCardMessage) {
-
-        return null;
-
-    }
 }
