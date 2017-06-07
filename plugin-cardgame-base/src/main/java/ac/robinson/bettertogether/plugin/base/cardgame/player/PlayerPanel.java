@@ -307,21 +307,21 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public boolean onDoubleTap(MotionEvent event) {
         Log.d(TAG, "onDoubleTap: " + event.toString());
 
-        Card card = null;
+        List<Card> cards = null;
         for (int i = 0; i < mCards.size(); i++) {
             Renderable r = mCards.get(i);
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
                 Collections.swap(mCards, i, mCards.size() - 1);
                 // TODO toggle if its a card and open the top card if it's a deck
-                card = r.handleDoubleTap(event);
+                cards = r.handleDoubleTap(event);
                 Log.d(TAG, " Double tap on card " + r.getName());
                 break;
             }
 
         }
 
-        if (card != null)
-            mCards.add(card);
+        if (cards != null)
+            mCards.addAll(cards);
 
         return true;
     }
