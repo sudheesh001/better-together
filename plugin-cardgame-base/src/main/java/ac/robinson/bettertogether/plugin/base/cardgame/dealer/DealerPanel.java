@@ -345,18 +345,10 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     @Override
-    public boolean onSingleTapUp(MotionEvent event) {
-        Log.d(TAG, "onSingleTapUp: " + event.toString());
-//        Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
-//        for (Renderable r : mCards) {
-//            if (r.isTouched()) {
-//
-//                r.setTouched(false);
-////                        Log.d(TAG, r.getName()+ " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
-//            }
-//        }
+    public boolean onSingleTapUp(MotionEvent e) {
         return true;
     }
+
 
     @Override
     public boolean onDoubleTap(MotionEvent event) {
@@ -395,16 +387,13 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public boolean onSingleTapConfirmed(MotionEvent event) {
         Log.d(TAG, "onSingleTapConfirmed: " + event.toString());
 
-        // TODO it's N2 .. change it find the nearest cards because we know all centre and their heights and widths so can bring it down to N maybe lower
-//        for (Renderable r : mCards) {
-//            for (Renderable r2 : mCards) {
-//                if (r2.equals(r)) {
-//                    continue;
-//                }
-//                r2.isOverlapping(r);
-//                // TODO merge the two decks is they are of similar type
-//            }
-//        }
+        for (Renderable r : mCards) {
+            if (r.isTouched()) {
+                r.setTouched(true);
+                break;
+            }
+        }
+        
 
         return true;
     }

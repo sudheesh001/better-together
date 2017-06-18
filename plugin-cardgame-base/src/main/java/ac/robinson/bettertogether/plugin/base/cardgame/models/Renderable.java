@@ -1,7 +1,10 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -17,8 +20,6 @@ import static android.content.ContentValues.TAG;
 
 public abstract class Renderable {
 
-    public static final int OVERLAP_THRESHOLD_LIMIT = 250*250;
-
     public int x; // X cooridnate
     public int y; // Y coordinate
     private boolean touched; // if it has been touched or picked up
@@ -28,10 +29,18 @@ public abstract class Renderable {
     public boolean safeToDelete = false; // should this card be deleted.
 
     protected boolean hidden;
+    protected static final Paint GLOW_PAINT = new Paint();
+    static {
+        final int GLOW_RADIUS = 32;
+        GLOW_PAINT.setColor(Color.rgb(255, 255, 255));
+        GLOW_PAINT.setMaskFilter(new BlurMaskFilter(GLOW_RADIUS, BlurMaskFilter.Blur.OUTER));
+    }
+    public static Renderable selectedRenderableForContext = null;
 
     protected final int FACADE_SCALED_WIDTH = 30;
-    protected final int scaledWidth = 300;
-    protected final int scaledHeight = 375;
+    public static final int scaledWidth = 300;
+    public static final int scaledHeight = 375;
+    public static final int OVERLAP_THRESHOLD_LIMIT = ((scaledWidth*5)/6) * ((scaledHeight*2)/3);
 
     protected CardDeckStatus status;
 

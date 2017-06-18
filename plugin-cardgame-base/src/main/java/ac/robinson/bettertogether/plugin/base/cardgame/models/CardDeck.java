@@ -211,7 +211,10 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
             canvas.drawBitmap(facadeBitmap, x-facadeBitmap.getWidth(), y, null);
         }
         canvas.drawBitmap(bitmap, x, y , null);
-
+        if (this == Renderable.selectedRenderableForContext) {
+            Bitmap alpha = bitmap.extractAlpha();
+            canvas.drawBitmap(alpha, x, y, GLOW_PAINT);
+        }
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.GREEN);

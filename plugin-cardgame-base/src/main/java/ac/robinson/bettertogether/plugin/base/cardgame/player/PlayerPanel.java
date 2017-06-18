@@ -21,6 +21,7 @@ import java.util.List;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
@@ -33,10 +34,13 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, GestureDetector.OnGestureListener,
         GestureDetector.OnDoubleTapListener {
 
+    private static final int FLING_CARD_OUTSIDE_VELOCITY_THRESHOLD = 3500;
+    private static final int FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD = (Renderable.scaledHeight/2); //  mid point
     private static final String TAG = ac.robinson.bettertogether.plugin.base.cardgame.dealer.DealerPanel.class.getSimpleName();
 
     private PlayerThread thread;
     private List<Renderable> mCards = Collections.synchronizedList(new ArrayList<Renderable>());
+    private Renderable mLastCardTouched = null; // for detecting the card being flinged.
 
     private SurfaceView surfaceView;
     private GestureDetectorCompat mDetector;
@@ -78,6 +82,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                         Renderable r = mCards.get(i);
                         if (r.isTouched()) {
                             r.setTouched(false);
+                            mLastCardTouched = r;
 //                            Log.d(TAG, r.getName() + " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
                             for (int j = 0; j< mCards.size();j++) {
                                 Renderable r2 = mCards.get(j);
@@ -220,6 +225,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         for (int i = 0; i < mCards.size(); i++) {
             mCards.get(i).draw(canvas);
         }
+        CardContextActionPanel.getInstance(mContext).draw(canvas);
 
     }
 
@@ -234,6 +240,13 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public boolean onDown(MotionEvent event) {
         Log.d(TAG, "onDown: " + event.toString());
+        mLastCardTouched = null;
+        Renderable.selectedRenderableForContext = null;
+
+        if (CardContextActionPanel.getInstance(mContext).handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.HANDLED)) {
+            return true;
+        }
+
         for (int i = 0; i < mCards.size(); i++) {
             Renderable r = mCards.get(i);
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
@@ -253,18 +266,18 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public boolean onFling(MotionEvent event1, MotionEvent event2,
                            float velocityX, float velocityY) {
-        Log.d(TAG, "onFling: " + event1.toString() + event2.toString());
+//        Log.d(TAG, "onFling: " + event1.toString() + event2.toString());
 
-        for (Renderable r : mCards) {
-            if ( r.isTouched()) {
-                // make sure it works only for deck and
-                Log.d(TAG, "Flinged " + r.getName() + " to Coords: x=" + event1.getX() + ",y=" + event1.getY());
-                Log.d(TAG, "Flinged E2" + r.getName() + " to Coords: x=" + event2.getX() + ",y=" + event2.getY());
-                ((BasePlayerActivity)getContext()).inflateCardFanView((CardDeck)r, true); // casting it caz we know it's an instance of card deck
-                break; // only moce the top card
+        if (mLastCardTouched != null) {
+            Log.d(TAG, "Flinged " + mLastCardTouched.getName() + " to Coords: x=" + event1.getX() + ", y=" + event1.getY());
+            Log.d(TAG, "Flinged E2" + mLastCardTouched.getName() + " to Coords: x=" + event2.getX() + ", y=" + event2.getY());
+            Log.d(TAG, "onFling: velocity " + velocityX + " " + velocityY);
+            if ((Math.abs(velocityX) + Math.abs(velocityY) >= FLING_CARD_OUTSIDE_VELOCITY_THRESHOLD)
+                    && event2.getY() <= FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD) {
+                // TODO: 18/6/17 Send the card/deck across
+                Log.d(TAG, "onFling: Sending " + mLastCardTouched  + " to Dealer Panel");
             }
         }
-
         return true;
     }
 
@@ -354,6 +367,22 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent event) {
         Log.d(TAG, "onSingleTapConfirmed: " + event.toString());
+        for(Renderable r: mCards) {
+            if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
+                r.setTouched(false);
+                Renderable.selectedRenderableForContext = r;
+                if (r instanceof Card) {
+                    CardContextActionPanel.getInstance(mContext).show(r, CardContextActionPanel.SHOW_TRANSFER | CardContextActionPanel.SHOW_REVERSE);
+                } else if (r instanceof CardDeck){
+                    CardContextActionPanel.getInstance(mContext).show(r,
+                            CardContextActionPanel.SHOW_TRANSFER |
+                            CardContextActionPanel.SHOW_REVERSE |
+                            CardContextActionPanel.SHOW_DISTRIBUTE |
+                            CardContextActionPanel.SHOW_SHUFFLE);
+                }
+                break;
+            }
+        }
 
         // TODO it's N2 .. change it find the nearest cards because we know all centre and their heights and widths so can bring it down to N maybe lower
 //        for (Renderable r : mCards) {

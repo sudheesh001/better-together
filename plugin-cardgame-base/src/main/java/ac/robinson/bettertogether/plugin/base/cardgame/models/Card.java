@@ -138,11 +138,13 @@ public class Card extends Renderable{
             );
         }
 
-        if (hidden) {
-            canvas.drawBitmap(hiddenBitmap, x, y , null);
-        } else {
-            canvas.drawBitmap(openBitmap, x, y , null);
+        Bitmap bitmapToUse = hidden ? hiddenBitmap : openBitmap;
+
+        if (this == Renderable.selectedRenderableForContext) {
+            Bitmap alpha = bitmapToUse.extractAlpha();
+            canvas.drawBitmap(alpha, x, y, GLOW_PAINT);
         }
+        canvas.drawBitmap(bitmapToUse, x, y , null);
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.RED);
