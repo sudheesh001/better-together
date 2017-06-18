@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context="ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,14 +16,12 @@
             android:layout_height="match_parent"
             app:emptyItemColor="@color/usc_gold"
             app:wheelColor="@color/dim_gray"
-            app:rotatableWheelDrawable="false"
             app:selectionAngle="90.0"
             app:selectionColor="@color/dodger_blue"
             app:selectionPadding="4dp"
-            app:repeatItems="true"
-            app:wheelRadius="176dp"
-            app:wheelItemCount="14"
             app:wheelPadding="13dp"
+            app:wheelItemCount="6"
+            app:wheelRadius="176dp"
             app:wheelItemRadius="41dp"/>
 
         <!--

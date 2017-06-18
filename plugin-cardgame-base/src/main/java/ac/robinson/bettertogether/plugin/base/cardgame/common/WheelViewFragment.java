@@ -38,8 +38,9 @@ public class WheelViewFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     private static Renderable renderable;
+    private static Map<String , MessageHelper.PlayerType> connectionMap;
 
-    private static final int ITEM_COUNT = 20;
+    private static final int ITEM_COUNT = 6;
 
     private OnFragmentInteractionListener mListener;
 
@@ -55,12 +56,14 @@ public class WheelViewFragment extends Fragment {
      * @return A new instance of fragment WheelViewFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WheelViewFragment newInstance(Renderable renderableObj) {
+    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> coonectionMapObj) {
         WheelViewFragment fragment = new WheelViewFragment();
         //TODO ideally should be set through arguments
 //        Bundle args = new Bundle();
 //        args.putSerializable(ARG_PARAM1, (Card)renderable);
 //        fragment.setArguments(args);
+        renderable = renderableObj;
+        connectionMap = coonectionMapObj;
 
         return fragment;
     }
@@ -115,6 +118,9 @@ public class WheelViewFragment extends Fragment {
 
         //populate the adapter, that knows how to draw each item (as you would do with a ListAdapter)
         wheelView.setAdapter(new MaterialColorAdapter(entries));
+        wheelView.setRepeatableAdapter(false);
+        wheelView.setWheelDrawableRotatable(false);
+        wheelView.setWheelDrawable(renderable);
 
         //a listener for receiving a callback for when the item closest to the selection angle changes
         wheelView.setOnWheelItemSelectedListener(new WheelView.OnWheelItemSelectListener() {

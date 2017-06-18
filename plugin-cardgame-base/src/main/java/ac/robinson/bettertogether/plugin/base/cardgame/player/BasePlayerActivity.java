@@ -67,10 +67,15 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     // Open carddeck available with the player.
     private List<CardDeck> mCardsDisplay;
 
+    MessageHelper messageHelper = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
+
+        messageHelper = MessageHelper.getInstance();
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -98,8 +103,8 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
                     @Override
                     public void onClick(View view) {
                         Log.d(TAG, "Hye I was clicked");
-                        Renderable r = new CardDeck(mContext, CardDeckStatus.OPEN, true);
-                        inflateWheelView(r, true);
+//                        Renderable r = new CardDeck(mContext, CardDeckStatus.OPEN, true);
+//                        inflateWheelView(messageHelper.getConnectionMap(), r, true);
                     }
                 }
         );
@@ -124,24 +129,24 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         // The identifier is the Card that has been selected.
         // This is the card that the user performs an action on.
         Log.d(TAG, "Player Gets: " + message.getMessage());
-        MessageHelper m = MessageHelper.getInstance();
+        messageHelper = MessageHelper.getInstance();
 
         if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
-            m.ReceivedDiscoveryMessage(message.getMessage());
+            messageHelper.ReceivedDiscoveryMessage(message.getMessage());
 
             SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
             String mName = prefs.getString("Name", null);
             MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
 
-            sendMessage(m.Discovery(mName, mPlayerType));
+            sendMessage(messageHelper.Discovery(mName, mPlayerType));
 
             // TODO: Will this cause a network flood?
         }
         else {
-            m.parse(message);
-            m.PlayerReceivedMessage();
+            messageHelper.parse(message);
+            messageHelper.PlayerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
@@ -174,11 +179,11 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
                     .commit();
     }
 
-    public void inflateWheelView(Renderable renderable, boolean status){
+    public void inflateWheelView( Renderable renderable, boolean status){
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance(renderable))
+                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance( renderable, messageHelper.getConnectionMap()))
                 .commit();
     }
 

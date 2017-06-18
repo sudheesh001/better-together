@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.adapter.WheelAdapter;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.transformer.FadingSelectionTransformer;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.transformer.ScalingItemTransformer;
@@ -107,6 +108,7 @@ public class WheelView extends View {
 
     private CacheItem[] mItemCacheArray;
     private Drawable mWheelDrawable;
+    private Renderable mWheelRenderable;
     private Drawable mEmptyItemDrawable;
     private Drawable mSelectionDrawable;
 
@@ -692,8 +694,14 @@ public class WheelView extends View {
         int wheelRadius = measureWheelRadius(mWheelRadius, width, height);
         mWheelBounds = new Circle(centerX, centerY, wheelRadius);
 
-        if (mWheelDrawable != null) {
-            mWheelDrawable.setBounds(mWheelBounds.getBoundingRect());
+        if (mWheelDrawable != null || mWheelRenderable != null) {
+
+            if( mWheelRenderable == null ){
+                mWheelDrawable.setBounds(new Circle(centerX, centerY, wheelRadius).getBoundingRect());//FIXME makes drawable small
+            }
+            mWheelRenderable.setY(centerY);
+            mWheelRenderable.setX(centerX);
+
         }
     }
 
@@ -750,6 +758,10 @@ public class WheelView extends View {
      */
     public void setWheelDrawable(@DrawableRes int resId) {
         setWheelDrawable(getResources().getDrawable(resId));
+    }
+
+    public void setWheelDrawable(Renderable renderable) {
+        this.mWheelRenderable = renderable;
     }
 
     /**
@@ -914,7 +926,9 @@ public class WheelView extends View {
      * @param angle given in degrees and can be any value (not only between 0 and 360)
      */
     public void setAngle(float angle) {
-        mAngle = angle;
+        // FIXME stops rotation
+        mAngle = 0;
+//        mAngle = angle;
 
         updateSelectedPosition();
 
@@ -1219,7 +1233,11 @@ public class WheelView extends View {
             mWheelDrawable.draw(canvas);
             canvas.restore();
         } else {
-            mWheelDrawable.draw(canvas);
+            if( mWheelRenderable != null ){
+                mWheelRenderable.draw(canvas);
+            }else {
+                mWheelDrawable.draw(canvas);
+            }
         }
     }
 
@@ -1230,8 +1248,9 @@ public class WheelView extends View {
         float centerX = mWheelBounds.mCenterX;
         float centerY = mWheelBounds.mCenterY;
 
-        int wheelItemOffset = mItemCount / 2;
-        int offset = mRawSelectedPosition - wheelItemOffset;
+//        int wheelItemOffset = mItemCount / 2;
+//        int offset = mRawSelectedPosition - wheelItemOffset;
+        int offset = 0; //FIXME displays all items at once
         int length = mItemCount + offset;
         for (int i = offset; i < length; i++) {
             int adapterPosition = rawPositionToAdapterPosition(i);
