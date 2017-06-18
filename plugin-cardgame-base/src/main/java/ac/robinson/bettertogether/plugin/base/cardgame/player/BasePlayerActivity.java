@@ -18,6 +18,7 @@ package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
@@ -26,8 +27,10 @@ import android.view.GestureDetector;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -40,11 +43,13 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardRespo
 import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
-public class BasePlayerActivity extends BasePluginActivity implements CardPanelCallback{
+public class BasePlayerActivity extends BasePluginActivity implements CardPanelCallback, WheelViewFragment.OnFragmentInteractionListener{
 
 
     private static final String TAG = BasePlayerActivity.class.getSimpleName();
@@ -54,6 +59,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     FrameLayout parentFrame = null;
     PlayerPanel playerPanel = null;
     MainFragment mainFragment;
+    WheelViewFragment wheelViewFragment = null;
 
     private Context mContext;
     private GestureDetector mDetector;
@@ -61,10 +67,15 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     // Open carddeck available with the player.
     private List<CardDeck> mCardsDisplay;
 
+    MessageHelper messageHelper = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
+
+        messageHelper = MessageHelper.getInstance();
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -81,6 +92,26 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         playerPanel = new PlayerPanel(this, null, mCardsDisplay);
         playerPanel.setCardPanelCallback(this);
         parentFrame.addView(playerPanel);
+        //TODO add a button right now for context menu emuation
+
+        LinearLayout linearLayout = new LinearLayout(mContext);
+        Button button = new Button(mContext);
+        button.setWidth(100);
+        button.setText("Click Me For Wheel View");
+        button.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.d(TAG, "Hye I was clicked");
+//                        Renderable r = new CardDeck(mContext, CardDeckStatus.OPEN, true);
+//                        inflateWheelView(messageHelper.getConnectionMap(), r, true);
+                    }
+                }
+        );
+        linearLayout.addView(button);
+
+        parentFrame.addView(linearLayout);
+
         setContentView(parentFrame);
         // setContentView(R.layout.activity_base_player);
 
@@ -98,24 +129,24 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         // The identifier is the Card that has been selected.
         // This is the card that the user performs an action on.
         Log.d(TAG, "Player Gets: " + message.getMessage());
-        MessageHelper m = MessageHelper.getInstance();
+        messageHelper = MessageHelper.getInstance();
 
         if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
-            m.ReceivedDiscoveryMessage(message.getMessage());
+            messageHelper.ReceivedDiscoveryMessage(message.getMessage());
 
             SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
             String mName = prefs.getString("Name", null);
             MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
 
-            sendMessage(m.Discovery(mName, mPlayerType));
+            sendMessage(messageHelper.Discovery(mName, mPlayerType));
 
             // TODO: Will this cause a network flood?
         }
         else {
-            m.parse(message);
-            m.PlayerReceivedMessage();
+            messageHelper.parse(message);
+            messageHelper.PlayerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
@@ -148,6 +179,14 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
                     .commit();
     }
 
+    public void inflateWheelView( Renderable renderable, boolean status){
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance( renderable, messageHelper.getConnectionMap()))
+                .commit();
+    }
+
     public void getSelectedCard(CardDeck cardDeck, Card card){
         Log.d(TAG, " Got Card " + card.getName());
         playerPanel.drawCardFromDeck(cardDeck, card);
@@ -159,4 +198,8 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     }
 
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        return;
+    }
 }

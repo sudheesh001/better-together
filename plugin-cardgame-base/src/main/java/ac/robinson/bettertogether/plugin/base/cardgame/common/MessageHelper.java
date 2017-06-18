@@ -45,6 +45,10 @@ public class MessageHelper {
         return mInstance;
     }
 
+    public Map<String ,PlayerType> getConnectionMap(){
+        return connectionMap;
+    }
+
     public boolean ReceivedDiscoveryMessage(String message) {
         String[] nameAndType = message.split(";");
         String name = nameAndType[0];

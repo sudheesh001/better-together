@@ -241,11 +241,11 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public boolean onDown(MotionEvent event) {
         Log.d(TAG, "onDown: " + event.toString());
         mLastCardTouched = null;
-        Renderable.selectedRenderableForContext = null;
 
         if (CardContextActionPanel.getInstance(mContext).handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.HANDLED)) {
             return true;
         }
+        Renderable.selectedRenderableForContext = null;
 
         for (int i = 0; i < mCards.size(); i++) {
             Renderable r = mCards.get(i);

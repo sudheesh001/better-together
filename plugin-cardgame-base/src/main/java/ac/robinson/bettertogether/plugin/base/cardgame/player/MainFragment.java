@@ -7,7 +7,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.Fade;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +28,8 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 
 
 public class MainFragment extends Fragment {
+
+    public static final String TAG = MainFragment.class.getSimpleName();
 
     private FanLayoutManager fanLayoutManager;
 
@@ -62,7 +66,7 @@ public class MainFragment extends Fragment {
         FanLayoutManagerSettings fanLayoutManagerSettings = FanLayoutManagerSettings
                 .newBuilder(getContext())
                 .withFanRadius(true)
-                .withAngleItemBounce(10)
+//                .withAngleItemBounce(10)
                 .withViewHeightDp(180)
                 .withViewWidthDp(125)
                 .build();
@@ -113,6 +117,31 @@ public class MainFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         recyclerView.setChildDrawingOrderCallback(new FanChildDrawingOrderCallback(fanLayoutManager));
+        ItemTouchHelper.SimpleCallback gestureCallback =
+                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                    @Override
+                    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                          RecyclerView.ViewHolder target) {
+                        Log.d(TAG, "onMove " +  target);
+                        return false;
+                    }
+
+                    @Override
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                        //do things
+                        Log.d(TAG, "Swipe Dir = " + direction);
+                    }
+
+                    @Override
+                    public int getDragDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                        int drag =  super.getDragDirs(recyclerView, viewHolder);
+                        Log.d(TAG, "Drag Dir = " + drag);
+                        return drag;
+                    }
+                };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(gestureCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         (view.findViewById(R.id.logo)).setOnClickListener(new View.OnClickListener() {
             @Override

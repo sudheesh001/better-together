@@ -18,7 +18,7 @@ import static android.content.ContentValues.TAG;
  * Created by t-apmehr on 4/5/2017.
  */
 
-public abstract class Renderable {
+public abstract class Renderable implements Cloneable{
 
     public int x; // X cooridnate
     public int y; // Y coordinate
@@ -127,5 +127,10 @@ public abstract class Renderable {
 
     public Bitmap getBitmap() {
         return bitmap;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

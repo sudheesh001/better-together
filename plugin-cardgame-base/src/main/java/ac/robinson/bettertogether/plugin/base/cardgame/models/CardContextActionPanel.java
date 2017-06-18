@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import java.util.List;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.player.BasePlayerActivity;
 
 import static android.content.ContentValues.TAG;
 
@@ -182,6 +183,11 @@ public class CardContextActionPanel extends Renderable {
     
     private void handleDistribute(int x, int y) {
         Log.d(TAG, "handleDistribute: ");
+        try {
+            ((BasePlayerActivity) mContext).inflateWheelView((Renderable) Renderable.selectedRenderableForContext.clone(), true);
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
     }
     
     private void handleReverse(int x, int y) {

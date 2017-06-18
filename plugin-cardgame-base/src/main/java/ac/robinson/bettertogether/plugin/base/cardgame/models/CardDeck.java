@@ -201,7 +201,6 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, x, y , null);
         if (this.mCards != null && this.mCards.size() > 1) {
             Bitmap facadeBitmap = facadeBitmap3;
             switch (mCards.size()) {
@@ -211,6 +210,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
             canvas.drawBitmap(facadeBitmap, x-facadeBitmap.getWidth(), y, null);
         }
         canvas.drawBitmap(bitmap, x, y , null);
+
         if (this == Renderable.selectedRenderableForContext) {
             Bitmap alpha = bitmap.extractAlpha();
             canvas.drawBitmap(alpha, x, y, GLOW_PAINT);
