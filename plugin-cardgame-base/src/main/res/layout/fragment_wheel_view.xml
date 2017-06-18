@@ -1,0 +1,37 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.WheelView
+            android:id="@+id/wheelview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:emptyItemColor="@color/usc_gold"
+            app:wheelColor="@color/dim_gray"
+            app:rotatableWheelDrawable="false"
+            app:selectionAngle="90.0"
+            app:selectionColor="@color/dodger_blue"
+            app:selectionPadding="4dp"
+            app:repeatItems="true"
+            app:wheelRadius="176dp"
+            app:wheelItemCount="14"
+            app:wheelPadding="13dp"
+            app:wheelItemRadius="41dp"/>
+
+        <!--
+                app:wheelPosition="bottom"
+                        app:wheelOffsetY="60dp"
+
+            app:wheelItemTransformer="com.lukedeighton.wheelview.transformer.SimpleItemTransformer"
+
+        -->
+    </RelativeLayout>
+
+</FrameLayout>
