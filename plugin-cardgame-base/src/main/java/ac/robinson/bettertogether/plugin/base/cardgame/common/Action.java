@@ -5,5 +5,7 @@ package ac.robinson.bettertogether.plugin.base.cardgame.common;
  */
 
 public enum Action {
-    draw,play,discard
+    draw, // dealer to player
+    play, // player to dealer
+    discard // TODO player to dealer for discard but how ?
 }

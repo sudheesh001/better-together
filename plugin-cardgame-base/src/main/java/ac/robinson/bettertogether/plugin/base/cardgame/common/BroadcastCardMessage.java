@@ -1,6 +1,6 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import java.util.List;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -10,7 +10,8 @@ public class BroadcastCardMessage {
     private String cardFrom;
     private String cardTo;
     private Action cardAction;
-    private Card mCard;
+
+    private List<String> Cards;
 
     public String getCardFrom() {
         // Get string from PlaySession AndroidID
@@ -38,11 +39,13 @@ public class BroadcastCardMessage {
         this.cardAction = cardAction;
     }
 
-    public Card getmCard() {
-        return mCard;
+    public List<String> getCards() {
+        return Cards;
     }
 
-    public void setmCard(Card mCard) {
-        this.mCard = mCard;
+    public void setCards(List<String> cards) {
+        this.Cards = cards;
     }
+
+
 }

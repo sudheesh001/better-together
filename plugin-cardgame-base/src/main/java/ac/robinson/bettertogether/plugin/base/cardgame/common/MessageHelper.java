@@ -1,12 +1,16 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
+import android.content.Context;
+import android.provider.Settings;
+
 import com.google.gson.Gson;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -37,12 +41,33 @@ public class MessageHelper {
         }
     }
 
-    public static MessageHelper getInstance(){
+    public static MessageHelper getInstance(Context mContext){
         if( mInstance == null){
             mInstance = new MessageHelper();
+            mUser = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
         }
 
         return mInstance;
+    }
+
+    public String getDealerFromMap(){
+//        if( !connectionMap.containsValue(PlayerType.DEALER)) {
+
+            Iterator it = connectionMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                System.out.println(pair.getKey() + " = " + pair.getValue());
+                if (pair.getValue().equals(PlayerType.DEALER)) {
+                    return (String)pair.getKey();
+                }
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+//        }
+        return null;
+    }
+
+    public String getmUser(){
+        return mUser;
     }
 
     public Map<String ,PlayerType> getConnectionMap(){
@@ -53,9 +78,9 @@ public class MessageHelper {
         String[] nameAndType = message.split(";");
         String name = nameAndType[0];
         PlayerType type = null;
-        if(nameAndType[1] == "PLAYER") {
+        if(nameAndType[1].equals("PLAYER")) {
             type = PlayerType.PLAYER;
-        }else if (nameAndType[1] == "DEALER"){
+        }else if (nameAndType[1].equals("DEALER")){
             type = PlayerType.DEALER;
         }
         if (!connectionMap.containsKey(name)) {
@@ -77,12 +102,17 @@ public class MessageHelper {
         return new BroadcastMessage(999, name+";"+type.toString());
     }
 
+    public void sendPlayerMessage(BroadcastCardMessage message){
+        Gson gson = new Gson();
+        new BroadcastMessage(MessageType.PLAYER_TO_DEALER, gson.toJson(message));
+    }
+
     public void PlayerReceivedMessage() {
         Action localCardAction = this.message.getCardAction();
         String localFromUser = this.message.getCardFrom();
         String localToUser = this.message.getCardTo();
         // Now having To and From and Action in place. It's time for the player to receive this card.
-        Card localCardItem = this.message.getmCard();
+        List<String> localCardStrings = this.message.getCards();
         // Step 1: Check if the Player is the player intended.
         // Step 2: Perform the required card action to the player list of cards.
 
@@ -93,8 +123,9 @@ public class MessageHelper {
         String localFromUser = this.message.getCardFrom();
         String localToUser = this.message.getCardTo();
         // Now having To and From and Action in place. It's time for the player to receive this card.
-        Card localCardItem = this.message.getmCard();
+        List<String> localCardsItem = this.message.getCards();
         // Step 1: Perform the required card action to the server deck of cards.
 
     }
+
 }
