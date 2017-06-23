@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -104,6 +105,14 @@ public class MessageHelper {
             type = PlayerType.DEALER;
         }
         if (!connectionMap.containsKey(name)) {
+            Collection<PlayerType> playerTypes = connectionMap.values();
+            if (type.equals(PlayerType.DEALER)) {
+                // Check if dealer already exists
+                if(playerTypes.contains(type)) {
+                    // Dealer already exists.
+                    return false;
+                }
+            }
             connectionMap.put(name, type);
             return true;
         }
