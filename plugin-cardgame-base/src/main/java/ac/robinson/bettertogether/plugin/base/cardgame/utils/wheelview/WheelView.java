@@ -1062,6 +1062,7 @@ public class WheelView extends View {
                     boolean isSelected = Math.abs(mClickedItem.mRelativePos) < 1f;
                     mOnItemClickListener.onWheelItemClick(this,
                             mClickedItem.mAdapterPosition, isSelected);
+                    invalidate();
                 }
             case MotionEvent.ACTION_CANCEL:
                 if (mIsDraggingWheel) {
@@ -1371,11 +1372,11 @@ public class WheelView extends View {
         return null;
     }
 
-    static class CacheItem {
+    public static class CacheItem {
         boolean mDirty;
         boolean mIsVisible;
         boolean mIsEmpty;
-        Drawable mDrawable;
+        public Drawable mDrawable;
 
         CacheItem() {
             mDirty = true;
@@ -1387,7 +1388,7 @@ public class WheelView extends View {
         }
     }
 
-    private CacheItem getCacheItem(int position) {
+    public CacheItem getCacheItem(int position) {
         if (isEmptyItemPosition(position)) return EMPTY_CACHE_ITEM;
 
         CacheItem cacheItem = mItemCacheArray[position];

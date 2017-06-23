@@ -183,7 +183,13 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance( renderable, messageHelper.getConnectionMap()))
+                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance(renderable, messageHelper.getConnectionMap(), new WheelViewFragment.DistributionCompletedCallback() {
+                    @Override
+                    public void onDistributionDecided(List<String> cardDistributionPlayerSequence) {
+                        getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
+                        wheelViewFragment = null;
+                    }
+                }))
                 .commit();
     }
 

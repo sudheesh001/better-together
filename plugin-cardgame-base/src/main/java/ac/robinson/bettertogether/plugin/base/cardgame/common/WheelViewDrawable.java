@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 
 /**
  * Created by t-apmehr on 6/18/2017.
@@ -14,7 +15,8 @@ import android.graphics.drawable.Drawable;
 
 public class WheelViewDrawable extends Drawable {
 
-    private final String text;
+    private String text;
+    public int count;
     private final Paint paint;
 
     public WheelViewDrawable(String text) {
@@ -29,12 +31,19 @@ public class WheelViewDrawable extends Drawable {
         paint.setShadowLayer(12f, 0, 0, Color.BLACK);
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.LEFT);
+
+        this.count = 0;
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         Rect bounds = getBounds();
-        canvas.drawText(text, bounds.centerX() - 15f /*just a lazy attempt to centre the text*/ * text.length(), bounds.centerY() + 15f, paint);
+        if (!text.equals("OK")) {
+            canvas.drawText(text, bounds.centerX() - 13f /*just a lazy attempt to centre the text*/ * text.length(), bounds.centerY() - 20, paint);
+            canvas.drawText(Integer.toString(count), bounds.centerX() - Integer.toString(count).length(), bounds.centerY() + 60f, paint);
+        } else {
+            canvas.drawText(text, bounds.centerX() - 13f /*just a lazy attempt to centre the text*/ * text.length(), bounds.centerY(), paint);
+        }
     }
 
     @Override
@@ -54,5 +63,9 @@ public class WheelViewDrawable extends Drawable {
 
     public String getText() {
         return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }
