@@ -85,7 +85,7 @@ public class BaseDealerActivity extends BasePluginActivity {
         String mName = prefs.getString("Name", null);
         MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
         // Now that we have name and type. Send discovery protocol
-        MessageHelper m = MessageHelper.getInstance();
+        MessageHelper m = MessageHelper.getInstance(mContext);
         sendMessage(m.Discovery(mName, mPlayerType));
 
         Log.d(TAG, "View added");
@@ -99,7 +99,7 @@ public class BaseDealerActivity extends BasePluginActivity {
         // once you get a DR ..
         // pass it to messaga helper to parse and update the connection map
         // if you get a action type then pass to MHelper to parse and do appropriate action.
-        MessageHelper m = MessageHelper.getInstance();
+        MessageHelper m = MessageHelper.getInstance(mContext);
         if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
@@ -119,4 +119,6 @@ public class BaseDealerActivity extends BasePluginActivity {
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
+
+
 }

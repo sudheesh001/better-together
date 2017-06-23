@@ -74,7 +74,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         super.onCreate(savedInstanceState);
         mContext = this;
 
-        messageHelper = MessageHelper.getInstance();
+        messageHelper = MessageHelper.getInstance(mContext);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -117,11 +117,10 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 
         // setContentView(R.layout.activity_base_player);
 
-        MessageHelper m = MessageHelper.getInstance();
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
         String mName = prefs.getString("Name", null);
         MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
-        sendMessage(m.Discovery(mName, mPlayerType));
+        sendMessage(messageHelper.Discovery(mName, mPlayerType));
     }
 
     @Override
@@ -129,7 +128,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         // The identifier is the Card that has been selected.
         // This is the card that the user performs an action on.
         Log.d(TAG, "Player Gets: " + message.getMessage());
-        messageHelper = MessageHelper.getInstance();
+        messageHelper = MessageHelper.getInstance(mContext);
 
         if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
@@ -137,7 +136,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
             messageHelper.ReceivedDiscoveryMessage(message.getMessage());
 
             SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-            String mName = prefs.getString("Name", null);
+            String mName = prefs.getString("Name", messageHelper.getmUser());
             MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
 
             sendMessage(messageHelper.Discovery(mName, mPlayerType));
@@ -149,6 +148,13 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
             messageHelper.PlayerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    protected void prepareMessage(@NonNull BroadcastCardMessage message){
+        message.setCardFrom(messageHelper.getmUser());
+        messageHelper.getConnectionMap();
+        message.setCardTo(messageHelper.getDealerFromMap());
+        messageHelper.sendPlayerMessage(message);
     }
 
     @Override

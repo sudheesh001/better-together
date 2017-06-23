@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
@@ -36,7 +38,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     private static final int FLING_CARD_OUTSIDE_VELOCITY_THRESHOLD = 3500;
     private static final int FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD = (Renderable.scaledHeight/2); //  mid point
-    private static final String TAG = ac.robinson.bettertogether.plugin.base.cardgame.dealer.DealerPanel.class.getSimpleName();
+    private static final String TAG = PlayerPanel.class.getSimpleName();
 
     private PlayerThread thread;
     private List<Renderable> mCards = Collections.synchronizedList(new ArrayList<Renderable>());
@@ -276,6 +278,23 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     && event2.getY() <= FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD) {
                 // TODO: 18/6/17 Send the card/deck across
                 Log.d(TAG, "onFling: Sending " + mLastCardTouched  + " to Dealer Panel");
+
+                // Prepare broadcast message
+                BroadcastCardMessage message = new BroadcastCardMessage();
+                message.setCardAction(Action.play);
+                if( mLastCardTouched instanceof Card){
+                    List<String> cards = new ArrayList<>();
+                    cards.add(mLastCardTouched.getName());
+                    message.setCards(cards);
+                }else if( mLastCardTouched instanceof CardDeck){
+                    List<String> cards = new ArrayList<>();
+                    for (Card card: ((CardDeck) mLastCardTouched).getmCards()
+                         ) {
+                        cards.add(card.getName());
+                    }
+                    message.setCards(cards);
+                }
+                ((BasePlayerActivity)getContext()).prepareMessage(message);
             }
         }
         return true;
