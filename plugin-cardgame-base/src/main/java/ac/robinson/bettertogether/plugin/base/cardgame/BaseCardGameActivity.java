@@ -47,14 +47,6 @@ public class BaseCardGameActivity extends AppCompatActivity {
 
     MarketplaceAPI apiInterface; // TODO: Temporary for testing
 
-    Context context;
-    RecyclerView recyclerView;
-    RelativeLayout relativeLayout;
-    RecyclerView.Adapter recyclerViewAdapter;
-    RecyclerView.LayoutManager recyclerViewLayoutManager;
-
-    String[] subjects = { "ANDROID", "PHP", "PYTHON", "PERL", "CPP" };
-
     Map<String, String> decksInMarketplace = new HashMap<String, String>();
 
 
@@ -66,16 +58,6 @@ public class BaseCardGameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_base_card_game);
 
         mUser = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        // Recycler View
-        // requestWindowFeature(Window.FEATURE_ACTION_BAR);
-        context = getApplicationContext();
-        relativeLayout = (RelativeLayout) findViewById(R.id.relativelayout1);
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview1);
-        recyclerViewLayoutManager = new LinearLayoutManager(context);
-        recyclerView.setLayoutManager(recyclerViewLayoutManager);
-        recyclerViewAdapter = new RecyclerViewAdapter(context, subjects);
-        recyclerView.setAdapter(recyclerViewAdapter);
 
         // TODO: Uncomment this when moving the client out.
         apiInterface = APIClient.getClient().create(MarketplaceAPI.class);

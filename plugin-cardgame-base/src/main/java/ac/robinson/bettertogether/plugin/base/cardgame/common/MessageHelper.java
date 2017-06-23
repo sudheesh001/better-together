@@ -2,6 +2,8 @@ package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
 import android.content.Context;
 import android.provider.Settings;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -30,11 +33,28 @@ public class MessageHelper {
         PLAYER, DEALER
     }
 
+    // FIXME: Somehow doesn't reach all the time.
     public void parse(BroadcastMessage message) { // singleton
         Gson gson = new Gson();
         // Convert message.getMessage() to BroadcastCardMessage object using gson
         try {
             this.message = gson.fromJson(message.getMessage(), BroadcastCardMessage.class);
+            int mType = message.getType();
+
+            if (mType == MessageType.PLAYER_TO_DEALER) {
+                // Received message sent by player on dealer views
+                if (this.message.getCardTo().equals(this.getmUser())) {
+                    // Check if the dealer is the recipient to whom it was sent.
+                    this.ServerReceivedMessage();
+                }
+            }
+            else if (mType == MessageType.DEALER_TO_PLAYER) {
+                // Received message sent by dealer on player views
+                if (this.message.getCardTo().equals(this.getmUser())) {
+                    // Check if the player is the recipient to whom it was sent.
+                    this.PlayerReceivedMessage();
+                }
+            }
         }
         catch (NullPointerException e) {
 
@@ -99,7 +119,7 @@ public class MessageHelper {
         }
         // 2. Trigger a broadcast
         // Discovery will use integer for discovery as 999 and will have ID;TYPE
-        return new BroadcastMessage(999, name+";"+type.toString());
+        return new BroadcastMessage(MessageType.DISCOVER, name+";"+type.toString());
     }
 
     public void sendPlayerMessage(BroadcastCardMessage message){
@@ -125,7 +145,8 @@ public class MessageHelper {
         // Now having To and From and Action in place. It's time for the player to receive this card.
         List<String> localCardsItem = this.message.getCards();
         // Step 1: Perform the required card action to the server deck of cards.
-
+        Log.d("Dealer Received" , "Message on Dealer: " + localCardsItem.toString());
+        // Perform required UI actions here.
     }
 
 }
