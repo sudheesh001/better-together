@@ -152,9 +152,9 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 
     protected void prepareMessage(@NonNull BroadcastCardMessage message){
         message.setCardFrom(messageHelper.getmUser());
-        messageHelper.getConnectionMap();
+//        messageHelper.getConnectionMap();
         message.setCardTo(messageHelper.getDealerFromMap());
-        messageHelper.sendPlayerMessage(message);
+        sendMessage(messageHelper.PlayerToDealerMessage(message));
     }
 
     @Override

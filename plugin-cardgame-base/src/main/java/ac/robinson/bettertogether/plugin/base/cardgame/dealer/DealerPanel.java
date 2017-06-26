@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.annotation.NonNull;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,8 +18,10 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
@@ -35,25 +38,24 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     private static final String TAG = DealerPanel.class.getSimpleName();
 
     private DealerThread thread;
-    private List<Renderable> mCards = Collections.synchronizedList(new ArrayList<Renderable>());
+    private HashMap<String, Card> mAllCardsRes= new HashMap<>();
+    private List<Renderable> mRenderablesInPlay = new ArrayList<>();
 
     private SurfaceView surfaceView;
     private GestureDetectorCompat mDetector;
     private Context mContext;
 
-
-    public DealerPanel(Context context, List<Renderable> cards, List<CardDeck> cardDecks) {
+    public DealerPanel(Context context, @NonNull CardDeck cardDeck) {
         super(context);
         // adding the callback (this) to the surface holder to intercept events
         getHolder().addCallback(this);
         surfaceView = this;
         mContext = context;
 
-        if (cards != null) {
-            this.mCards.addAll(cards);
-        }
-        if (cardDecks != null) {
-            this.mCards.addAll(cardDecks);
+        mRenderablesInPlay.add(cardDeck);
+
+        for(Card card: cardDeck.getmCards()) {
+            mAllCardsRes.put(card.getName(), card);
         }
 
         // create the game loop thread
@@ -72,13 +74,13 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     // touch was released
 //                    Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
 
-                        for (int i = 0; i<mCards.size();i++) {
-                            Renderable r = mCards.get(i);
+                        for (int i = 0; i< mRenderablesInPlay.size(); i++) {
+                            Renderable r = mRenderablesInPlay.get(i);
                             if (r.isTouched()) {
                                 r.setTouched(false);
 //                            Log.d(TAG, r.getName() + " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
-                                for (int j = 0; j< mCards.size();j++) {
-                                    Renderable r2 = mCards.get(j);
+                                for (int j = 0; j< mRenderablesInPlay.size(); j++) {
+                                    Renderable r2 = mRenderablesInPlay.get(j);
                                     if (r2.equals(r)) {
                                         continue;
                                     }
@@ -106,9 +108,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     private void removeCardFromList(Renderable card) {
-
-            mCards.remove(card);
-
+            mRenderablesInPlay.remove(card);
     }
 
     private void mergeRenderables(Renderable r1, Renderable r2) {
@@ -123,7 +123,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             CardDeck finalDeck;
             if (cd1 == null && cd2 == null) {
                 finalDeck = new CardDeck(mContext, (r1.isHidden() ? CardDeckStatus.CLOSED : CardDeckStatus.OPEN), false);
-                    mCards.add(finalDeck);
+                    mRenderablesInPlay.add(finalDeck);
             } else {
                 finalDeck = cd1 == null ? cd2: cd1;
             }
@@ -207,11 +207,11 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 //    public boolean onTouchEvent(MotionEvent event) {
 //        if (event.getAction() == MotionEvent.ACTION_DOWN) {
 //            // delegating event handling to the droid
-//            for (int i = 0; i < mCards.size(); i++) {
-//                Renderable r = mCards.get(i);
+//            for (int i = 0; i < mRenderablesInPlay.size(); i++) {
+//                Renderable r = mRenderablesInPlay.get(i);
 //                if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
 //                    Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
-//                    Collections.swap(mCards, i, mCards.size() - 1);
+//                    Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
 //                }
 //
 //
@@ -227,7 +227,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 //            if (event.getAction() == MotionEvent.ACTION_MOVE) {
 ////            Log.d(TAG, "Move: x=" + event.getX() + ",y=" + event.getY());
 //                // the gestures
-//                for (Renderable r : mCards) {
+//                for (Renderable r : mRenderablesInPlay) {
 //                    if (r.isTouched()) {
 //                        // the image was picked up and is being dragged
 //                        Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
@@ -240,11 +240,11 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 //            if (event.getAction() == MotionEvent.ACTION_UP) {
 //                // touch was released
 //            Log.d(TAG, "Act Up Coords: x=" + event.getX() + ",y=" + event.getY());
-//                for (Renderable r : mCards) {
+//                for (Renderable r : mRenderablesInPlay) {
 //                    if (r.isTouched()) {
 //                        r.setTouched(false);
 //                        Log.d(TAG, r.getName()+ " Setting to False " + r.getName() + "Coords: x=" + event.getX() + ",y=" + event.getY() + " " + r.isTouched());
-//                        for (Renderable r2 : mCards
+//                        for (Renderable r2 : mRenderablesInPlay
 //                                ) {
 //                            if (r2.equals(r)) {
 //                                continue;
@@ -267,12 +267,12 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.drawColor(Color.BLACK);
         setupPanel(canvas);
 
-//        for (Renderable r: mCards) {
+//        for (Renderable r: mRenderablesInPlay) {
 //            r.draw(canvas);
 //        }
 
-        for (int i = 0; i < mCards.size(); i++) {
-            mCards.get(i).draw(canvas);
+        for (int i = 0; i < mRenderablesInPlay.size(); i++) {
+            mRenderablesInPlay.get(i).draw(canvas);
         }
 
     }
@@ -280,16 +280,16 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     @Override
     public boolean onDown(MotionEvent event) {
         Log.d(TAG, "onDown: " + event.toString());
-        for (int i = mCards.size() - 1; i >= 0; i--) {
-            Renderable r = mCards.get(i);
+        for (int i = mRenderablesInPlay.size() - 1; i >= 0; i--) {
+            Renderable r = mRenderablesInPlay.get(i);
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
                 Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
 
                 for (int currI = i-1; currI >= 0; currI --) {
-                    mCards.get(currI).setTouched(false);
+                    mRenderablesInPlay.get(currI).setTouched(false);
                 }
 
-                Collections.swap(mCards, i, mCards.size() - 1);
+                Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
                 break;
             }
             // check if in the lower part of the screen we exit
@@ -322,7 +322,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
         Log.d(TAG, "Move: x=" + e2.getX() + ",y=" + e2.getY());
 //                // the gestures
-        for (Renderable r : mCards) {
+        for (Renderable r : mRenderablesInPlay) {
             if (r.isTouched()) {
                 // the image was picked up and is being dragged
                 Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + e2.getX() + ",y=" + e2.getY());
@@ -355,13 +355,13 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         Log.d(TAG, "onDoubleTap: " + event.toString());
 
         List<Card> cards = null;
-        for (int i = mCards.size() - 1; i >= 0; i--) {
-            Renderable r = mCards.get(i);
+        for (int i = mRenderablesInPlay.size() - 1; i >= 0; i--) {
+            Renderable r = mRenderablesInPlay.get(i);
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
                 for (int currI = i-1; currI >= 0; currI --) {
-                    mCards.get(currI).setTouched(false);
+                    mRenderablesInPlay.get(currI).setTouched(false);
                 }
-                Collections.swap(mCards, i, mCards.size() - 1);
+                Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
                 // TODO toggle if its a card and open the top card if it's a deck
                 cards = r.handleDoubleTap(event);
                 Log.d(TAG, " Double tap on card " + r.getName());
@@ -371,7 +371,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         }
 
         if (cards != null)
-            mCards.addAll(cards);
+            mRenderablesInPlay.addAll(cards);
 
         return true;
     }
@@ -387,7 +387,7 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     public boolean onSingleTapConfirmed(MotionEvent event) {
         Log.d(TAG, "onSingleTapConfirmed: " + event.toString());
 
-        for (Renderable r : mCards) {
+        for (Renderable r : mRenderablesInPlay) {
             if (r.isTouched()) {
                 r.setTouched(true);
                 break;
@@ -398,4 +398,23 @@ public class DealerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         return true;
     }
 
+    public void onCardReceived(BroadcastCardMessage cardMessage) {
+        List<String> receivedCards = cardMessage.getCards();
+        if (receivedCards.size() == 0) return;
+        if (receivedCards.size() == 1) {
+            Card receivedCard = mAllCardsRes.get(receivedCards.get(0));
+            receivedCard.randomizeScreenLocation(200, 200);
+            receivedCard.setHidden(cardMessage.isHidden());
+            mRenderablesInPlay.add(receivedCard);
+        }
+
+        else {
+            CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden() ? CardDeckStatus.CLOSED: CardDeckStatus.OPEN, false);
+            for(String cardId: receivedCards) {
+                receivedCardDeck.addCardToDeck(mAllCardsRes.get(cardId));
+            }
+            receivedCardDeck.setX(200); receivedCardDeck.setY(200);
+            mRenderablesInPlay.add(receivedCardDeck);
+        }
+    }
 }

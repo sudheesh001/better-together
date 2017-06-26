@@ -26,11 +26,14 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
@@ -47,6 +50,7 @@ public class BaseDealerActivity extends BasePluginActivity {
     private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 4 but later we want any number of decks as possible in line with NUI
 
     List<CardDeck> mCardsDisplay;
+    DealerPanel mDealerPanel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +83,8 @@ public class BaseDealerActivity extends BasePluginActivity {
         // making it full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         // set our MainGamePanel as the View
-        setContentView(new DealerPanel(this, null, mCardsDisplay));
+        mDealerPanel = new DealerPanel(this, mOpenDeck);
+        setContentView(mDealerPanel);
         // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
         String mName = prefs.getString("Name", null);
@@ -112,6 +117,12 @@ public class BaseDealerActivity extends BasePluginActivity {
                 sendMessage(m.Discovery(mName, mPlayerType));
 
             // TODO: Will this cause a network flood?
+        }
+        else if (message.getType() == MessageType.PLAYER_TO_DEALER) {
+            if (message.getMessage() != null && !message.getMessage().isEmpty()) {
+                BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
+                mDealerPanel.onCardReceived(receivedMessage);
+            }
         }
         else {
             m.parse(message);

@@ -294,7 +294,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     }
                     message.setCards(cards);
                 }
+
+                message.setHidden(mLastCardTouched.isHidden());
+
                 ((BasePlayerActivity)getContext()).prepareMessage(message);
+                mCards.remove(mLastCardTouched);
+                mLastCardTouched = null;
             }
         }
         return true;

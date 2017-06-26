@@ -12,6 +12,7 @@ public class BroadcastCardMessage {
     private Action cardAction;
 
     private List<String> Cards;
+    private boolean isHidden;
 
     public String getCardFrom() {
         // Get string from PlaySession AndroidID
@@ -47,5 +48,11 @@ public class BroadcastCardMessage {
         this.Cards = cards;
     }
 
+    public boolean isHidden() {
+        return isHidden;
+    }
 
+    public void setHidden(boolean hidden) {
+        isHidden = hidden;
+    }
 }

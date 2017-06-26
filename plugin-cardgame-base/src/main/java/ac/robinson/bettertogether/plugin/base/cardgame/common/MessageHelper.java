@@ -131,9 +131,9 @@ public class MessageHelper {
         return new BroadcastMessage(MessageType.DISCOVER, name+";"+type.toString());
     }
 
-    public void sendPlayerMessage(BroadcastCardMessage message){
+    public BroadcastMessage PlayerToDealerMessage(BroadcastCardMessage message){
         Gson gson = new Gson();
-        new BroadcastMessage(MessageType.PLAYER_TO_DEALER, gson.toJson(message));
+        return new BroadcastMessage(MessageType.PLAYER_TO_DEALER, gson.toJson(message));
     }
 
     public void PlayerReceivedMessage() {
