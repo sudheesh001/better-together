@@ -3,7 +3,6 @@ package ac.robinson.bettertogether.plugin.base.cardgame.common;
 import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
-import ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -138,6 +136,10 @@ public class MessageHelper {
 
     public BroadcastMessage DealerToPlayerMessage(BroadcastCardMessage message) {
         return new BroadcastMessage(MessageType.DEALER_TO_PLAYER, new Gson().toJson(message));
+    }
+
+    public BroadcastMessage RequestCardMessage(String requesterPlayerId, int messageType) {
+        return new BroadcastMessage(messageType, requesterPlayerId);
     }
 
 

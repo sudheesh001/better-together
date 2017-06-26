@@ -24,6 +24,7 @@ import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
@@ -42,6 +43,20 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     private static final int FLING_CARD_OUTSIDE_VELOCITY_THRESHOLD = 3500;
     private static final int FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD = (Renderable.scaledHeight/2); //  mid point
     private static final String TAG = PlayerPanel.class.getSimpleName();
+
+    protected static final int PULL_CARD_BUTTON_MARGIN = 20;
+    protected static final int PULL_CARD_BUTTON_RADIUS = 40;
+    protected static final Paint TEXT_PAINT;
+    static {
+        TEXT_PAINT = new Paint();
+        TEXT_PAINT.setColor(Color.WHITE);
+        TEXT_PAINT.setTextSize(52f);
+        TEXT_PAINT.setAntiAlias(true);
+        TEXT_PAINT.setFakeBoldText(true);
+        TEXT_PAINT.setShadowLayer(12f, 0, 0, Color.BLACK);
+        TEXT_PAINT.setStyle(Paint.Style.FILL);
+        TEXT_PAINT.setTextAlign(Paint.Align.LEFT);
+    }
 
     private PlayerThread playerThread;
     protected HashMap<String, Card> mAllCardsRes= new HashMap<>();  // Map of card_name -> Card.
@@ -91,9 +106,13 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                                 }
                             }
                         }
-
                     }
 
+                    if (BasePlayerActivity.requestingCardActively || BasePlayerActivity.isRequestCardHolder) {
+                        BasePlayerActivity.requestingCardActively = false;
+                        BasePlayerActivity.isRequestCardHolder = false;
+                        ((BasePlayerActivity) mContext).sendRequestDrawCardMessage(MessageType.REQUEST_DRAW_CARD_WITHDRAW);
+                    }
                 }
                 mDetector.onTouchEvent(event);
                 return true;
@@ -203,14 +222,21 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         tryClosingThread(playerThread);
     }
 
-    public void render(Canvas canvas) {
-
+    public void render(Canvas canvas, boolean isPlayerThread) {
         canvas.drawColor(Color.BLACK);
         setupPanel(canvas);
         for (int i = 0; i < mRenderablesInPlay.size(); i++) {
             mRenderablesInPlay.get(i).draw(canvas);
         }
         CardContextActionPanel.getInstance(mContext).draw(canvas);
+        if (isPlayerThread) { // PlayerPanel is calling this render function
+            canvas.drawCircle(
+                    PULL_CARD_BUTTON_RADIUS + PULL_CARD_BUTTON_MARGIN,
+                    PULL_CARD_BUTTON_RADIUS + PULL_CARD_BUTTON_MARGIN,
+                    PULL_CARD_BUTTON_RADIUS,
+                    Renderable.SELECTED_BUTTON_PAINT
+             );
+        }
     }
 
     public boolean drawCardFromDeck(CardDeck cardDeck, Card card){
@@ -224,14 +250,27 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         Log.d(TAG, "onDown: " + event.toString());
         mLastCardTouched = null;
 
-        if (CardContextActionPanel.getInstance(mContext).handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.HANDLED)) {
+        float x = event.getX(); float y = event.getY();
+        if (
+                playerThread != null && // detect request card on player thread
+                !BasePlayerActivity.isRequestCardHolder &&
+                !BasePlayerActivity.requestingCardActively &&
+                x <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_RADIUS) &&
+                y <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_MARGIN)
+            ) {
+            BasePlayerActivity.requestingCardActively = true;
+            ((BasePlayerActivity) mContext).sendRequestDrawCardMessage(MessageType.REQUEST_DRAW_CARD);
+            return true;
+        }
+
+        if (CardContextActionPanel.getInstance(mContext).handleActionDown((int) x, (int) y).equals(Gesture.HANDLED)) {
             return true;
         }
         Renderable.selectedRenderableForContext = null;
 
         for (int i = 0; i < mRenderablesInPlay.size(); i++) {
             Renderable r = mRenderablesInPlay.get(i);
-            if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
+            if (r.handleActionDown((int) x, (int) y).equals(Gesture.TOUCHED)) {
                 Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
                 Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
             }
@@ -397,6 +436,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             }
             receivedCardDeck.setX(200); receivedCardDeck.setY(200);
             mRenderablesInPlay.add(receivedCardDeck);
+        }
+
+        if (BasePlayerActivity.isRequestCardHolder) {
+            BasePlayerActivity.isRequestCardHolder = false;
+
+            // so whenever the player picks up his finger, its becomes false. Also it should be true,
+            // so a new request is not made when the figure directly slides in that area.
+            BasePlayerActivity.requestingCardActively = true;
         }
     }
 }

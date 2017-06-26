@@ -1,17 +1,19 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.player.PlayerPanel;
 
@@ -53,6 +55,36 @@ public class DealerPanel extends PlayerPanel {
     @Override
     protected void handleFling(Renderable flungRenderable) {
         Log.d(TAG, "handleFling: " + flungRenderable);
+        if (BaseDealerActivity.requestedPlayerId != null) {
+            Map<String, List<Card>> distribution = new HashMap<String, List<Card>>();
+            List<Card> cards = new ArrayList<>();
+            if (flungRenderable instanceof Card) {
+                cards.add((Card) flungRenderable);
+            } else if (flungRenderable instanceof CardDeck) {
+                cards.addAll(((CardDeck)flungRenderable).getmCards());
+            }
+            distribution.put(BaseDealerActivity.requestedPlayerId, cards);
+            ((BaseDealerActivity)mContext).handleCardDistribution(distribution, flungRenderable);
+            mRenderablesInPlay.remove(flungRenderable);
+            BaseDealerActivity.requestedPlayerId = null;
+        }
+    }
+
+    public void render(Canvas canvas) {
+        super.render(canvas, false);
+        if (BaseDealerActivity.requestedPlayerId != null) {
+            canvas.drawCircle(
+                    PULL_CARD_BUTTON_RADIUS + PULL_CARD_BUTTON_MARGIN,
+                    PULL_CARD_BUTTON_RADIUS + PULL_CARD_BUTTON_MARGIN,
+                    PULL_CARD_BUTTON_RADIUS,
+                    Renderable.SELECTED_BUTTON_PAINT
+            );
+            canvas.drawText(
+                    "Requested by: " + BaseDealerActivity.requestedPlayerId,
+                    (PULL_CARD_BUTTON_MARGIN+PULL_CARD_BUTTON_RADIUS) * 2,
+                    PULL_CARD_BUTTON_MARGIN+PULL_CARD_BUTTON_RADIUS,
+                    TEXT_PAINT);
+        }
     }
 
     @Override

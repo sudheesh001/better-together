@@ -30,10 +30,13 @@ public abstract class Renderable implements Cloneable{
 
     protected boolean hidden;
     protected static final Paint GLOW_PAINT = new Paint();
+    public static final Paint SELECTED_BUTTON_PAINT = new Paint();
     static {
         final int GLOW_RADIUS = 32;
         GLOW_PAINT.setColor(Color.rgb(255, 255, 255));
         GLOW_PAINT.setMaskFilter(new BlurMaskFilter(GLOW_RADIUS, BlurMaskFilter.Blur.OUTER));
+
+        SELECTED_BUTTON_PAINT.setColor(Color.rgb(173, 216, 230));
     }
     public static Renderable selectedRenderableForContext = null;
 

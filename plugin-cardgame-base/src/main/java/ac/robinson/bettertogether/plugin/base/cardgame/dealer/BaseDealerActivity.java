@@ -26,13 +26,11 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +45,6 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
-import ac.robinson.bettertogether.plugin.base.cardgame.player.BasePlayerActivity;
 import ac.robinson.bettertogether.plugin.base.cardgame.player.MainFragment;
 
 public class BaseDealerActivity extends BasePluginActivity implements WheelViewFragment.OnFragmentInteractionListener {
@@ -61,6 +58,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
     DealerPanel mDealerPanel;
     private CardDeck mCardDeck;
+    public static String requestedPlayerId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +96,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
                 .commit();
     }
 
-    private void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
+    public void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
         for(String playerId: distribution.keySet()) {
             List<String> cardsToSend = new ArrayList<>();
             for(Card card: distribution.get(playerId)) {
@@ -169,6 +167,17 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
             if (message.getMessage() != null && !message.getMessage().isEmpty()) {
                 BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
                 mDealerPanel.onCardReceived(receivedMessage);
+            }
+        } else if (message.getType() == MessageType.REQUEST_DRAW_CARD) {
+            if (requestedPlayerId == null) {
+                requestedPlayerId = message.getMessage();
+                sendMessage(messageHelper.RequestCardMessage(requestedPlayerId, MessageType.REQUEST_DRAW_CARD_ACK));
+            } else {
+                sendMessage(messageHelper.RequestCardMessage(requestedPlayerId, MessageType.REQUEST_DRAW_CARD_NACK));
+            }
+        } else if (message.getType() == MessageType.REQUEST_DRAW_CARD_WITHDRAW) {
+            if (requestedPlayerId != null && requestedPlayerId.equals(message.getMessage())) {
+                requestedPlayerId = null;
             }
         }
         else {

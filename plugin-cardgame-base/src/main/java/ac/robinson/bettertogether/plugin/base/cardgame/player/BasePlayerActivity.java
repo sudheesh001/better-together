@@ -63,6 +63,9 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     private Context mContext;
     private GestureDetector mDetector;
 
+    public static boolean requestingCardActively = false;
+    public static boolean isRequestCardHolder = false;
+
     // Open carddeck available with the player.
 //    private List<CardDeck> mCardsDisplay;
 
@@ -122,20 +125,34 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
             MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
 
             sendMessage(messageHelper.Discovery(mName, mPlayerType));
-
             // TODO: Will this cause a network flood?
         } else if (message.getType() == MessageType.DEALER_TO_PLAYER) {
             if (message.getMessage() != null && !message.getMessage().isEmpty()) {
                 BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
-                playerPanel.onCardReceived(receivedMessage);
+                if (receivedMessage.getCardTo().equals(messageHelper.getmUser())) {
+                    playerPanel.onCardReceived(receivedMessage);
+                }
             }
+        } else if (message.getType() == MessageType.REQUEST_DRAW_CARD_ACK && BasePlayerActivity.requestingCardActively) {
+            if (!messageHelper.getmUser().equals(message.getMessage())) return;
+            BasePlayerActivity.requestingCardActively = false;
+            BasePlayerActivity.isRequestCardHolder = true;
+        } else if (message.getType() == MessageType.REQUEST_DRAW_CARD_NACK && BasePlayerActivity.requestingCardActively) {
+            if (!messageHelper.getmUser().equals(message.getMessage())) return;
+            BasePlayerActivity.requestingCardActively = false;
+            BasePlayerActivity.isRequestCardHolder = false;
         }
 
         else {
+            Log.e(TAG, "onMessageReceived: Trying to parse extra message " + message + " " + message.getMessage() + " " + message.getType());
             messageHelper.parse(message);
             messageHelper.PlayerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    protected void sendRequestDrawCardMessage(int messageType) {
+        sendMessage(messageHelper.RequestCardMessage(messageHelper.getmUser(), messageType));
     }
 
     protected void prepareMessage(@NonNull BroadcastCardMessage message){
@@ -151,7 +168,6 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
             super.onBackPressed();
         }else if( mainFragment.isVisible()){
             getSupportFragmentManager().beginTransaction().remove(mainFragment).commit();
-
         }
     }
 
