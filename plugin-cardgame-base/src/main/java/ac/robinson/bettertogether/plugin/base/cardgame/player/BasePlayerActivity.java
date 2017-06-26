@@ -51,10 +51,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
 public class BasePlayerActivity extends BasePluginActivity implements CardPanelCallback, WheelViewFragment.OnFragmentInteractionListener{
 
-
     private static final String TAG = BasePlayerActivity.class.getSimpleName();
-
-    ImageView mPlayerDeck;
 
     FrameLayout parentFrame = null;
     PlayerPanel playerPanel = null;
@@ -65,7 +62,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     private GestureDetector mDetector;
 
     // Open carddeck available with the player.
-    private List<CardDeck> mCardsDisplay;
+//    private List<CardDeck> mCardsDisplay;
 
     MessageHelper messageHelper = null;
 
@@ -84,33 +81,16 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 
 //        cardDeck = new CardDeck(mContext, CardDeckStatus.OPEN, true);
 
-        mCardsDisplay = new ArrayList<>();
+//        mCardsDisplay = new ArrayList<>();
 
-        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.OPEN, true));
-        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.CLOSED, true));
+//        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.OPEN, true));
+//        mCardsDisplay.add();
 
-        playerPanel = new PlayerPanel(this, null, mCardsDisplay);
-        playerPanel.setCardPanelCallback(this);
+        playerPanel = new PlayerPanel(this, new CardDeck(mContext, CardDeckStatus.CLOSED, true).getmCards());
+        playerPanel.init();
+//        playerPanel.setCardPanelCallback(this);
         parentFrame.addView(playerPanel);
         //TODO add a button right now for context menu emuation
-
-        LinearLayout linearLayout = new LinearLayout(mContext);
-        Button button = new Button(mContext);
-        button.setWidth(100);
-        button.setText("Click Me For Wheel View");
-        button.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Log.d(TAG, "Hye I was clicked");
-//                        Renderable r = new CardDeck(mContext, CardDeckStatus.OPEN, true);
-//                        inflateWheelView(messageHelper.getConnectionMap(), r, true);
-                    }
-                }
-        );
-        linearLayout.addView(button);
-
-        parentFrame.addView(linearLayout);
 
         setContentView(parentFrame);
         // setContentView(R.layout.activity_base_player);
@@ -178,7 +158,6 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     }
 
     public void inflateCardFanView(CardDeck cardDeck, boolean status){
-
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
@@ -186,7 +165,6 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     }
 
     public void inflateWheelView( Renderable renderable, boolean status){
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance(renderable, messageHelper.getConnectionMap(), new WheelViewFragment.DistributionCompletedCallback() {

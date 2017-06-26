@@ -7,9 +7,11 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import java.util.Collections;
 import java.util.List;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity;
 import ac.robinson.bettertogether.plugin.base.cardgame.player.BasePlayerActivity;
 
 import static android.content.ContentValues.TAG;
@@ -175,6 +177,10 @@ public class CardContextActionPanel extends Renderable {
 
     private void handleShuffle(int x, int y) {
         Log.d(TAG, "handleShuffle: ");
+        if (forRenderable instanceof CardDeck) {
+            CardDeck cardDeck = (CardDeck) forRenderable;
+            Collections.shuffle(cardDeck.getmCards());
+        }
     }
     
     private void handleTransfer(int x, int y) {
@@ -184,7 +190,11 @@ public class CardContextActionPanel extends Renderable {
     private void handleDistribute(int x, int y) {
         Log.d(TAG, "handleDistribute: ");
         try {
-            ((BasePlayerActivity) mContext).inflateWheelView((Renderable) Renderable.selectedRenderableForContext.clone(), true);
+            if (mContext instanceof BasePlayerActivity) {
+                ((BasePlayerActivity) mContext).inflateWheelView((Renderable) Renderable.selectedRenderableForContext.clone(), true);
+            } else if (mContext instanceof BaseDealerActivity) {
+                // pass
+            }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
