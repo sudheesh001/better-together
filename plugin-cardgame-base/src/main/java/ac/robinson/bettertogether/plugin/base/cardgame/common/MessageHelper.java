@@ -136,6 +136,11 @@ public class MessageHelper {
         return new BroadcastMessage(MessageType.PLAYER_TO_DEALER, gson.toJson(message));
     }
 
+    public BroadcastMessage DealerToPlayerMessage(BroadcastCardMessage message) {
+        return new BroadcastMessage(MessageType.DEALER_TO_PLAYER, new Gson().toJson(message));
+    }
+
+
     public void PlayerReceivedMessage() {
         Action localCardAction = this.message.getCardAction();
         String localFromUser = this.message.getCardFrom();

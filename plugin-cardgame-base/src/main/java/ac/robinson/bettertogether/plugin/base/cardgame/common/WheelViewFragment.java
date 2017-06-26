@@ -49,19 +49,9 @@ public class WheelViewFragment extends Fragment {
     private List<String> playerNames;
     private DistributionCompletedCallback callback;
 
-    private static final Map<String, MessageHelper.PlayerType> DEBUG_CONNECTION_MAP = new HashMap<>();
-    static {
-        DEBUG_CONNECTION_MAP.put("Jack", MessageHelper.PlayerType.PLAYER);
-        DEBUG_CONNECTION_MAP.put("Jill", MessageHelper.PlayerType.PLAYER);
-        DEBUG_CONNECTION_MAP.put("Bala", MessageHelper.PlayerType.PLAYER);
-        DEBUG_CONNECTION_MAP.put("Narula", MessageHelper.PlayerType.PLAYER);
-        DEBUG_CONNECTION_MAP.put("Ganesh", MessageHelper.PlayerType.PLAYER);
-        DEBUG_CONNECTION_MAP.put("Bunty", MessageHelper.PlayerType.PLAYER);
-    }
-
     private OnFragmentInteractionListener mListener;
 
-    public List<String> cardDistributionSequence;
+    public Map<String, List<Card>> cardDistributionSequence;
 
     public WheelViewFragment() {
         // Required empty public constructor
@@ -75,7 +65,7 @@ public class WheelViewFragment extends Fragment {
      * @return A new instance of fragment WheelViewFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> coonectionMapObj_, DistributionCompletedCallback callback) {
+    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> coonectionMapObj, DistributionCompletedCallback callback) {
         WheelViewFragment fragment = new WheelViewFragment();
         //TODO ideally should be set through arguments
 //        Bundle args = new Bundle();
@@ -83,13 +73,17 @@ public class WheelViewFragment extends Fragment {
 //        fragment.setArguments(args);
         renderable = renderableObj;
 
-//        connectionMap = coonectionMapObj;
-        Log.d(TAG, "static initializer: SETTING UP INVALID CONNECTION MAP. use only in debug mode");
-        connectionMap = DEBUG_CONNECTION_MAP;
+        connectionMap = coonectionMapObj;
 
-        fragment.playerNames = new ArrayList<>(connectionMap.keySet());
+        fragment.playerNames = new ArrayList<>();
+        for(String playerId: connectionMap.keySet()) {
+            if (connectionMap.get(playerId) == MessageHelper.PlayerType.PLAYER) {
+                fragment.playerNames.add(playerId);
+            }
+        }
         fragment.playerNames.add(0, "OK"); // TODO: make this more elegant.
-        fragment.cardDistributionSequence = new ArrayList<>();
+
+        fragment.cardDistributionSequence = new HashMap<>();
         fragment.callback = callback;
 
         return fragment;
@@ -169,7 +163,19 @@ public class WheelViewFragment extends Fragment {
 
                 WheelViewDrawable drawable = ((WheelViewDrawable)((LayerDrawable)wheelView.getCacheItem(position).mDrawable).getDrawable(1));
                 drawable.count++;
-                cardDistributionSequence.add(playerNames.get(position));
+
+                Card cardToAdd;
+                if (renderable instanceof CardDeck) {
+                    cardToAdd = ((CardDeck) renderable).getmCards().get(0);
+                } else {
+                    cardToAdd = (Card) renderable;
+                }
+                String playerId = playerNames.get(position);
+                if (!cardDistributionSequence.containsKey(playerId)) {
+                    cardDistributionSequence.put(playerId, new ArrayList<Card>());
+                }
+                cardDistributionSequence.get(playerId).add(cardToAdd);
+
                 wheelView.invalidate();
 
                 if (renderable instanceof CardDeck) {
@@ -262,6 +268,6 @@ public class WheelViewFragment extends Fragment {
     }
 
     public interface DistributionCompletedCallback {
-        void onDistributionDecided(List<String> cardDistributionPlayerSequence);
+        void onDistributionDecided(Map<String, List<Card>> cardDistributionPlayerSequence);
     }
 }

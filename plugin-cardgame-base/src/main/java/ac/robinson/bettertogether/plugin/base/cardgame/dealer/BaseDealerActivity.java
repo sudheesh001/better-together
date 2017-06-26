@@ -18,73 +18,67 @@ package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
+import ac.robinson.bettertogether.plugin.base.cardgame.player.BasePlayerActivity;
+import ac.robinson.bettertogether.plugin.base.cardgame.player.MainFragment;
 
-public class BaseDealerActivity extends BasePluginActivity {
+public class BaseDealerActivity extends BasePluginActivity implements WheelViewFragment.OnFragmentInteractionListener {
 
     private static final String TAG = BaseDealerActivity.class.getSimpleName();
-
-    ImageView mDeckImage, mOpenDeckImage, mDiscardedDeckImage;
-
+    FrameLayout parentFrame = null;
+    MainFragment mainFragment;
     private Context mContext;
+    WheelViewFragment wheelViewFragment = null;
+    MessageHelper messageHelper = null;
 
-    private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 4 but later we want any number of decks as possible in line with NUI
-
-    List<CardDeck> mCardsDisplay;
     DealerPanel mDealerPanel;
+    private CardDeck mCardDeck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_base_dealer);
-//
         mContext = this;
-//
-        cardDeck = new CardDeck(mContext, CardDeckStatus.CLOSED, true);
-        mOpenDeck = new CardDeck(mContext, CardDeckStatus.OPEN, true);
-//
-//        mDeckImage = (ImageView) findViewById(R.id.deckImage);
-//        mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);
-//        mDiscardedDeckImage = (ImageView) findViewById(R.id.discardedDeckImage);
-//
-//        mDeckImage.setImageResource(R.drawable.card_back);
-//
-//        mDetector = new GestureDetectorCompat(this,this);
-//        // Set the gesture detector as the double tap
-//        // listener.
-//        mDetector.setOnDoubleTapListener(this);
-//        cardDeck.shuffleCardDeck(cardDeck.getClosedCardDeck());
 
-        mCardsDisplay = new ArrayList<>();
-
-        mCardsDisplay.add(cardDeck);
-        mCardsDisplay.add(mOpenDeck);
+        mCardDeck = new CardDeck(mContext, CardDeckStatus.CLOSED, true); // TODO: read this from selected card deck
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        // set our MainGamePanel as the View
-        mDealerPanel = new DealerPanel(this, mOpenDeck);
-        setContentView(mDealerPanel);
+
+        parentFrame = new FrameLayout(mContext);
+        parentFrame.setId(View.generateViewId());
+        mDealerPanel = new DealerPanel(this, mCardDeck);
+        parentFrame.addView(mDealerPanel);
+        setContentView(parentFrame);
+
         // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
         String mName = prefs.getString("Name", null);
@@ -92,8 +86,61 @@ public class BaseDealerActivity extends BasePluginActivity {
         // Now that we have name and type. Send discovery protocol
         MessageHelper m = MessageHelper.getInstance(mContext);
         sendMessage(m.Discovery(mName, mPlayerType));
+        messageHelper = m;
 
         Log.d(TAG, "View added");
+    }
+
+    public void inflateCardFanView(CardDeck cardDeck, boolean status){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
+                .commit();
+    }
+
+    private void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
+        for(String playerId: distribution.keySet()) {
+            List<String> cardsToSend = new ArrayList<>();
+            for(Card card: distribution.get(playerId)) {
+                cardsToSend.add(card.getName());
+            }
+
+            if (cardsToSend.size() > 0) {
+                BroadcastCardMessage message = new BroadcastCardMessage();
+                message.setCardAction(Action.draw);
+                message.setCards(cardsToSend);
+                message.setHidden(renderable.isHidden());
+                message.setCardFrom(messageHelper.getmUser());
+                message.setCardTo(playerId);
+                Log.d(TAG, "handleCardDistribution: Sending message " + message + " from" + messageHelper.getmUser() + " to " + playerId);
+                sendMessage(messageHelper.DealerToPlayerMessage(message));
+            }
+        }
+    }
+
+    public void inflateWheelView(final Renderable renderable, boolean status){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance(renderable, messageHelper.getConnectionMap(), new WheelViewFragment.DistributionCompletedCallback() {
+
+                    @Override
+                    public void onDistributionDecided(Map<String, List<Card>> cardDistributionPlayerSequence) {
+                        getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
+                        wheelViewFragment = null;
+
+                        handleCardDistribution(cardDistributionPlayerSequence, renderable);
+                    }
+                }))
+                .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mainFragment == null || !mainFragment.isAdded() || !mainFragment.isVisible()) {
+            super.onBackPressed();
+        }else if( mainFragment.isVisible()){
+            getSupportFragmentManager().beginTransaction().remove(mainFragment).commit();
+        }
     }
 
 
@@ -132,4 +179,6 @@ public class BaseDealerActivity extends BasePluginActivity {
     }
 
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {}
 }

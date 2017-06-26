@@ -31,6 +31,9 @@ public class CardContextActionPanel extends Renderable {
     private static final int[] FLAGS = {SHOW_SHUFFLE, SHOW_TRANSFER, SHOW_DISTRIBUTE, SHOW_REVERSE};
 
     private Context mContext;
+    private static Context playerActivityContext;
+    private static Context dealerActivityContext;
+
     private Renderable forRenderable;
     private int showFlags = SHOW_SHUFFLE | SHOW_TRANSFER | SHOW_DISTRIBUTE | SHOW_REVERSE;
 
@@ -44,6 +47,15 @@ public class CardContextActionPanel extends Renderable {
 
     private static CardContextActionPanel instance;
     public static CardContextActionPanel getInstance(Context context) {
+        if (context instanceof BaseDealerActivity) {
+            dealerActivityContext = context;
+            playerActivityContext = null;
+        }
+        if (context instanceof BasePlayerActivity) {
+            playerActivityContext = context;
+            dealerActivityContext = null;
+        }
+
         if (instance == null) {
             instance = new CardContextActionPanel(context);
         }
@@ -190,10 +202,8 @@ public class CardContextActionPanel extends Renderable {
     private void handleDistribute(int x, int y) {
         Log.d(TAG, "handleDistribute: ");
         try {
-            if (mContext instanceof BasePlayerActivity) {
-                ((BasePlayerActivity) mContext).inflateWheelView((Renderable) Renderable.selectedRenderableForContext.clone(), true);
-            } else if (mContext instanceof BaseDealerActivity) {
-                // pass
+            if (dealerActivityContext != null) {
+                ((BaseDealerActivity) dealerActivityContext).inflateWheelView((Renderable) Renderable.selectedRenderableForContext.clone(), true);
             }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();

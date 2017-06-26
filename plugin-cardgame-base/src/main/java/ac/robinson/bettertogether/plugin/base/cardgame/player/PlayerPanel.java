@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
@@ -377,5 +378,25 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             }
         }
         return true;
+    }
+
+    public void onCardReceived(BroadcastCardMessage cardMessage) {
+        List<String> receivedCards = cardMessage.getCards();
+        if (receivedCards.size() == 0) return;
+        if (receivedCards.size() == 1) {
+            Card receivedCard = mAllCardsRes.get(receivedCards.get(0));
+            receivedCard.randomizeScreenLocation(200, 200);
+            receivedCard.setHidden(cardMessage.isHidden());
+            mRenderablesInPlay.add(receivedCard);
+        }
+
+        else {
+            CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden() ? CardDeckStatus.CLOSED: CardDeckStatus.OPEN, false);
+            for(String cardId: receivedCards) {
+                receivedCardDeck.addCardToDeck(mAllCardsRes.get(cardId));
+            }
+            receivedCardDeck.setX(200); receivedCardDeck.setY(200);
+            mRenderablesInPlay.add(receivedCardDeck);
+        }
     }
 }

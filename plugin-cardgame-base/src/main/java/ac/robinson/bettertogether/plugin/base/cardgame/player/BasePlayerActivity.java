@@ -33,6 +33,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,7 +124,13 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
             sendMessage(messageHelper.Discovery(mName, mPlayerType));
 
             // TODO: Will this cause a network flood?
+        } else if (message.getType() == MessageType.DEALER_TO_PLAYER) {
+            if (message.getMessage() != null && !message.getMessage().isEmpty()) {
+                BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
+                playerPanel.onCardReceived(receivedMessage);
+            }
         }
+
         else {
             messageHelper.parse(message);
             messageHelper.PlayerReceivedMessage();
@@ -162,19 +170,6 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
                     .beginTransaction()
                     .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
                     .commit();
-    }
-
-    public void inflateWheelView( Renderable renderable, boolean status){
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance(renderable, messageHelper.getConnectionMap(), new WheelViewFragment.DistributionCompletedCallback() {
-                    @Override
-                    public void onDistributionDecided(List<String> cardDistributionPlayerSequence) {
-                        getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
-                        wheelViewFragment = null;
-                    }
-                }))
-                .commit();
     }
 
     public void getSelectedCard(CardDeck cardDeck, Card card){
