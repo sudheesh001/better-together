@@ -17,24 +17,16 @@
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Window;
-import android.widget.RelativeLayout;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MarketplaceAPI;
-import ac.robinson.bettertogether.plugin.base.cardgame.common.RecyclerViewAdapter;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.DeckDetail;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Decks;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
@@ -82,10 +74,10 @@ public class BaseCardGameActivity extends AppCompatActivity {
             }
         });
 
-        // save the player to shared preferences
-        SharedPreferences.Editor prefs = this.getSharedPreferences("Details", MODE_PRIVATE).edit();
-        prefs.putString("Name", mUser);
-        prefs.commit();
+//        // save the player to shared preferences
+//        SharedPreferences.Editor prefs = this.getSharedPreferences("Details", MODE_PRIVATE).edit();
+//        prefs.putString("Name", mUser);
+//        prefs.commit();
 
     }
 }

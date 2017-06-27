@@ -60,7 +60,7 @@ public class WheelViewFragment extends Fragment {
      * @return A new instance of fragment WheelViewFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> coonectionMapObj, DistributionCompletedCallback callback) {
+    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> connectionMapObj, DistributionCompletedCallback callback) {
         WheelViewFragment fragment = new WheelViewFragment();
         //TODO ideally should be set through arguments
 //        Bundle args = new Bundle();
@@ -68,7 +68,7 @@ public class WheelViewFragment extends Fragment {
 //        fragment.setArguments(args);
         renderable = renderableObj;
 
-        connectionMap = coonectionMapObj;
+        connectionMap = connectionMapObj;
 
         fragment.playerNames = new ArrayList<>();
         for(String playerId: connectionMap.keySet()) {

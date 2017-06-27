@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
@@ -40,9 +42,11 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     private static final int FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD = (Renderable.scaledHeight/2); //  mid point
     private static final String TAG = PlayerPanel.class.getSimpleName();
 
-    protected static final int PULL_CARD_BUTTON_MARGIN = 20;
-    protected static final int PULL_CARD_BUTTON_RADIUS = 40;
+    protected static final int PULL_CARD_BUTTON_MARGIN = 30;
+    protected static final int PULL_CARD_BUTTON_RADIUS = 60;
     protected static final Paint TEXT_PAINT;
+    protected static final Paint DEBUG_TEXT_PAINT;
+    private static final int DEBUG_TEXT_PAINT_SIZE = 24;
     static {
         TEXT_PAINT = new Paint();
         TEXT_PAINT.setColor(Color.WHITE);
@@ -52,6 +56,9 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         TEXT_PAINT.setShadowLayer(12f, 0, 0, Color.BLACK);
         TEXT_PAINT.setStyle(Paint.Style.FILL);
         TEXT_PAINT.setTextAlign(Paint.Align.LEFT);
+
+        DEBUG_TEXT_PAINT = new Paint(TEXT_PAINT);
+        DEBUG_TEXT_PAINT.setTextSize(DEBUG_TEXT_PAINT_SIZE);
     }
 
     private PlayerThread playerThread;
@@ -62,6 +69,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     protected SurfaceView surfaceView;
     protected GestureDetectorCompat mDetector;
     protected Context mContext;
+    protected MessageHelper mMessageHelper;
 
 //    private CardPanelCallback cardPanelCallback;
 
@@ -74,6 +82,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         getHolder().addCallback(this);  // adding the callback (this) to the surface holder to intercept events
         surfaceView = this;
         mContext = context;
+        mMessageHelper = MessageHelper.getInstance(mContext);
 
         if (cards != null) {
             for(Card card: cards) {
@@ -181,7 +190,30 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         canvas.drawLine(0, (screenHeight / 3) * 2, screenWidth, (screenHeight / 3) * 2, paint);
         canvas.drawLine(0, (screenHeight / 3), screenWidth, (screenHeight / 3), paint);
 
+        Map<String, MessageHelper.PlayerType> connectionMap = mMessageHelper.getConnectionMap();
+        if (connectionMap != null && !connectionMap.isEmpty()) {
+            List<String> players = new ArrayList<>(connectionMap.keySet());
+            int numPlayers = players.size();
+            for(int i = 0; i < numPlayers; i++) {
+                String playerName = players.get(i);
+                if (playerName == null) {
+                    playerName = "NuLL--Null";
+                }
+                if (connectionMap.containsKey(playerName) && connectionMap.get(playerName).equals(MessageHelper.PlayerType.DEALER)) {
+                    DEBUG_TEXT_PAINT.setColor(Color.RED);
+                }
+                canvas.drawText(playerName, PULL_CARD_BUTTON_MARGIN, screenHeight - (numPlayers-i)*(PULL_CARD_BUTTON_MARGIN + DEBUG_TEXT_PAINT_SIZE), DEBUG_TEXT_PAINT);
+                DEBUG_TEXT_PAINT.setColor(Color.WHITE);
+            }
+        }
 
+        if (mMessageHelper.getmUser() != null && !mMessageHelper.getmUser().isEmpty()) {
+            canvas.drawText(mMessageHelper.getmUser(), screenWidth - 240, screenHeight - PULL_CARD_BUTTON_MARGIN - DEBUG_TEXT_PAINT_SIZE, DEBUG_TEXT_PAINT);
+            if (connectionMap.containsKey(mMessageHelper.getmUser())) {
+                String type = connectionMap.get(mMessageHelper.getmUser()).name();
+                canvas.drawText(type, screenWidth - 240, screenHeight - 2*(PULL_CARD_BUTTON_MARGIN - DEBUG_TEXT_PAINT_SIZE), DEBUG_TEXT_PAINT);
+            }
+        }
     }
 
     @Override
@@ -452,6 +484,17 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             // so whenever the player picks up his finger, its becomes false. Also it should be true,
             // so a new request is not made when the figure directly slides in that area.
             BasePlayerActivity.requestingCardActively = true;
+        }
+    }
+
+    public void discardCardsFromDeck(CardDeck cardDeck, List<Card> cards) {
+        cardDeck.getmCards().removeAll(cards);
+        if (cardDeck.getmCards().size() == 0) {
+            mRenderablesInPlay.remove(cardDeck);
+        }
+        else if (cardDeck.getmCards().size() == 1) {
+            mRenderablesInPlay.remove(cardDeck);
+            mRenderablesInPlay.add(cardDeck.getTopCardFromDeck());
         }
     }
 }

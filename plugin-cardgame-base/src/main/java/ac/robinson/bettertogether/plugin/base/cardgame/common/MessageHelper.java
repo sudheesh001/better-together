@@ -1,6 +1,7 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -64,6 +67,12 @@ public class MessageHelper {
         if( mInstance == null){
             mInstance = new MessageHelper();
             mUser = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+            // save the player to shared preferences
+            SharedPreferences.Editor prefs = mContext.getSharedPreferences("Details", MODE_PRIVATE).edit();
+            prefs.putString("Name", mUser);
+            prefs.commit();
+
         }
 
         return mInstance;
@@ -102,19 +111,17 @@ public class MessageHelper {
         }else if (nameAndType[1].equals("DEALER")){
             type = PlayerType.DEALER;
         }
-        if (!connectionMap.containsKey(name)) {
-            Collection<PlayerType> playerTypes = connectionMap.values();
-            if (type.equals(PlayerType.DEALER)) {
-                // Check if dealer already exists
-                if(playerTypes.contains(type)) {
-                    // Dealer already exists.
-                    return false;
-                }
+        if (connectionMap.containsKey(name)) return false;
+        Collection<PlayerType> playerTypes = connectionMap.values();
+        if (type.equals(PlayerType.DEALER)) {
+            // Check if dealer already exists
+            if (playerTypes.contains(type)) {
+                // Dealer already exists.
+                return false;
             }
-            connectionMap.put(name, type);
-            return true;
         }
-        return false;
+        connectionMap.put(name, type);
+        return true;
     }
 
     public BroadcastMessage Discovery(String name, PlayerType type) {

@@ -63,6 +63,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
+        messageHelper = MessageHelper.getInstance(mContext);
 
         mCardDeck = new CardDeck(mContext, true, true); // TODO: read this from selected card deck
         // requesting to turn the title OFF
@@ -78,12 +79,11 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
         // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-        String mName = prefs.getString("Name", null);
+        String mName = prefs.getString("Name", "NoNameFoundForDealer");
         MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
         // Now that we have name and type. Send discovery protocol
-        MessageHelper m = MessageHelper.getInstance(mContext);
-        sendMessage(m.Discovery(mName, mPlayerType));
-        messageHelper = m;
+        messageHelper.getConnectionMap().put(mName, mPlayerType);
+        sendMessage(messageHelper.Discovery(mName, mPlayerType));
 
         Log.d(TAG, "View added");
     }
@@ -113,14 +113,6 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
                 sendMessage(messageHelper.DealerToPlayerMessage(message));
             }
         }
-        if (renderable instanceof CardDeck) {
-            CardDeck chosenDeck = (CardDeck) renderable;
-            for(List<Card> cardsList: distribution.values()) {
-                for (Card card: cardsList) {
-                    mDealerPanel.drawCardFromDeck(chosenDeck, card);
-                }
-            }
-        }
     }
 
     public void inflateWheelView(final Renderable renderable, boolean status){
@@ -133,6 +125,16 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
                         getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
                         wheelViewFragment = null;
                         handleCardDistribution(cardDistributionPlayerSequence, renderable);
+
+                        if (renderable instanceof CardDeck) {
+                            List<Card> cardsToDiscard = new ArrayList<Card>();
+                            for(List<Card> cardsList: cardDistributionPlayerSequence.values()) {
+                                for(Card card: cardsList) {
+                                    cardsToDiscard.add(card);
+                                }
+                            }
+                            mDealerPanel.discardCardsFromDeck((CardDeck) renderable, cardsToDiscard);
+                        }
                     }
                 }))
                 .commit();
@@ -164,14 +166,16 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
             Boolean response = m.ReceivedDiscoveryMessage(message.getMessage());
-            SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-            String mName = prefs.getString("Name", null);
-            MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
 
-            if( response )
+            if( response ){
+                SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+                String mName = prefs.getString("Name", null);
+                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+
                 sendMessage(m.Discovery(mName, mPlayerType));
+                // TODO: Will this cause a network flood?
+            }
 
-            // TODO: Will this cause a network flood?
         }
         else if (message.getType() == MessageType.PLAYER_TO_DEALER) {
             if (message.getMessage() != null && !message.getMessage().isEmpty()) {

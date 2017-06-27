@@ -95,8 +95,9 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         // setContentView(R.layout.activity_base_player);
 
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-        String mName = prefs.getString("Name", null);
+        String mName = prefs.getString("Name", "NoNameFoundForPlayer");
         MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+        messageHelper.getConnectionMap().put(mName, mPlayerType);
         sendMessage(messageHelper.Discovery(mName, mPlayerType));
     }
 
@@ -110,14 +111,15 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
-            messageHelper.ReceivedDiscoveryMessage(message.getMessage());
+            boolean replyDiscoveryNeeded = messageHelper.ReceivedDiscoveryMessage(message.getMessage());
 
-            SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-            String mName = prefs.getString("Name", messageHelper.getmUser());
-            MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+            if (replyDiscoveryNeeded) {
+                SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+                String mName = prefs.getString("Name", messageHelper.getmUser());
+                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
 
-            sendMessage(messageHelper.Discovery(mName, mPlayerType));
-            // TODO: Will this cause a network flood?
+                sendMessage(messageHelper.Discovery(mName, mPlayerType)); // TODO: Will this cause a network flood?
+            }
         } else if (message.getType() == MessageType.DEALER_TO_PLAYER) {
             if (message.getMessage() != null && !message.getMessage().isEmpty()) {
                 BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
