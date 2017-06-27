@@ -1,6 +1,5 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -20,10 +19,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
-import ac.robinson.bettertogether.plugin.base.cardgame.common.CardPanelCallback;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
@@ -346,8 +343,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             if (r.isTouched()) {
                 // the image was picked up and is being dragged
                 Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + e2.getX() + ",y=" + e2.getY());
-                r.setX((int) e2.getX());
-                r.setY((int) e2.getY());
+                r.displaceX((int) -distanceX);
+                r.displaceY((int) -distanceY);
 
                 break; // only move the top card
             }
