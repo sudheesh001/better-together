@@ -24,6 +24,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
+import ac.robinson.bettertogether.plugin.base.cardgame.dealer.DealerThread;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
@@ -235,9 +236,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     protected void tryClosingThread(Thread thread) {
         boolean retry = true;
+        if (thread instanceof PlayerThread) {
+            ((PlayerThread) thread).setRunning(false);
+        } else {
+            ((DealerThread) thread).setRunning(false);
+        }
         while (retry) {
             try {
-                playerThread.join();
+                thread.join();
                 retry = false;
             } catch (InterruptedException e) {
                 // try again shutting down the thread
@@ -252,6 +258,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         // tell the thread to shut down and wait for it to finish
         // this is a clean shutdown
         tryClosingThread(playerThread);
+
     }
 
 

@@ -43,7 +43,8 @@ public class DealerThread extends Thread {
                 synchronized (surfaceHolder) {
                     // render state to the screen
                     // draws the canvas on the panel
-                    this.gamePanel.render(canvas);
+                    if( canvas != null)
+                        this.gamePanel.render(canvas);
                 }
             } finally {
                 // in case of an exception the surface is not left in

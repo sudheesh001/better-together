@@ -38,7 +38,8 @@ public class PlayerThread extends Thread {
                 synchronized (surfaceHolder) {
                     // render state to the screen
                     // draws the canvas on the panel
-                    this.gamePanel.render(canvas, true);
+                    if( canvas != null)
+                        this.gamePanel.render(canvas, true);
                 }
             } finally {
                 // in case of an exception the surface is not left in
