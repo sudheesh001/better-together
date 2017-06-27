@@ -2,7 +2,6 @@ package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -27,10 +26,9 @@ public class DealerPanel extends PlayerPanel {
 
     private DealerThread dealerThread;
 
-    public DealerPanel(Context context, @NonNull CardDeck cardDeck) {
-        super(context, cardDeck.getmCards());
+    public DealerPanel(Context context) {
+        super(context);
         mContext = context;
-        mRenderablesInPlay.add(cardDeck);
         dealerThread = new DealerThread(getHolder(), this);
     }
 

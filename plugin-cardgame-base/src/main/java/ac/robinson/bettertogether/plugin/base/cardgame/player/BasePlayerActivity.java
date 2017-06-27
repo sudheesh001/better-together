@@ -31,6 +31,9 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.orhanobut.hawk.Hawk;
+
+import java.util.HashSet;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
@@ -42,6 +45,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
 public class BasePlayerActivity extends BasePluginActivity implements CardPanelCallback, WheelViewFragment.OnFragmentInteractionListener{
@@ -58,6 +62,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 
     public static boolean requestingCardActively = false;
     public static boolean isRequestCardHolder = false;
+    private static Integer SELECTED_CARD_DECK = null;
 
     // Open carddeck available with the player.
 //    private List<CardDeck> mCardsDisplay;
@@ -84,7 +89,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 //        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.OPEN, true));
 //        mCardsDisplay.add();
 
-        playerPanel = new PlayerPanel(this, new CardDeck(mContext, true, true).getmCards());
+        playerPanel = new PlayerPanel(this);
         playerPanel.init();
 //        playerPanel.setCardPanelCallback(this);
         parentFrame.addView(playerPanel);
@@ -136,6 +141,16 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
             if (!messageHelper.getmUser().equals(message.getMessage())) return;
             BasePlayerActivity.requestingCardActively = false;
             BasePlayerActivity.isRequestCardHolder = false;
+        } else if (message.getType() == MessageType.USE_SELECTED_CARD_DECK && SELECTED_CARD_DECK == null) {
+            SELECTED_CARD_DECK = Integer.parseInt(message.getMessage());
+            Hawk.init(mContext).build();
+            if (!Hawk.get(Constants.DOWNLOADED_ITEMS_ID_KEY, new HashSet<>()).contains(SELECTED_CARD_DECK)) {
+                Toast.makeText(mContext, "Please download deck", Toast.LENGTH_SHORT).show();
+                onBackPressed();
+            } else {
+                MarketplaceItem selectedDeck = Hawk.get(Integer.toString(SELECTED_CARD_DECK));
+                playerPanel.setCurrentlyPlayingCardDeck(selectedDeck, false, false);
+            }
         }
 
         else {

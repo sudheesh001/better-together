@@ -14,4 +14,5 @@ public class MessageType {
     public static final int REQUEST_DRAW_CARD_ACK = 993;
     public static final int REQUEST_DRAW_CARD_NACK = 992;
     public static final int REQUEST_DRAW_CARD_WITHDRAW = 991;
+    public static final int USE_SELECTED_CARD_DECK = 990;
 }

@@ -29,7 +29,9 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
+import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
 
 /**
  * Created by t-sus on 4/5/2017.
@@ -78,18 +80,35 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         playerThread = new PlayerThread(getHolder(), this);  // create the game loop thread
     }
 
-    public PlayerPanel(Context context, List<Card> cards) {
+    public void setCurrentlyPlayingCardDeck(MarketplaceItem item, boolean addToPanel, boolean addToPanelAsHidden) {
+        String backgroundCardUrl = APIClient.getBaseURL().concat(item.getBackground_card());
+        CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
+
+        for(String cardName: item.getCards()) {
+            Card card = new Card();
+            card.setmContext(mContext);
+            card.setName(cardName);
+            card.setHidden(addToPanelAsHidden);
+            card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardName));
+            card.setBackBitmapUrl(backgroundCardUrl);
+            mAllCardsRes.put(card.getName(), card);
+
+            if (addToPanel) {
+                cardDeck.addCardToDeck(card);
+            }
+        }
+
+        if (addToPanel) {
+            mRenderablesInPlay.add(cardDeck);
+        }
+    }
+
+    public PlayerPanel(Context context) {
         super(context);
         getHolder().addCallback(this);  // adding the callback (this) to the surface holder to intercept events
         surfaceView = this;
         mContext = context;
         mMessageHelper = MessageHelper.getInstance(mContext);
-
-        if (cards != null) {
-            for(Card card: cards) {
-                mAllCardsRes.put(card.getName(), card);
-            }
-        }
 
         setFocusable(true);  // make the Panel focusable so it can handle events
         mDetector = new GestureDetectorCompat(mContext, this);
@@ -147,7 +166,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
             CardDeck finalDeck;
             if (cd1 == null && cd2 == null) {
-                finalDeck = new CardDeck(mContext, r1.isHidden(), false);
+                finalDeck = new CardDeck(mContext, r1.isHidden());
                 mRenderablesInPlay.add(finalDeck);
             } else {
                 finalDeck = cd1 == null ? cd2: cd1;
@@ -258,7 +277,6 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         // tell the thread to shut down and wait for it to finish
         // this is a clean shutdown
         tryClosingThread(playerThread);
-
     }
 
 
@@ -494,7 +512,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         }
 
         else {
-            CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden(), false);
+            CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden());
             for(String cardId: receivedCards) {
                 receivedCardDeck.addCardToDeck(mAllCardsRes.get(cardId));
             }

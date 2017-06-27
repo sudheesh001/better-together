@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Random;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
-import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
 public class CardDeck extends Renderable implements CardActions, Serializable{
 
@@ -66,7 +65,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         mCards.remove(card);
     }
     
-    public CardDeck(Context mContext, boolean isHidden, boolean randomInitialize) {
+    public CardDeck(Context mContext, boolean isHidden) {
         setHidden(isHidden);
         this.name = isHidden ? "Closed Deck" : "Open Deck";
 
@@ -89,23 +88,6 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         this.mCards = new ArrayList<>();
 
         // TODO currently fixed to one but a deck can have more than one deck of cards
-        if( randomInitialize ) {
-            final int N_DECKS = 1; // create just one deck.
-            for (int i = 0, cardId = N_DECKS; i < 1; i++) {
-                for (Suits suit : Suits.values()) {
-                    for (CardRank rank : CardRank.values()) {
-                        Card card = new Card();
-                        card.setmContext(mContext);
-                        card.setCardId(cardId++);
-                        card.setSuit(suit);
-                        card.setRank(rank);
-                        card.setName(rank + Constants.CONNECTOR + suit);
-                        card.setHidden(isHidden);
-                        addCardToDeck(card);
-                    }
-                }
-            }
-        }
     }
 
     // Fisher-Yates shuffle

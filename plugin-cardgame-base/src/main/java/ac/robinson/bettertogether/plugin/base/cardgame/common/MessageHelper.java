@@ -150,6 +150,10 @@ public class MessageHelper {
         return new BroadcastMessage(messageType, requesterPlayerId);
     }
 
+    public BroadcastMessage UseSelectedCardDeckMessage(int marketPlaceItemId) {
+        return new BroadcastMessage(MessageType.USE_SELECTED_CARD_DECK, Integer.toString(marketPlaceItemId));
+    }
+
 
     public void PlayerReceivedMessage() {
         Action localCardAction = this.message.getCardAction();

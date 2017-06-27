@@ -17,22 +17,28 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.orhanobut.hawk.Hawk;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
@@ -43,6 +49,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.player.MainFragment;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
@@ -57,8 +64,8 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
     MessageHelper messageHelper = null;
 
     DealerPanel mDealerPanel;
-    private CardDeck mCardDeck;
     public static String requestedPlayerId = null;
+    public static int SELECTED_CARD_DECK;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,27 +73,89 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
         mContext = this;
         messageHelper = MessageHelper.getInstance(mContext);
 
-        mCardDeck = new CardDeck(mContext, true, true); // TODO: read this from selected card deck
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        parentFrame = new FrameLayout(mContext);
-        parentFrame.setId(View.generateViewId());
-        mDealerPanel = new DealerPanel(this, mCardDeck);
-        parentFrame.addView(mDealerPanel);
-        setContentView(parentFrame);
+        final BaseDealerActivity that = this;
 
-        // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
-        SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-        String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForDealer");
-        MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
-        // Now that we have name and type. Send discovery protocol
-        messageHelper.getConnectionMap().put(mName, mPlayerType);
-        sendMessage(messageHelper.Discovery(mName, mPlayerType));
+        selectCardDeckToPlay(new OnDeckSelectedCallback() {
+            @Override
+            public void onDeckSelected(MarketplaceItem item) {
+                SELECTED_CARD_DECK = item.getId();
 
-        Log.d(TAG, "View added");
+                parentFrame = new FrameLayout(mContext);
+                parentFrame.setId(View.generateViewId());
+                mDealerPanel = new DealerPanel(mContext);
+                mDealerPanel.setCurrentlyPlayingCardDeck(item, true, true);
+                parentFrame.addView(mDealerPanel);
+
+                that.setContentView(parentFrame);
+
+                // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
+                SharedPreferences prefs = that.getSharedPreferences("Details", MODE_PRIVATE);
+                String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForDealer");
+                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+                // Now that we have name and type. Send discovery protocol
+                messageHelper.getConnectionMap().put(mName, mPlayerType);
+                that.sendMessage(messageHelper.Discovery(mName, mPlayerType));
+
+                Log.d(TAG, "View added");
+            }
+
+            @Override
+            public void onDismiss() {
+                finish();
+            }
+        });
+    }
+
+    private interface OnDeckSelectedCallback {
+        void onDeckSelected(MarketplaceItem item);
+        void onDismiss();
+    }
+
+    private void selectCardDeckToPlay(final OnDeckSelectedCallback callback) {
+        Hawk.init(this).build();
+        Set<Integer> downloadedDeckIds = Hawk.get(Constants.DOWNLOADED_ITEMS_ID_KEY, new HashSet<Integer>());
+        if (downloadedDeckIds.size() == 0) {
+            Toast.makeText(mContext, "Please download at least 1 deck from the marketplace.", Toast.LENGTH_SHORT).show();
+            callback.onDismiss();
+            return;
+        }
+        final List<MarketplaceItem> items = new ArrayList<>();
+        List<String> deckNames = new ArrayList<>();
+        for(int downloadedDeckId: downloadedDeckIds) {
+            MarketplaceItem item = Hawk.get(Integer.toString(downloadedDeckId), null);
+            if (item != null) {
+                items.add(item);
+                deckNames.add(item.getName());
+            }
+        }
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Select Deck to play.");
+
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.select_dialog_singlechoice);
+        arrayAdapter.addAll(deckNames);
+        dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                callback.onDismiss();
+            }
+        });
+        dialogBuilder.setCancelable(false);
+
+        dialogBuilder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                MarketplaceItem selectedCardDeck = items.get(which);
+                callback.onDeckSelected(selectedCardDeck);
+            }
+        });
+        dialogBuilder.show();
     }
 
     public void inflateCardFanView(CardDeck cardDeck){
@@ -97,8 +166,8 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
     }
 
     public void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
-        List<String> cardsToSend = new ArrayList<>();
         for(String playerId: distribution.keySet()) {
+            List<String> cardsToSend = new ArrayList<>();
             for(Card card: distribution.get(playerId)) {
                 cardsToSend.add(card.getName());
             }
@@ -175,6 +244,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
                 sendMessage(m.Discovery(mName, mPlayerType));
                 // TODO: Will this cause a network flood?
+                sendMessage(m.UseSelectedCardDeckMessage(SELECTED_CARD_DECK));
             }
 
         }

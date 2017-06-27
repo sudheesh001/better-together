@@ -2,12 +2,14 @@ package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 
+import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -20,12 +22,10 @@ public class Card extends Renderable{
     private static final String TAG = Card.class.getSimpleName();
 
     private Context mContext;
-    private Integer cardId;
-
-    private CardRank rank;
-    private Suits suit;
-
     private boolean touched;
+
+    private String frontBitmapUrl;
+    private String backBitmapUrl;
 
     public Context getmContext() {
         return mContext;
@@ -33,13 +33,6 @@ public class Card extends Renderable{
 
     public void setmContext(Context mContext) {
         this.mContext = mContext;
-    }
-
-    public Integer getCardId() {
-        return cardId;
-    }
-    public void setCardId(Integer cardId) {
-        this.cardId = cardId;
     }
 
     public String getName() {
@@ -56,30 +49,30 @@ public class Card extends Renderable{
         this.name = name;
     }
 
-    public CardRank getRank() {
-        return rank;
-    }
-
-    public void setRank(CardRank rank) {
-        this.rank = rank;
-    }
-
-    public Suits getSuit() {
-        return suit;
-    }
-
-    public void setSuit(Suits suit) {
-        this.suit = suit;
-    }
 
     public Bitmap getBitmap(boolean forceLoad) {
         if( getBitmap() == null && forceLoad) {
-            setBitmap(
-                    BitmapFactory.decodeResource(mContext.getResources(),
-                            mContext.getResources().getIdentifier(this.getName(), "drawable", mContext.getPackageName())),
-                    BitmapFactory.decodeResource(mContext.getResources(),
-                            mContext.getResources().getIdentifier("card_back", "drawable", mContext.getPackageName()))
-            );
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        setBitmap(
+                                Picasso.with(mContext).load(frontBitmapUrl).get(),
+                                Picasso.with(mContext).load(backBitmapUrl).get()
+                        );
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+        }
+        while (getBitmap() == null) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return getBitmap();
     }
@@ -157,5 +150,13 @@ public class Card extends Renderable{
 
     private void toggleHidden() {
         this.hidden = !this.hidden;
+    }
+
+    public void setFrontBitmapUrl(String frontBitmapUrl) {
+        this.frontBitmapUrl = frontBitmapUrl;
+    }
+
+    public void setBackBitmapUrl(String backBitmapUrl) {
+        this.backBitmapUrl = backBitmapUrl;
     }
 }
