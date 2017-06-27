@@ -3,9 +3,11 @@ package ac.robinson.bettertogether.plugin.base.cardgame.common;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.provider.Settings;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.Map;
 
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -32,11 +36,28 @@ public class MessageHelper {
         PLAYER, DEALER
     }
 
+    // FIXME: Somehow doesn't reach all the time.
     public void parse(BroadcastMessage message) { // singleton
         Gson gson = new Gson();
         // Convert message.getMessage() to BroadcastCardMessage object using gson
         try {
             this.message = gson.fromJson(message.getMessage(), BroadcastCardMessage.class);
+            int mType = message.getType();
+
+            if (mType == MessageType.PLAYER_TO_DEALER) {
+                // Received message sent by player on dealer views
+                if (this.message.getCardTo().equals(this.getmUser())) {
+                    // Check if the dealer is the recipient to whom it was sent.
+                    this.ServerReceivedMessage();
+                }
+            }
+            else if (mType == MessageType.DEALER_TO_PLAYER) {
+                // Received message sent by dealer on player views
+                if (this.message.getCardTo().equals(this.getmUser())) {
+                    // Check if the player is the recipient to whom it was sent.
+                    this.PlayerReceivedMessage();
+                }
+            }
         }
         catch (NullPointerException e) {
 
@@ -47,9 +68,12 @@ public class MessageHelper {
         if( mInstance == null){
             mInstance = new MessageHelper();
             mUser = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-            SharedPreferences.Editor prefs = mContext.getSharedPreferences("Details", mContext.MODE_PRIVATE).edit();
+
+            // save the player to shared preferences
+            SharedPreferences.Editor prefs = mContext.getSharedPreferences("Details", MODE_PRIVATE).edit();
             prefs.putString(Constants.USER_ANDROID_ID, mUser);
             prefs.commit();
+
         }
 
         return mInstance;
@@ -88,11 +112,17 @@ public class MessageHelper {
         }else if (nameAndType[1].equals("DEALER")){
             type = PlayerType.DEALER;
         }
-        if (!connectionMap.containsKey(name)) {
-            connectionMap.put(name, type);
-            return true;
+        if (connectionMap.containsKey(name)) return false;
+        Collection<PlayerType> playerTypes = connectionMap.values();
+        if (type.equals(PlayerType.DEALER)) {
+            // Check if dealer already exists
+            if (playerTypes.contains(type)) {
+                // Dealer already exists.
+                return false;
+            }
         }
-        return false;
+        connectionMap.put(name, type);
+        return true;
     }
 
     public BroadcastMessage Discovery(String name, PlayerType type) {
@@ -104,13 +134,22 @@ public class MessageHelper {
         }
         // 2. Trigger a broadcast
         // Discovery will use integer for discovery as 999 and will have ID;TYPE
-        return new BroadcastMessage(999, name+";"+type.toString());
+        return new BroadcastMessage(MessageType.DISCOVER, name+";"+type.toString());
     }
 
-    public void sendPlayerMessage(BroadcastCardMessage message){
+    public BroadcastMessage PlayerToDealerMessage(BroadcastCardMessage message){
         Gson gson = new Gson();
-        new BroadcastMessage(MessageType.PLAYER_TO_DEALER, gson.toJson(message));
+        return new BroadcastMessage(MessageType.PLAYER_TO_DEALER, gson.toJson(message));
     }
+
+    public BroadcastMessage DealerToPlayerMessage(BroadcastCardMessage message) {
+        return new BroadcastMessage(MessageType.DEALER_TO_PLAYER, new Gson().toJson(message));
+    }
+
+    public BroadcastMessage RequestCardMessage(String requesterPlayerId, int messageType) {
+        return new BroadcastMessage(messageType, requesterPlayerId);
+    }
+
 
     public void PlayerReceivedMessage() {
         Action localCardAction = this.message.getCardAction();
@@ -130,7 +169,8 @@ public class MessageHelper {
         // Now having To and From and Action in place. It's time for the player to receive this card.
         List<String> localCardsItem = this.message.getCards();
         // Step 1: Perform the required card action to the server deck of cards.
-
+        Log.d("Dealer Received" , "Message on Dealer: " + localCardsItem.toString());
+        // Perform required UI actions here.
     }
 
 }

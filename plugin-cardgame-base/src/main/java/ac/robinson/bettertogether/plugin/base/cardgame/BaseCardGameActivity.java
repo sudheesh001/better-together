@@ -99,14 +99,9 @@ public class BaseCardGameActivity extends AppCompatActivity
 
         MarketplaceRecyclerViewAdapter rcAdapter = new MarketplaceRecyclerViewAdapter(
                 this, items);
-//        rcAdapter.setClickListener(this);
         recyclerView.setAdapter(rcAdapter);
+
 
     }
 
-
-//    @Override
-//    public void onItemClick(View view, int position) {
-//        Log.i("TAG", "You clicked number " + adapter.getItem(position) + ", which is at cell position " + position);
-//    }
 }

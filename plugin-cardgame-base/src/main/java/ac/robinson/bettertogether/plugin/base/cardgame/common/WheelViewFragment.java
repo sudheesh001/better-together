@@ -12,13 +12,15 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.WheelView;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.adapter.WheelArrayAdapter;
@@ -39,10 +41,12 @@ public class WheelViewFragment extends Fragment {
 
     private static Renderable renderable;
     private static Map<String , MessageHelper.PlayerType> connectionMap;
-
-    private static final int ITEM_COUNT = 6;
+    private List<String> playerNames;
+    private DistributionCompletedCallback callback;
 
     private OnFragmentInteractionListener mListener;
+
+    public Map<String, List<Card>> cardDistributionSequence;
 
     public WheelViewFragment() {
         // Required empty public constructor
@@ -56,14 +60,26 @@ public class WheelViewFragment extends Fragment {
      * @return A new instance of fragment WheelViewFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> coonectionMapObj) {
+    public static WheelViewFragment newInstance(Renderable renderableObj, Map<String , MessageHelper.PlayerType> connectionMapObj, DistributionCompletedCallback callback) {
         WheelViewFragment fragment = new WheelViewFragment();
         //TODO ideally should be set through arguments
 //        Bundle args = new Bundle();
 //        args.putSerializable(ARG_PARAM1, (Card)renderable);
 //        fragment.setArguments(args);
         renderable = renderableObj;
-        connectionMap = coonectionMapObj;
+
+        connectionMap = connectionMapObj;
+
+        fragment.playerNames = new ArrayList<>();
+        for(String playerId: connectionMap.keySet()) {
+            if (connectionMap.get(playerId) == MessageHelper.PlayerType.PLAYER) {
+                fragment.playerNames.add(playerId);
+            }
+        }
+        fragment.playerNames.add(0, "OK"); // TODO: make this more elegant.
+
+        fragment.cardDistributionSequence = new HashMap<>();
+        fragment.callback = callback;
 
         return fragment;
     }
@@ -110,14 +126,13 @@ public class WheelViewFragment extends Fragment {
         final WheelView wheelView = (WheelView) view.findViewById(R.id.wheelview);
 
         //create data for the adapter
-        List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(ITEM_COUNT);
-        for (int i = 0; i < ITEM_COUNT; i++) {
-            Map.Entry<String, Integer> entry = WheelViewMaterialColor.random(getContext(), "\\D*_500$");
-            entries.add(entry);
+        List<Map.Entry<String, Integer>> entries = new ArrayList<>(connectionMap.size());
+        for(String playerName: playerNames) {
+            entries.add(WheelViewMaterialColor.random(getContext(), "\\D*_500$"));
         }
 
         //populate the adapter, that knows how to draw each item (as you would do with a ListAdapter)
-        wheelView.setAdapter(new MaterialColorAdapter(entries));
+        wheelView.setAdapter(new MaterialColorAdapter(entries, playerNames));
         wheelView.setRepeatableAdapter(false);
         wheelView.setWheelDrawableRotatable(false);
         wheelView.setWheelDrawable(renderable);
@@ -135,8 +150,52 @@ public class WheelViewFragment extends Fragment {
         wheelView.setOnWheelItemClickListener(new WheelView.OnWheelItemClickListener() {
             @Override
             public void onWheelItemClick(WheelView parent, int position, boolean isSelected) {
-                String msg = String.valueOf(position) + " " + isSelected;
-                Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+                if (position == 0) {
+                    callback.onDistributionDecided(cardDistributionSequence);
+                    return;
+                }
+                if (renderable == null) return;
+
+                WheelViewDrawable drawable = ((WheelViewDrawable)((LayerDrawable)wheelView.getCacheItem(position).mDrawable).getDrawable(1));
+                drawable.count++;
+
+                Card cardToAdd;
+                if (renderable instanceof CardDeck) {
+                    cardToAdd = ((CardDeck) renderable).getmCards().get(0);
+                } else {
+                    cardToAdd = (Card) renderable;
+                }
+                String playerId = playerNames.get(position);
+                if (!cardDistributionSequence.containsKey(playerId)) {
+                    cardDistributionSequence.put(playerId, new ArrayList<Card>());
+                }
+                cardDistributionSequence.get(playerId).add(cardToAdd);
+
+                wheelView.invalidate();
+
+                if (renderable instanceof CardDeck) {
+                    CardDeck deck = (CardDeck) renderable;
+                    int old_x = deck.getX(); int old_y = deck.getY();
+                    List<Card> discardedCards = deck.handleDoubleTap(null);
+                    if (discardedCards.size() == 2) {
+                        try {
+                            renderable = (Card) discardedCards.get(1).clone();
+                            wheelView.setWheelDrawable(renderable);
+                            // since deck.x and deck.y are -99999 by the time it gets here,
+                            // set the renderable x/y coordinates to the old coordinates.
+                            renderable.setAbsoluteX(old_x);
+                            renderable.setAbsoluteY(old_y);
+                            wheelView.invalidate();
+                        } catch (CloneNotSupportedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    Card card = (Card) renderable;
+                    card.setX(-99999);
+                    card.setY(-99999);
+                    renderable = null;
+                }
             }
         });
 
@@ -180,15 +239,18 @@ public class WheelViewFragment extends Fragment {
     }
 
     static class MaterialColorAdapter extends WheelArrayAdapter<Map.Entry<String, Integer>> {
-        MaterialColorAdapter(List<Map.Entry<String, Integer>> entries) {
-            super(entries);
+
+        List<String> names;
+        MaterialColorAdapter(List<Map.Entry<String, Integer>> colors, List<String> names) {
+            super(colors);
+            this.names = names;
         }
 
         @Override
         public Drawable getDrawable(int position) {
             Drawable[] drawable = new Drawable[] {
                     createOvalDrawable(getItem(position).getValue()),
-                    new WheelViewDrawable(String.valueOf(position))
+                    new WheelViewDrawable(names.get(position))
             };
             return new LayerDrawable(drawable);
         }
@@ -198,5 +260,9 @@ public class WheelViewFragment extends Fragment {
             shapeDrawable.getPaint().setColor(color);
             return shapeDrawable;
         }
+    }
+
+    public interface DistributionCompletedCallback {
+        void onDistributionDecided(Map<String, List<Card>> cardDistributionPlayerSequence);
     }
 }

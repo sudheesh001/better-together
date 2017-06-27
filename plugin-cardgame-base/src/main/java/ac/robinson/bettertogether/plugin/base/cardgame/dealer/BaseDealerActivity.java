@@ -18,77 +18,140 @@ package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
+import ac.robinson.bettertogether.plugin.base.cardgame.player.MainFragment;
+import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
-public class BaseDealerActivity extends BasePluginActivity {
+public class BaseDealerActivity extends BasePluginActivity implements WheelViewFragment.OnFragmentInteractionListener {
 
     private static final String TAG = BaseDealerActivity.class.getSimpleName();
-
-    ImageView mDeckImage, mOpenDeckImage, mDiscardedDeckImage;
-
+    FrameLayout parentFrame = null;
+    MainFragment mainFragment;
     private Context mContext;
+    WheelViewFragment wheelViewFragment = null;
+    MessageHelper messageHelper = null;
 
-    private CardDeck cardDeck, mOpenDeck,mClosedDeck,mDiscardedDeck; // FIXME harcoded to 4 but later we want any number of decks as possible in line with NUI
-
-    List<CardDeck> mCardsDisplay;
+    DealerPanel mDealerPanel;
+    private CardDeck mCardDeck;
+    public static String requestedPlayerId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_base_dealer);
-//
         mContext = this;
-//
-        cardDeck = new CardDeck(mContext, CardDeckStatus.CLOSED, true);
-        mOpenDeck = new CardDeck(mContext, CardDeckStatus.OPEN, true);
-//
-//        mDeckImage = (ImageView) findViewById(R.id.deckImage);
-//        mOpenDeckImage = (ImageView) findViewById(R.id.openDeckImage);
-//        mDiscardedDeckImage = (ImageView) findViewById(R.id.discardedDeckImage);
-//
-//        mDeckImage.setImageResource(R.drawable.card_back);
-//
-//        mDetector = new GestureDetectorCompat(this,this);
-//        // Set the gesture detector as the double tap
-//        // listener.
-//        mDetector.setOnDoubleTapListener(this);
-//        cardDeck.shuffleCardDeck(cardDeck.getClosedCardDeck());
+        messageHelper = MessageHelper.getInstance(mContext);
 
-        mCardsDisplay = new ArrayList<>();
-
-        mCardsDisplay.add(cardDeck);
-        mCardsDisplay.add(mOpenDeck);
+        mCardDeck = new CardDeck(mContext, true, true); // TODO: read this from selected card deck
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        // set our MainGamePanel as the View
-        setContentView(new DealerPanel(this, null, mCardsDisplay));
+
+        parentFrame = new FrameLayout(mContext);
+        parentFrame.setId(View.generateViewId());
+        mDealerPanel = new DealerPanel(this, mCardDeck);
+        parentFrame.addView(mDealerPanel);
+        setContentView(parentFrame);
+
         // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-        String mName = prefs.getString("Name", null);
+        String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForDealer");
         MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
         // Now that we have name and type. Send discovery protocol
-        MessageHelper m = MessageHelper.getInstance(mContext);
-        sendMessage(m.Discovery(mName, mPlayerType));
+        messageHelper.getConnectionMap().put(mName, mPlayerType);
+        sendMessage(messageHelper.Discovery(mName, mPlayerType));
 
         Log.d(TAG, "View added");
+    }
+
+    public void inflateCardFanView(CardDeck cardDeck){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
+                .commit();
+    }
+
+    public void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
+        List<String> cardsToSend = new ArrayList<>();
+        for(String playerId: distribution.keySet()) {
+            for(Card card: distribution.get(playerId)) {
+                cardsToSend.add(card.getName());
+            }
+
+            if (cardsToSend.size() > 0) {
+                BroadcastCardMessage message = new BroadcastCardMessage();
+                message.setCardAction(Action.draw);
+                message.setCards(cardsToSend);
+                message.setHidden(renderable.isHidden());
+                message.setCardFrom(messageHelper.getmUser());
+                message.setCardTo(playerId);
+                Log.d(TAG, "handleCardDistribution: Sending message " + message + " from" + messageHelper.getmUser() + " to " + playerId);
+                sendMessage(messageHelper.DealerToPlayerMessage(message));
+            }
+        }
+    }
+
+    public void inflateWheelView(final Renderable renderable, boolean status){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(parentFrame.getId(), wheelViewFragment = WheelViewFragment.newInstance(renderable, messageHelper.getConnectionMap(), new WheelViewFragment.DistributionCompletedCallback() {
+
+                    @Override
+                    public void onDistributionDecided(Map<String, List<Card>> cardDistributionPlayerSequence) {
+                        getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
+                        wheelViewFragment = null;
+                        handleCardDistribution(cardDistributionPlayerSequence, renderable);
+
+                        if (renderable instanceof CardDeck) {
+                            List<Card> cardsToDiscard = new ArrayList<Card>();
+                            for(List<Card> cardsList: cardDistributionPlayerSequence.values()) {
+                                for(Card card: cardsList) {
+                                    cardsToDiscard.add(card);
+                                }
+                            }
+                            mDealerPanel.discardCardsFromDeck((CardDeck) renderable, cardsToDiscard);
+                        }
+                    }
+                }))
+                .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mainFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(mainFragment).commit();
+            mainFragment = null;
+        } else if (wheelViewFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
+            wheelViewFragment = null;
+        } else {
+            super.onBackPressed();
+        }
     }
 
 
@@ -104,21 +167,51 @@ public class BaseDealerActivity extends BasePluginActivity {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
             Boolean response = m.ReceivedDiscoveryMessage(message.getMessage());
-            SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-            String mName = prefs.getString("Name", null);
-            MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
 
-            if( response )
+            if( response ){
+                SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
+                String mName = prefs.getString(Constants.USER_ANDROID_ID, null);
+                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+
                 sendMessage(m.Discovery(mName, mPlayerType));
+                // TODO: Will this cause a network flood?
+            }
 
-            // TODO: Will this cause a network flood?
+        }
+        else if (message.getType() == MessageType.PLAYER_TO_DEALER) {
+            if (message.getMessage() != null && !message.getMessage().isEmpty()) {
+                BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
+                mDealerPanel.onCardReceived(receivedMessage);
+            }
+        } else if (message.getType() == MessageType.REQUEST_DRAW_CARD) {
+            if (requestedPlayerId == null) {
+                requestedPlayerId = message.getMessage();
+                sendMessage(messageHelper.RequestCardMessage(requestedPlayerId, MessageType.REQUEST_DRAW_CARD_ACK));
+            } else {
+                sendMessage(messageHelper.RequestCardMessage(requestedPlayerId, MessageType.REQUEST_DRAW_CARD_NACK));
+            }
+        } else if (message.getType() == MessageType.REQUEST_DRAW_CARD_WITHDRAW) {
+            if (requestedPlayerId != null && requestedPlayerId.equals(message.getMessage())) {
+                requestedPlayerId = null;
+            }
         }
         else {
-            m.parse(message);
-            m.ServerReceivedMessage();
+            Log.e(TAG, "onMessageReceived: Ignoring message that I don't know how to handle " + message + " " + message.getMessage() + " " + message.getType());
+//            Log.e(TAG, "onMessageReceived: Trying to parse extra message " + message + " " + message.getMessage() + " " + message.getType());
+//            messageHelper.parse(message);
+//            messageHelper.PlayerReceivedMessage();
+//            m.parse(message);
+//            m.ServerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {}
+
+    public void getSelectedCard(CardDeck cardDeck, Card card){
+        Log.d(TAG, " Got Card " + card.getName());
+        mDealerPanel.drawCardFromDeck(cardDeck, card);
+    }
 }
