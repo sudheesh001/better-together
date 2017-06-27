@@ -7,29 +7,29 @@ import java.util.List;
  */
 
 public class MarketplaceItem {
-    private String backgroundCardLink;
-    private String createdBy;
+    private String background_card;
+    private String created_by;
     private String description;
     private String name;
-    private Integer numberOfCards;
+    private Integer number_of_cards;
     private Integer id;
     private String rules;
-    private List<String> cardLinks;
+    private List<String> cards;
 
-    public String getBackgroundCardLink() {
-        return backgroundCardLink;
+    public String getBackground_card() {
+        return background_card;
     }
 
-    public void setBackgroundCardLink(String backgroundCardLink) {
-        this.backgroundCardLink = backgroundCardLink;
+    public void setBackground_card(String background_card) {
+        this.background_card = background_card;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getCreated_by() {
+        return created_by;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setCreated_by(String created_by) {
+        this.created_by = created_by;
     }
 
     public String getDescription() {
@@ -48,12 +48,12 @@ public class MarketplaceItem {
         this.name = name;
     }
 
-    public Integer getNumberOfCards() {
-        return numberOfCards;
+    public Integer getNumber_of_cards() {
+        return number_of_cards;
     }
 
-    public void setNumberOfCards(Integer numberOfCards) {
-        this.numberOfCards = numberOfCards;
+    public void setNumber_of_cards(Integer number_of_cards) {
+        this.number_of_cards = number_of_cards;
     }
 
     public Integer getId() {
@@ -72,11 +72,11 @@ public class MarketplaceItem {
         this.rules = rules;
     }
 
-    public List<String> getCardLinks() {
-        return cardLinks;
+    public List<String> getCards() {
+        return cards;
     }
 
-    public void setCardLinks(List<String> cardLinks) {
-        this.cardLinks = cardLinks;
+    public void setCards(List<String> cards) {
+        this.cards = cards;
     }
 }

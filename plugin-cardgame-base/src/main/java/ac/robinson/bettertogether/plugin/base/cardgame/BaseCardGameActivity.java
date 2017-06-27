@@ -17,24 +17,21 @@
 package ac.robinson.bettertogether.plugin.base.cardgame;
 
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
-import android.view.Window;
-import android.widget.RelativeLayout;
+import android.view.View;
+
+import com.orhanobut.hawk.Hawk;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MarketplaceAPI;
-import ac.robinson.bettertogether.plugin.base.cardgame.common.RecyclerViewAdapter;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.MarketplaceRecyclerViewAdapter;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.DeckDetail;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Decks;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
@@ -42,40 +39,37 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BaseCardGameActivity extends AppCompatActivity {
-
+public class BaseCardGameActivity extends AppCompatActivity
+//        implements MarketplaceRecyclerViewAdapter.ItemClickListener{
+{
 
     MarketplaceAPI apiInterface; // TODO: Temporary for testing
 
-    Context context;
-    RecyclerView recyclerView;
-    RelativeLayout relativeLayout;
-    RecyclerView.Adapter recyclerViewAdapter;
-    RecyclerView.LayoutManager recyclerViewLayoutManager;
-
-    String[] subjects = { "ANDROID", "PHP", "PYTHON", "PERL", "CPP" };
-
     Map<String, String> decksInMarketplace = new HashMap<String, String>();
 
-
-    private String mUser = null;
+    private StaggeredGridLayoutManager _sGridLayoutManager;
+    private RecyclerView recyclerView;
+    private MarketplaceRecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_card_game);
 
-        mUser = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        Hawk.init(this).build();
 
-        // Recycler View
-        // requestWindowFeature(Window.FEATURE_ACTION_BAR);
-        context = getApplicationContext();
-        relativeLayout = (RelativeLayout) findViewById(R.id.relativelayout1);
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview1);
-        recyclerViewLayoutManager = new LinearLayoutManager(context);
-        recyclerView.setLayoutManager(recyclerViewLayoutManager);
-        recyclerViewAdapter = new RecyclerViewAdapter(context, subjects);
-        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerViewMarketplace);
+        recyclerView.setHasFixedSize(true);
+
+        _sGridLayoutManager = new StaggeredGridLayoutManager(2,
+                StaggeredGridLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(_sGridLayoutManager);
+        recyclerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         // TODO: Uncomment this when moving the client out.
         apiInterface = APIClient.getClient().create(MarketplaceAPI.class);
@@ -86,12 +80,11 @@ public class BaseCardGameActivity extends AppCompatActivity {
             public void onResponse(Call<Decks> call, Response<Decks> response) {
                 Decks res = response.body();
                 List<DeckDetail> details = res.getDecks();
-                String BASE_URL = APIClient.getBaseURL();
-                for (DeckDetail singleDeck : details) {
-                    decksInMarketplace.put(singleDeck.getName() , BASE_URL+singleDeck.getApi_link());
-                }
+
                 Log.d("API", "Get Decks from Marketplace: " + response.toString());
                 Log.d("Marketplace Contains", decksInMarketplace.toString());
+
+                setupRecyclerView(details);
             }
 
             @Override
@@ -100,10 +93,20 @@ public class BaseCardGameActivity extends AppCompatActivity {
             }
         });
 
-        // save the player to shared preferences
-        SharedPreferences.Editor prefs = this.getSharedPreferences("Details", MODE_PRIVATE).edit();
-        prefs.putString("Name", mUser);
-        prefs.commit();
+    }
+
+    public void setupRecyclerView(List<DeckDetail> items){
+
+        MarketplaceRecyclerViewAdapter rcAdapter = new MarketplaceRecyclerViewAdapter(
+                this, items);
+//        rcAdapter.setClickListener(this);
+        recyclerView.setAdapter(rcAdapter);
 
     }
+
+
+//    @Override
+//    public void onItemClick(View view, int position) {
+//        Log.i("TAG", "You clicked number " + adapter.getItem(position) + ", which is at cell position " + position);
+//    }
 }

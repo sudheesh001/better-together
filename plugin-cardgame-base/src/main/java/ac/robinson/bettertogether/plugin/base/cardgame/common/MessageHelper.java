@@ -1,6 +1,7 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.provider.Settings;
 
 import com.google.gson.Gson;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
+import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -45,6 +47,9 @@ public class MessageHelper {
         if( mInstance == null){
             mInstance = new MessageHelper();
             mUser = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+            SharedPreferences.Editor prefs = mContext.getSharedPreferences("Details", mContext.MODE_PRIVATE).edit();
+            prefs.putString(Constants.USER_ANDROID_ID, mUser);
+            prefs.commit();
         }
 
         return mInstance;

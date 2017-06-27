@@ -21,7 +21,8 @@
 
     <application>
         <activity android:name=".dealer.BaseDealerActivity" />
-        <activity android:name=".player.BasePlayerActivity"></activity>
+        <activity android:name=".player.BasePlayerActivity" />
+        <activity android:name=".common.DeckHomeActivity"></activity>
     </application>
 
 </manifest>

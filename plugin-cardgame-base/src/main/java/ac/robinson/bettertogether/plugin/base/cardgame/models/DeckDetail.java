@@ -1,10 +1,12 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
+import java.io.Serializable;
+
 /**
  * Created by t-sus on 5/29/2017.
  */
 
-public class DeckDetail {
+public class DeckDetail  implements Serializable{
 
     // Private members
     private String api_link;
@@ -12,6 +14,15 @@ public class DeckDetail {
     private String name;
     private String number_of_cards;
     private String view_link;
+    private String deckImage;
+
+    public String getDeckImage() {
+        return deckImage;
+    }
+
+    public void setDeckImage(String deckImage) {
+        this.deckImage = deckImage;
+    }
 
     public String getApi_link() {
         return api_link;
