@@ -214,6 +214,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 canvas.drawText(type, screenWidth - 240, screenHeight - 2*(PULL_CARD_BUTTON_MARGIN - DEBUG_TEXT_PAINT_SIZE), DEBUG_TEXT_PAINT);
             }
         }
+
+        printFPS(canvas, screenWidth);
     }
 
     @Override
@@ -250,6 +252,21 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         // tell the thread to shut down and wait for it to finish
         // this is a clean shutdown
         tryClosingThread(playerThread);
+    }
+
+
+    // for printing fps
+    private long fpsMLastTime = 0;
+    private int fps = 0, ifps = 0;
+    private void printFPS(Canvas canvas, int screenWidth) {
+        canvas.drawText("FPS: " + fps + " X 2", screenWidth - 160, PULL_CARD_BUTTON_MARGIN, DEBUG_TEXT_PAINT);
+        long now = System.currentTimeMillis();
+        ifps++;
+        if(now > (fpsMLastTime + 500)) {
+            fpsMLastTime = now;
+            fps = ifps;
+            ifps = 0;
+        }
     }
 
     public void render(Canvas canvas, boolean isPlayerThread) {
