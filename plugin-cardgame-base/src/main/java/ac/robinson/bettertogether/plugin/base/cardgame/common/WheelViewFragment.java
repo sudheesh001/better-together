@@ -1,7 +1,6 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
 import android.content.Context;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -10,11 +9,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +24,6 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.WheelView;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.wheelview.adapter.WheelArrayAdapter;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -155,11 +150,11 @@ public class WheelViewFragment extends Fragment {
         wheelView.setOnWheelItemClickListener(new WheelView.OnWheelItemClickListener() {
             @Override
             public void onWheelItemClick(WheelView parent, int position, boolean isSelected) {
-                if (renderable == null) return;
                 if (position == 0) {
                     callback.onDistributionDecided(cardDistributionSequence);
                     return;
                 }
+                if (renderable == null) return;
 
                 WheelViewDrawable drawable = ((WheelViewDrawable)((LayerDrawable)wheelView.getCacheItem(position).mDrawable).getDrawable(1));
                 drawable.count++;
@@ -180,7 +175,7 @@ public class WheelViewFragment extends Fragment {
 
                 if (renderable instanceof CardDeck) {
                     CardDeck deck = (CardDeck) renderable;
-                    int old_x = deck.x; int old_y = deck.y;
+                    int old_x = deck.getX(); int old_y = deck.getY();
                     List<Card> discardedCards = deck.handleDoubleTap(null);
                     if (discardedCards.size() == 2) {
                         try {
@@ -188,8 +183,8 @@ public class WheelViewFragment extends Fragment {
                             wheelView.setWheelDrawable(renderable);
                             // since deck.x and deck.y are -99999 by the time it gets here,
                             // set the renderable x/y coordinates to the old coordinates.
-                            renderable.x = old_x;
-                            renderable.y = old_y;
+                            renderable.setAbsoluteX(old_x);
+                            renderable.setAbsoluteY(old_y);
                             wheelView.invalidate();
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
@@ -197,8 +192,8 @@ public class WheelViewFragment extends Fragment {
                     }
                 } else {
                     Card card = (Card) renderable;
-                    card.x = -99999;
-                    card.y = -99999;
+                    card.setX(-99999);
+                    card.setY(-99999);
                     renderable = null;
                 }
             }

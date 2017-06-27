@@ -19,6 +19,7 @@ import com.cleveroad.fanlayoutmanager.FanLayoutManagerSettings;
 import com.cleveroad.fanlayoutmanager.callbacks.FanChildDrawingOrderCallback;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 
@@ -169,7 +170,11 @@ public class MainFragment extends Fragment {
 //                .commit();
         Card card = adapter.getModelByPos(pos);
 
-        ((BasePlayerActivity)getActivity()).getSelectedCard(cardDeck, card);
+        if (getActivity() instanceof BasePlayerActivity) {
+            ((BasePlayerActivity)getActivity()).getSelectedCard(cardDeck, card);
+        } else {
+            ((BaseDealerActivity) getActivity()).getSelectedCard(cardDeck, card);
+        }
         // FIXME send a local broadcast to surface view
 
         setExitTransition(new Fade());

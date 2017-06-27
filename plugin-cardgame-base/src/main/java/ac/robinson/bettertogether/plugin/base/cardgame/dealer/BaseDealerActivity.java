@@ -43,7 +43,6 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.player.MainFragment;
 
@@ -65,7 +64,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
         super.onCreate(savedInstanceState);
         mContext = this;
 
-        mCardDeck = new CardDeck(mContext, CardDeckStatus.CLOSED, true); // TODO: read this from selected card deck
+        mCardDeck = new CardDeck(mContext, true, true); // TODO: read this from selected card deck
         // requesting to turn the title OFF
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // making it full screen
@@ -89,7 +88,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
         Log.d(TAG, "View added");
     }
 
-    public void inflateCardFanView(CardDeck cardDeck, boolean status){
+    public void inflateCardFanView(CardDeck cardDeck){
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
@@ -97,8 +96,8 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
     }
 
     public void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
+        List<String> cardsToSend = new ArrayList<>();
         for(String playerId: distribution.keySet()) {
-            List<String> cardsToSend = new ArrayList<>();
             for(Card card: distribution.get(playerId)) {
                 cardsToSend.add(card.getName());
             }
@@ -114,6 +113,14 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
                 sendMessage(messageHelper.DealerToPlayerMessage(message));
             }
         }
+        if (renderable instanceof CardDeck) {
+            CardDeck chosenDeck = (CardDeck) renderable;
+            for(List<Card> cardsList: distribution.values()) {
+                for (Card card: cardsList) {
+                    mDealerPanel.drawCardFromDeck(chosenDeck, card);
+                }
+            }
+        }
     }
 
     public void inflateWheelView(final Renderable renderable, boolean status){
@@ -125,7 +132,6 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
                     public void onDistributionDecided(Map<String, List<Card>> cardDistributionPlayerSequence) {
                         getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
                         wheelViewFragment = null;
-
                         handleCardDistribution(cardDistributionPlayerSequence, renderable);
                     }
                 }))
@@ -134,10 +140,14 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
     @Override
     public void onBackPressed() {
-        if (mainFragment == null || !mainFragment.isAdded() || !mainFragment.isVisible()) {
-            super.onBackPressed();
-        }else if( mainFragment.isVisible()){
+        if (mainFragment != null) {
             getSupportFragmentManager().beginTransaction().remove(mainFragment).commit();
+            mainFragment = null;
+        } else if (wheelViewFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(wheelViewFragment).commit();
+            wheelViewFragment = null;
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -181,8 +191,12 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
             }
         }
         else {
-            m.parse(message);
-            m.ServerReceivedMessage();
+            Log.e(TAG, "onMessageReceived: Ignoring message that I don't know how to handle " + message + " " + message.getMessage() + " " + message.getType());
+//            Log.e(TAG, "onMessageReceived: Trying to parse extra message " + message + " " + message.getMessage() + " " + message.getType());
+//            messageHelper.parse(message);
+//            messageHelper.PlayerReceivedMessage();
+//            m.parse(message);
+//            m.ServerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
@@ -190,4 +204,9 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
     @Override
     public void onFragmentInteraction(Uri uri) {}
+
+    public void getSelectedCard(CardDeck cardDeck, Card card){
+        Log.d(TAG, " Got Card " + card.getName());
+        mDealerPanel.drawCardFromDeck(cardDeck, card);
+    }
 }

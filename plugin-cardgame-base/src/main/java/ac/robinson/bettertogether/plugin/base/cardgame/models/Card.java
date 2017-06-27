@@ -20,21 +20,12 @@ public class Card extends Renderable{
     private static final String TAG = Card.class.getSimpleName();
 
     private Context mContext;
-
     private Integer cardId;
 
-    private String name;
     private CardRank rank;
     private Suits suit;
 
-    private Bitmap openBitmap;
-    private Bitmap hiddenBitmap;
-
     private boolean touched;
-//    protected long startTime;
-
-// variable for moving the view
-
 
     public Context getmContext() {
         return mContext;
@@ -47,10 +38,10 @@ public class Card extends Renderable{
     public Integer getCardId() {
         return cardId;
     }
-
     public void setCardId(Integer cardId) {
         this.cardId = cardId;
     }
+
     public String getName() {
         return name;
     }
@@ -81,12 +72,8 @@ public class Card extends Renderable{
         this.suit = suit;
     }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
     public Bitmap getBitmap(boolean forceLoad) {
-        if( bitmap == null && forceLoad) {
+        if( getBitmap() == null && forceLoad) {
             setBitmap(
                     BitmapFactory.decodeResource(mContext.getResources(),
                             mContext.getResources().getIdentifier(this.getName(), "drawable", mContext.getPackageName())),
@@ -94,15 +81,7 @@ public class Card extends Renderable{
                             mContext.getResources().getIdentifier("card_back", "drawable", mContext.getPackageName()))
             );
         }
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap openBitmap, Bitmap hiddenBitmap) {
-        this.openBitmap = Bitmap.createScaledBitmap(openBitmap, scaledWidth, scaledHeight, true);;
-        this.hiddenBitmap = Bitmap.createScaledBitmap(hiddenBitmap, scaledWidth, scaledHeight, true);;
-        this.bitmap = hidden ? this.hiddenBitmap : this.openBitmap ;
-        setX(x + (bitmap.getWidth()/2));
-        setY(y + (bitmap.getHeight()/2));
+        return getBitmap();
     }
 
     public boolean isHidden() {
@@ -123,34 +102,28 @@ public class Card extends Renderable{
         this.touched = touched;
     }
 
-    @Override
-    public boolean isFlinged() {
-        return false;
-    }
-
     public void draw(Canvas canvas) {
-        if( bitmap == null ){
-            setBitmap(
-            BitmapFactory.decodeResource(mContext.getResources(),
-                    mContext.getResources().getIdentifier(this.getName(),"drawable",mContext.getPackageName())),
-            BitmapFactory.decodeResource(mContext.getResources(),
-                            mContext.getResources().getIdentifier("card_back","drawable",mContext.getPackageName()))
-            );
-        }
-
-        Bitmap bitmapToUse = hidden ? hiddenBitmap : openBitmap;
+        Bitmap bitmapToUse = getBitmap(true);
 
         if (this == Renderable.selectedRenderableForContext) {
             Bitmap alpha = bitmapToUse.extractAlpha();
-            canvas.drawBitmap(alpha, x, y, GLOW_PAINT);
+            canvas.drawBitmap(alpha, getX(), getY(), GLOW_PAINT);
         }
-        canvas.drawBitmap(bitmapToUse, x, y , null);
+        canvas.drawBitmap(bitmapToUse, getX(), getY() , null);
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(20);
-        canvas.drawPoint(x, y, paint);
+        canvas.drawPoint(getX(), getY(), paint);
+
+
+        if (isHidden()) {
+            paint.setColor(Color.RED);
+        } else {
+            paint.setColor(Color.GREEN);
+        }
+        canvas.drawPoint(getX()+100, getY(), paint);
     }
 
     @Override
@@ -168,11 +141,9 @@ public class Card extends Renderable{
      */
     @SuppressWarnings("JavadocReference")
     public Gesture handleActionDown(int eventX, int eventY) {
-        if (eventX >= (getX()) && (eventX <= (getX() + bitmap.getWidth()))) {
-            if (eventY >= (getY()) && (eventY <= (getY() + bitmap.getHeight() ))) {
-
+        if (eventX >= (getX()) && (eventX <= (getX() + getBitmap(true).getWidth()))) {
+            if (eventY >= (getY()) && (eventY <= (getY() + getBitmap(true).getHeight() ))) {
                 setTouched(true);
-//                startTime = System.currentTimeMillis();
                 return Gesture.TOUCHED;
             } else {
                 setTouched(false);
@@ -184,7 +155,7 @@ public class Card extends Renderable{
 
     }
 
-    public void toggleHidden() {
+    private void toggleHidden() {
         this.hidden = !this.hidden;
     }
 }

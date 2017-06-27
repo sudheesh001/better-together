@@ -90,6 +90,8 @@ public class DealerPanel extends PlayerPanel {
     @Override
     protected void handleLongPress(CardDeck cardDeck) {
         Log.d(TAG, "handleLongPress: " + cardDeck);
+        ((BaseDealerActivity)getContext()).inflateCardFanView(cardDeck);
+
     }
 
     @Override

@@ -25,7 +25,6 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
@@ -76,8 +75,10 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         surfaceView = this;
         mContext = context;
 
-        for(Card card: cards) {
-            mAllCardsRes.put(card.getName(), card);
+        if (cards != null) {
+            for(Card card: cards) {
+                mAllCardsRes.put(card.getName(), card);
+            }
         }
 
         setFocusable(true);  // make the Panel focusable so it can handle events
@@ -136,7 +137,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
             CardDeck finalDeck;
             if (cd1 == null && cd2 == null) {
-                finalDeck = new CardDeck(mContext, (r1.isHidden() ? CardDeckStatus.CLOSED : CardDeckStatus.OPEN), false);
+                finalDeck = new CardDeck(mContext, r1.isHidden(), false);
                 mRenderablesInPlay.add(finalDeck);
             } else {
                 finalDeck = cd1 == null ? cd2: cd1;
@@ -237,8 +238,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     public boolean drawCardFromDeck(CardDeck cardDeck, Card card){
-        cardDeck.drawCardFromDeck(card);
-        mRenderablesInPlay.add(card);
+        boolean removed = cardDeck.drawCardFromDeck(card);
+        if (removed) {
+            mRenderablesInPlay.add(card);
+        }
+        if (cardDeck.getmCards().size() == 1) {
+            mRenderablesInPlay.add(cardDeck.getTopCardFromDeck());
+            mRenderablesInPlay.remove(cardDeck);
+        }
         return true;
     }
 
@@ -287,8 +294,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             message.setCards(cards);
         }else if( flungRenderable instanceof CardDeck){
             List<String> cards = new ArrayList<>();
-            for (Card card: ((CardDeck) flungRenderable).getmCards()
-                    ) {
+            for (Card card: ((CardDeck) flungRenderable).getmCards()) {
                 cards.add(card.getName());
             }
             message.setCards(cards);
@@ -315,7 +321,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     protected void handleLongPress(CardDeck cardDeck) {
-        ((BasePlayerActivity)getContext()).inflateCardFanView(cardDeck, true);
+        ((BasePlayerActivity)getContext()).inflateCardFanView(cardDeck);
     }
 
     @Override
@@ -372,14 +378,19 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
                 // TODO toggle if its a card and open the top card if it's a deck
                 cards = r.handleDoubleTap(event);
+
+                if (r instanceof CardDeck && ((CardDeck) r).isSafeToDelete()) {
+                    mRenderablesInPlay.remove(r);
+                }
+
                 Log.d(TAG, " Double tap on card " + r.getName());
                 break;
             }
-
         }
 
-        if (cards != null)
+        if (cards != null){
             mRenderablesInPlay.addAll(cards);
+        }
 
         return true;
     }
@@ -427,7 +438,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         }
 
         else {
-            CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden() ? CardDeckStatus.CLOSED: CardDeckStatus.OPEN, false);
+            CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden(), false);
             for(String cardId: receivedCards) {
                 receivedCardDeck.addCardToDeck(mAllCardsRes.get(cardId));
             }

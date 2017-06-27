@@ -20,13 +20,12 @@ import static android.content.ContentValues.TAG;
 
 public abstract class Renderable implements Cloneable{
 
-    public int x; // X cooridnate
-    public int y; // Y coordinate
-    private boolean touched; // if it has been touched or picked up
-    Bitmap bitmap = null;
+    private int x; // X cooridnate
+    private int y; // Y coordinate
+    private Bitmap openBitmap = null;
+    private Bitmap hiddenBitmap = null;
 
-    private String name;
-    public boolean safeToDelete = false; // should this card be deleted.
+    protected String name;
 
     protected boolean hidden;
     protected static final Paint GLOW_PAINT = new Paint();
@@ -45,8 +44,6 @@ public abstract class Renderable implements Cloneable{
     public static final int scaledHeight = 375;
     public static final int OVERLAP_THRESHOLD_LIMIT = ((scaledWidth*5)/6) * ((scaledHeight*2)/3);
 
-    protected CardDeckStatus status;
-
     public boolean isHidden() {
         return hidden;
     }
@@ -55,19 +52,9 @@ public abstract class Renderable implements Cloneable{
         this.hidden = hidden;
     }
 
-    protected static final int MAX_DURATION = 200;
+    public String getName() {return name;};
 
-    public CardDeckStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(CardDeckStatus status) {
-        this.status = status;
-    }
-
-    public abstract String getName();
-
-    public abstract void setName(String name);
+    public void setName(String name) {this.name = name;};
 
     public abstract Gesture handleActionDown(int eventX, int eventY);
 
@@ -89,6 +76,13 @@ public abstract class Renderable implements Cloneable{
         this.x = x-scaledWidth/2;
     }
 
+    public void setAbsoluteX(int x) {
+        this.x = x;
+    }
+    public void setAbsoluteY(int y) {
+        this.y = y;
+    }
+
     public int getY(){
         return this.y;
     }
@@ -101,10 +95,9 @@ public abstract class Renderable implements Cloneable{
 
     public abstract void setTouched(boolean touched);
 
-    public abstract boolean isFlinged();
-
     public boolean isOverlapping(Renderable image) {
         Bitmap imBmp = image.getBitmap();
+        Bitmap bitmap = getBitmap();
 
         if (imBmp == null || bitmap == null) return false;
 
@@ -129,7 +122,15 @@ public abstract class Renderable implements Cloneable{
     public abstract List<Card> handleDoubleTap(MotionEvent event);
 
     public Bitmap getBitmap() {
-        return bitmap;
+        return hidden ? hiddenBitmap: openBitmap;
+    }
+
+    public void setBitmap(Bitmap openBitmap, Bitmap hiddenBitmap) {
+        this.openBitmap = Bitmap.createScaledBitmap(openBitmap, scaledWidth, scaledHeight, true);;
+        this.hiddenBitmap = Bitmap.createScaledBitmap(hiddenBitmap, scaledWidth, scaledHeight, true);;
+        Bitmap bitmap = getBitmap();
+        setX(getX() + (bitmap.getWidth()/2)); // Don't remember why I had to do this.
+        setY(getY() + (bitmap.getHeight()/2));
     }
 
     @Override

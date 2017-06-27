@@ -27,16 +27,10 @@ import android.view.GestureDetector;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
@@ -48,8 +42,6 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.WheelViewFragment;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeckStatus;
-import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 
 public class BasePlayerActivity extends BasePluginActivity implements CardPanelCallback, WheelViewFragment.OnFragmentInteractionListener{
 
@@ -91,7 +83,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 //        mCardsDisplay.add(new CardDeck(mContext, CardDeckStatus.OPEN, true));
 //        mCardsDisplay.add();
 
-        playerPanel = new PlayerPanel(this, new CardDeck(mContext, CardDeckStatus.CLOSED, true).getmCards());
+        playerPanel = new PlayerPanel(this, new CardDeck(mContext, true, true).getmCards());
         playerPanel.init();
 //        playerPanel.setCardPanelCallback(this);
         parentFrame.addView(playerPanel);
@@ -144,9 +136,10 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         }
 
         else {
-            Log.e(TAG, "onMessageReceived: Trying to parse extra message " + message + " " + message.getMessage() + " " + message.getType());
-            messageHelper.parse(message);
-            messageHelper.PlayerReceivedMessage();
+            Log.e(TAG, "onMessageReceived: Ignoring message that I don't know how to handle " + message + " " + message.getMessage() + " " + message.getType());
+//            Log.e(TAG, "onMessageReceived: Trying to parse extra message " + message + " " + message.getMessage() + " " + message.getType());
+//            messageHelper.parse(message);
+//            messageHelper.PlayerReceivedMessage();
         }
         Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
@@ -181,7 +174,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         super.onRestoreInstanceState(savedInstanceState, persistentState);
     }
 
-    public void inflateCardFanView(CardDeck cardDeck, boolean status){
+    public void inflateCardFanView(CardDeck cardDeck){
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))

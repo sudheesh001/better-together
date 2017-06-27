@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import java.util.Collections;
 import java.util.List;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
@@ -102,6 +101,7 @@ public class CardContextActionPanel extends Renderable {
         }
         int panelWidth = (MARGIN+CONTEXT_ACTION_DIMEN)*panelsShown;
 
+        int x = getX(); int y = getY();
         if (eventX >= x && eventX <= (x+panelWidth)) {
             if (eventY >= y && eventY <= y + MARGIN + CONTEXT_ACTION_DIMEN) {
 
@@ -141,6 +141,7 @@ public class CardContextActionPanel extends Renderable {
             return;
         }
 
+        int x = getX(); int y = getY();
         int shownActions = 0;
         if ((showFlags & SHOW_SHUFFLE) != 0) {
             canvas.drawBitmap(bitmapShuffle, x + shownActions*(CONTEXT_ACTION_DIMEN+MARGIN), y, null);
@@ -162,9 +163,15 @@ public class CardContextActionPanel extends Renderable {
     public void show(Renderable renderable, int showFlags) {
         forRenderable = renderable;
         hidden = false;
-        x = renderable.getX();
-        y = renderable.getY() - MARGIN - CONTEXT_ACTION_DIMEN;
         this.showFlags = showFlags;
+    }
+
+    public int getX() {
+        return forRenderable.getX();
+    }
+
+    public int getY() {
+        return forRenderable.getY() - MARGIN - CONTEXT_ACTION_DIMEN;
     }
 
     @Override
@@ -178,11 +185,6 @@ public class CardContextActionPanel extends Renderable {
     }
 
     @Override
-    public boolean isFlinged() {
-        return false;
-    }
-
-    @Override
     public List<Card> handleDoubleTap(MotionEvent event) {
         return null;
     }
@@ -191,7 +193,7 @@ public class CardContextActionPanel extends Renderable {
         Log.d(TAG, "handleShuffle: ");
         if (forRenderable instanceof CardDeck) {
             CardDeck cardDeck = (CardDeck) forRenderable;
-            Collections.shuffle(cardDeck.getmCards());
+            cardDeck.shuffleCardDeck();
         }
     }
     
@@ -211,6 +213,16 @@ public class CardContextActionPanel extends Renderable {
     }
     
     private void handleReverse(int x, int y) {
+        if (forRenderable instanceof Card) {
+            forRenderable.setHidden(!forRenderable.isHidden());
+        } else if (forRenderable instanceof CardDeck) {
+            CardDeck deck = (CardDeck) forRenderable;
+            boolean toggledHidden = !deck.isHidden();
+            deck.setHidden(toggledHidden);
+            for(Card card: deck.getmCards()) {
+                card.setHidden(toggledHidden);
+            }
+        }
         Log.d(TAG, "handleReverse: ");
     }
 }
