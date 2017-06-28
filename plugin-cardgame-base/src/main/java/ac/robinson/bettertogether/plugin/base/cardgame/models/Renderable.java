@@ -24,6 +24,7 @@ public abstract class Renderable implements Cloneable{
     private int y; // Y coordinate
     private Bitmap openBitmap = null;
     private Bitmap hiddenBitmap = null;
+    public boolean safeToDelete = false;
 
     protected String name;
 
@@ -136,5 +137,17 @@ public abstract class Renderable implements Cloneable{
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    public void clampInPlayground(int screenWidth, int screenHeight) {
+        this.x = Math.max(-scaledWidth/2, this.x);
+        this.x = Math.min(screenWidth+scaledWidth/2 - scaledWidth, this.x);
+
+        this.y = Math.max(-scaledHeight/2, this.y);
+        this.y = Math.min(screenHeight+scaledHeight/2 - scaledHeight, this.y);
+    }
+
+    public boolean isSafeToDelete() {
+        return safeToDelete;
     }
 }

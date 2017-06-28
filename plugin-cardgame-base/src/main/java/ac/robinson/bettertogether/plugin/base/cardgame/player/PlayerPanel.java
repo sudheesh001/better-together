@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.BaseCardGameActivity;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
@@ -73,6 +74,9 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     protected GestureDetectorCompat mDetector;
     protected Context mContext;
     protected MessageHelper mMessageHelper;
+
+    protected final int SCREEN_WIDTH;
+    protected final int SCREEN_HEIGHT;
 
 //    private CardPanelCallback cardPanelCallback;
 
@@ -151,6 +155,10 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         // Set the gesture detector as the double tap
         // listener.
         mDetector.setOnDoubleTapListener(this);
+
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        SCREEN_WIDTH = metrics.widthPixels;
+        SCREEN_HEIGHT = metrics.heightPixels;
     }
 
     protected void removeCardFromList(Renderable card) {
@@ -303,8 +311,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     public void render(Canvas canvas, boolean isPlayerThread) {
         canvas.drawColor(Color.BLACK);
-        setupPanel(canvas);
+        if (BaseCardGameActivity.IS_DEBUG_MODE) {
+            setupPanel(canvas);
+        }
         for (int i = 0; i < mRenderablesInPlay.size(); i++) {
+            Renderable renderable = mRenderablesInPlay.get(i);
+            renderable.clampInPlayground(SCREEN_WIDTH, SCREEN_HEIGHT);
             mRenderablesInPlay.get(i).draw(canvas);
         }
         CardContextActionPanel.getInstance(mContext).draw(canvas);
@@ -353,11 +365,13 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         }
         Renderable.selectedRenderableForContext = null;
 
-        for (int i = 0; i < mRenderablesInPlay.size(); i++) {
+        int mSize = mRenderablesInPlay.size() - 1;
+        for (int i = mSize; i >= 0; i--) {
             Renderable r = mRenderablesInPlay.get(i);
             if (r.handleActionDown((int) x, (int) y).equals(Gesture.TOUCHED)) {
-                Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
-                Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
+//                Log.d(TAG, r.getName() + " Single Tap " + r.getX() + "," + r.getY());
+//                Collections.swap(mRenderablesInPlay, i, mRenderablesInPlay.size() - 1);
+                break;
             }
         }
         return true;
@@ -460,7 +474,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 // TODO toggle if its a card and open the top card if it's a deck
                 cards = r.handleDoubleTap(event);
 
-                if (r instanceof CardDeck && ((CardDeck) r).isSafeToDelete()) {
+                if (r instanceof CardDeck && r.isSafeToDelete()) {
                     mRenderablesInPlay.remove(r);
                 }
 

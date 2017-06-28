@@ -1,10 +1,12 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
 import com.squareup.picasso.Picasso;
@@ -12,6 +14,8 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+
+import ac.robinson.bettertogether.plugin.base.cardgame.BaseCardGameActivity;
 
 /**
  * Created by t-apmehr on 4/2/2017.
@@ -52,12 +56,15 @@ public class Card extends Renderable{
 
     public Bitmap getBitmap(boolean forceLoad) {
         if( getBitmap() == null && forceLoad) {
+            DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+            final int screenHeight = ((int) (metrics.heightPixels * 0.9)) + 80;
+            final int cardHeight = Math.max(30, screenHeight/5);
             Thread thread = new Thread() {
                 @Override
                 public void run() {
                     try {
                         setBitmap(
-                                Picasso.with(mContext).load(frontBitmapUrl).get(),
+                                Picasso.with(mContext).load(frontBitmapUrl).resize(cardHeight, cardHeight).centerInside().get(),
                                 Picasso.with(mContext).load(backBitmapUrl).get()
                         );
                     } catch (IOException e) {
@@ -97,6 +104,7 @@ public class Card extends Renderable{
 
     public void draw(Canvas canvas) {
         Bitmap bitmapToUse = getBitmap(true);
+        if (isSafeToDelete()) return;
 
         if (this == Renderable.selectedRenderableForContext) {
             Bitmap alpha = bitmapToUse.extractAlpha();
@@ -104,19 +112,21 @@ public class Card extends Renderable{
         }
         canvas.drawBitmap(bitmapToUse, getX(), getY() , null);
 
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(20);
-        canvas.drawPoint(getX(), getY(), paint);
-
-
-        if (isHidden()) {
+        if (BaseCardGameActivity.IS_DEBUG_MODE) {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setColor(Color.RED);
-        } else {
-            paint.setColor(Color.GREEN);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(20);
+            canvas.drawPoint(getX(), getY(), paint);
+
+
+            if (isHidden()) {
+                paint.setColor(Color.RED);
+            } else {
+                paint.setColor(Color.GREEN);
+            }
+            canvas.drawPoint(getX()+100, getY(), paint);
         }
-        canvas.drawPoint(getX()+100, getY(), paint);
     }
 
     @Override

@@ -42,6 +42,7 @@ import retrofit2.Response;
 public class BaseCardGameActivity extends AppCompatActivity
 //        implements MarketplaceRecyclerViewAdapter.ItemClickListener{
 {
+    public static final boolean IS_DEBUG_MODE = true;
 
     MarketplaceAPI apiInterface; // TODO: Temporary for testing
 

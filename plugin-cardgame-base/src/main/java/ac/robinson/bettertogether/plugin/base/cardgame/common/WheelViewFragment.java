@@ -192,8 +192,7 @@ public class WheelViewFragment extends Fragment {
                     }
                 } else {
                     Card card = (Card) renderable;
-                    card.setX(-99999);
-                    card.setY(-99999);
+                    card.safeToDelete = true;
                     renderable = null;
                 }
             }

@@ -36,12 +36,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import ac.robinson.bettertogether.plugin.base.cardgame.BaseCardGameActivity;
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
 
 public class CardDeck extends Renderable implements CardActions, Serializable{
 
     private static final String TAG = CardDeck.class.getSimpleName();
-    private boolean safeToDelete = false;
 
     private boolean touched;
     private List<Card> mCards;
@@ -130,6 +130,9 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         return topCard.getBitmap(true);
     }
 
+
+    private Bitmap extractedAlpha = null;
+    private Renderable extractedAlphaFor = null;
     public void draw(Canvas canvas) {
         if (this.mCards == null || this.mCards.size() == 0) return;
 
@@ -146,23 +149,29 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         canvas.drawBitmap(bitmap, getX(), getY(), null);
 
         if (this == Renderable.selectedRenderableForContext) {
-            Bitmap alpha = bitmap.extractAlpha();
-            canvas.drawBitmap(alpha, getX(), getY(), GLOW_PAINT);
+            if (this != extractedAlphaFor) {
+                extractedAlpha = bitmap.extractAlpha();
+                extractedAlphaFor = this;
+            }
+            canvas.drawBitmap(extractedAlpha, getX(), getY(), GLOW_PAINT);
         }
 
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.GREEN);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(20);
-        canvas.drawPoint(getX(), getY(), paint);
-
-        if (isHidden()) {
-            paint.setColor(Color.RED);
-        } else {
+        if (BaseCardGameActivity.IS_DEBUG_MODE) {
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setColor(Color.GREEN);
-        }
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(20);
+            canvas.drawPoint(getX(), getY(), paint);
 
-        canvas.drawPoint(getX()+100, getY(), paint);
+            if (isHidden()) {
+                paint.setColor(Color.RED);
+            } else {
+                paint.setColor(Color.GREEN);
+            }
+
+            canvas.drawPoint(getX()+100, getY(), paint);
+
+        }
     }
 
     @Override
@@ -233,9 +242,5 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         }
         return Gesture.NONE;
 
-    }
-
-    public boolean isSafeToDelete() {
-        return safeToDelete;
     }
 }
