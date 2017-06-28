@@ -25,6 +25,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
+import ac.robinson.bettertogether.plugin.base.cardgame.dealer.DealerPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.dealer.DealerThread;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
@@ -410,6 +411,21 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     && event2.getY() <= FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD) {
                 handleFling(mLastCardTouched);
                 mLastCardTouched = null;
+                return true;
+            }
+
+            // dealer thread can fling any card/deck to any side.
+            if ((Math.abs(velocityX) + Math.abs(velocityY) >= FLING_CARD_OUTSIDE_VELOCITY_THRESHOLD)) {
+                if (this instanceof DealerPanel) {
+                    if (event2.getX() <= FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD ||
+                            event2.getY() <= FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD ||
+                            event2.getX() >= SCREEN_WIDTH - FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD ||
+                            event2.getY() >= SCREEN_HEIGHT - FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD) {
+                        handleFling(mLastCardTouched);
+                        mLastCardTouched = null;
+                        return true;
+                    }
+                }
             }
         }
         return true;

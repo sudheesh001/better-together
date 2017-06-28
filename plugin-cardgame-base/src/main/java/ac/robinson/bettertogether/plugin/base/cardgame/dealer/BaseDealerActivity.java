@@ -19,6 +19,8 @@ package ac.robinson.bettertogether.plugin.base.cardgame.dealer;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -70,6 +72,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         mContext = this;
         messageHelper = MessageHelper.getInstance(mContext);
 
@@ -283,5 +286,11 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
     public void getSelectedCard(CardDeck cardDeck, Card card){
         Log.d(TAG, " Got Card " + card.getName());
         mDealerPanel.drawCardFromDeck(cardDeck, card);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        // ignore orientation/keyboard change
+        super.onConfigurationChanged(newConfig);
     }
 }
