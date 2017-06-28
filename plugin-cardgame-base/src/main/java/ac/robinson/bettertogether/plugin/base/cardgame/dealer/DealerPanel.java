@@ -64,7 +64,6 @@ public class DealerPanel extends PlayerPanel {
             distribution.put(BaseDealerActivity.requestedPlayerId, cards);
             ((BaseDealerActivity)mContext).handleCardDistribution(distribution, flungRenderable);
             mRenderablesInPlay.remove(flungRenderable);
-            BaseDealerActivity.requestedPlayerId = null;
         }
     }
 

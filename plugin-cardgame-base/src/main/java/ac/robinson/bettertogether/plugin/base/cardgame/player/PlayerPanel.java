@@ -557,13 +557,13 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             mRenderablesInPlay.add(receivedCardDeck);
         }
 
-        if (BasePlayerActivity.isRequestCardHolder) {
-            BasePlayerActivity.isRequestCardHolder = false;
-
-            // so whenever the player picks up his finger, its becomes false. Also it should be true,
-            // so a new request is not made when the figure directly slides in that area.
-            BasePlayerActivity.requestingCardActively = true;
-        }
+//        if (BasePlayerActivity.isRequestCardHolder) {
+//            BasePlayerActivity.isRequestCardHolder = false;
+//
+//            // so whenever the player picks up his finger, its becomes false. Also it should be true,
+//            // so a new request is not made when the figure directly slides in that area.
+//            BasePlayerActivity.requestingCardActively = true;
+//        }
     }
 
     public void discardCardsFromDeck(CardDeck cardDeck, List<Card> cards) {
