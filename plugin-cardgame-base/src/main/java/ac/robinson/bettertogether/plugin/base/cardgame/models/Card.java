@@ -69,7 +69,7 @@ public class Card extends Renderable{
         }
         while (getBitmap() == null) {
             try {
-                Thread.sleep(5);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -135,7 +135,7 @@ public class Card extends Renderable{
     @SuppressWarnings("JavadocReference")
     public Gesture handleActionDown(int eventX, int eventY) {
         if (eventX >= (getX()) && (eventX <= (getX() + getBitmap(true).getWidth()))) {
-            if (eventY >= (getY()) && (eventY <= (getY() + getBitmap(true).getHeight() ))) {
+            if (eventY >= (getY()) && (eventY <= (getY() + getBitmap().getHeight() ))) {
                 setTouched(true);
                 return Gesture.TOUCHED;
             } else {

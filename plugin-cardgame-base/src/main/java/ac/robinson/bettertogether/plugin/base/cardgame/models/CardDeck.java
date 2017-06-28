@@ -56,6 +56,10 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         return mCards;
     }
 
+    public void addCardToDeck(Card card, int position) {
+        this.mCards.add(position, card);
+    }
+
     // Method to add card to deck.
     public void addCardToDeck(Card mCard) {
         this.mCards.add(mCard);
@@ -171,19 +175,29 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
         this.touched = touched;
     }
 
+    private int mCardsMoved = 0;
+    private void moveCardToTheRightOfDeck(Card card) {
+        card.setAbsoluteX(this.getX() + Renderable.scaledWidth + (Renderable.FACADE_SCALED_WIDTH)*2*mCardsMoved);
+        card.setAbsoluteY(this.getY());
+        mCardsMoved = (mCardsMoved+1)%5;
+    }
+
     @Override
     public List<Card> handleDoubleTap(MotionEvent event) {
 
         if( mCards.size() > 2){
             Card card =  getTopCardFromDeck();
             removeCardFromDeck(card);
-            card.randomizeScreenLocation(this.getX(), this.getY());
+            moveCardToTheRightOfDeck(card);
             return Collections.singletonList(card);
         }
 
         this.safeToDelete = true;
         if (mCards.size() == 2) {
-            return Arrays.asList(mCards.get(0), mCards.get(1));
+            Card topCard = mCards.get(0);
+            Card bottomCard = mCards.get(1);
+            moveCardToTheRightOfDeck(topCard);
+            return Arrays.asList(topCard, bottomCard);
         }
         return Arrays.asList(mCards.get(0));
     }

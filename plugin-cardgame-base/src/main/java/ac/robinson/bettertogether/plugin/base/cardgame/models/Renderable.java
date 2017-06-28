@@ -39,7 +39,7 @@ public abstract class Renderable implements Cloneable{
     }
     public static Renderable selectedRenderableForContext = null;
 
-    protected final int FACADE_SCALED_WIDTH = 30;
+    protected static final int FACADE_SCALED_WIDTH = 30;
     public static final int scaledWidth = 300;
     public static final int scaledHeight = 375;
     public static final int OVERLAP_THRESHOLD_LIMIT = ((scaledWidth*5)/6) * ((scaledHeight*2)/3);

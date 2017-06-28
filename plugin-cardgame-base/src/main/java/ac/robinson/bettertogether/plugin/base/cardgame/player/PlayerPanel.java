@@ -130,8 +130,10 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                                 }
                                 if (r2.isOverlapping(r)) {
                                     mergeRenderables(r, r2);
+                                    break;
                                 }
                             }
+                            break;
                         }
                     }
 
@@ -173,7 +175,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             }
 
             if (c1 != null) {
-                finalDeck.addCardToDeck(c1);
+                finalDeck.addCardToDeck(c1, 0);
                 removeCardFromList(c1);
             }
             if (c2 != null) {
@@ -182,16 +184,21 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             }
             if (cd2 != null && finalDeck != cd2) {
                 for (Renderable card : cd2.getmCards()) {
+                    card.setHidden(r1.isHidden());
                     finalDeck.addCardToDeck((Card) card);
                 }
                 removeCardFromList(cd2);
             }
             if (cd1 != null && finalDeck != cd1) {
                 for (Renderable card : cd1.getmCards()) {
+                    card.setHidden(r1.isHidden());
                     finalDeck.addCardToDeck((Card) card);
                 }
                 removeCardFromList(cd1);
             }
+
+            finalDeck.setAbsoluteX(r2.getX());
+            finalDeck.setAbsoluteY(r2.getY());
         }
     }
 
