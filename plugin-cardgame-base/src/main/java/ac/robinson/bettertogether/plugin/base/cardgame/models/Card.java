@@ -53,26 +53,33 @@ public class Card extends Renderable{
         this.name = name;
     }
 
+    public void warmBitmapCache() {
+        startLoadBitmapThread();
+    }
+
+    private void startLoadBitmapThread() {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        final int screenHeight = ((int) (metrics.heightPixels * 0.9)) + 80;
+        final int cardHeight = Math.max(30, screenHeight/5);
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    setBitmap(
+                            Picasso.with(mContext).load(frontBitmapUrl).resize(cardHeight, cardHeight).centerInside().get(),
+                            Picasso.with(mContext).load(backBitmapUrl).get()
+                    );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+    }
 
     public Bitmap getBitmap(boolean forceLoad) {
         if( getBitmap() == null && forceLoad) {
-            DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-            final int screenHeight = ((int) (metrics.heightPixels * 0.9)) + 80;
-            final int cardHeight = Math.max(30, screenHeight/5);
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        setBitmap(
-                                Picasso.with(mContext).load(frontBitmapUrl).resize(cardHeight, cardHeight).centerInside().get(),
-                                Picasso.with(mContext).load(backBitmapUrl).get()
-                        );
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            thread.start();
+            startLoadBitmapThread();
         }
         while (getBitmap() == null) {
             try {

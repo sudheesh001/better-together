@@ -158,8 +158,8 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 //            Log.e(TAG, "onMessageReceived: Trying to parse extra message " + message + " " + message.getMessage() + " " + message.getType());
 //            messageHelper.parse(message);
 //            messageHelper.PlayerReceivedMessage();
+            Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     protected void sendRequestDrawCardMessage(int messageType) {

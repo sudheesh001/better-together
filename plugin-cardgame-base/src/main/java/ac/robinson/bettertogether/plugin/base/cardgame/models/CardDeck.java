@@ -186,7 +186,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
 
     private int mCardsMoved = 0;
     private void moveCardToTheRightOfDeck(Card card) {
-        card.setAbsoluteX(this.getX() + Renderable.scaledWidth + (Renderable.FACADE_SCALED_WIDTH)*2*mCardsMoved);
+        card.setAbsoluteX(this.getX() + Renderable.scaledWidth + (Renderable.FACADE_SCALED_WIDTH)*(mCardsMoved+1));
         card.setAbsoluteY(this.getY());
         mCardsMoved = (mCardsMoved+1)%5;
     }
@@ -206,6 +206,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
             Card topCard = mCards.get(0);
             Card bottomCard = mCards.get(1);
             moveCardToTheRightOfDeck(topCard);
+            bottomCard.setAbsoluteX(getX()); bottomCard.setAbsoluteY(getY());
             return Arrays.asList(topCard, bottomCard);
         }
         return Arrays.asList(mCards.get(0));
