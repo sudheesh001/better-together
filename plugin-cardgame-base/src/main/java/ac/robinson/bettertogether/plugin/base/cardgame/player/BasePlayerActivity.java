@@ -101,9 +101,10 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
         // setContentView(R.layout.activity_base_player);
 
         SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-        String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForPlayer");
-        MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+        final String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForPlayer");
+        final MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
         messageHelper.getConnectionMap().put(mName, mPlayerType);
+
         sendMessage(messageHelper.Discovery(mName, mPlayerType));
     }
 
@@ -121,10 +122,11 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
 
             if (replyDiscoveryNeeded) {
                 SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-                String mName = prefs.getString(Constants.USER_ANDROID_ID, messageHelper.getmUser());
-                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
+                final String mName = prefs.getString(Constants.USER_ANDROID_ID, messageHelper.getmUser());
+                final MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.PLAYER;
 
                 sendMessage(messageHelper.Discovery(mName, mPlayerType)); // TODO: Will this cause a network flood?
+                
             }
         } else if (message.getType() == MessageType.DEALER_TO_PLAYER) {
             if (message.getMessage() != null && !message.getMessage().isEmpty()) {

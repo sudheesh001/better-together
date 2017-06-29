@@ -18,6 +18,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.orhanobut.hawk.Hawk;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +41,8 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
+
+import static ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity.SELECTED_CARD_DECK;
 
 /**
  * Created by t-sus on 4/5/2017.
@@ -95,6 +99,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         String backgroundCardUrl = APIClient.getBaseURL().concat(item.getBackground_card());
         CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
 
+        mAllCardsRes = new HashMap<>();
         for(String cardName: item.getCards()) {
             Card card = new Card();
             card.setmContext(mContext);
@@ -175,6 +180,11 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 SCREEN_HEIGHT,
                 false
         );
+
+        if (SELECTED_CARD_DECK != -1 && Hawk.contains(Integer.toString(SELECTED_CARD_DECK))) {
+            MarketplaceItem selectedDeck = Hawk.get(Integer.toString(SELECTED_CARD_DECK));
+            setCurrentlyPlayingCardDeck(selectedDeck, false, false);
+        }
     }
 
     private Bitmap getRotatedBackgroundBitmap(Bitmap bitmap) {
@@ -377,7 +387,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 !BasePlayerActivity.isRequestCardHolder &&
                 !BasePlayerActivity.requestingCardActively &&
                 x <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_RADIUS) &&
-                y <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_MARGIN)
+                y <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_RADIUS)
             ) {
             BasePlayerActivity.requestingCardActively = true;
             ((BasePlayerActivity) mContext).sendRequestDrawCardMessage(MessageType.REQUEST_DRAW_CARD);
@@ -574,9 +584,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         else {
             CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden());
             for(String cardId: receivedCards) {
-                receivedCardDeck.addCardToDeck(mAllCardsRes.get(cardId));
+                Card card = mAllCardsRes.get(cardId);
+                card.setHidden(cardMessage.isHidden());
+                receivedCardDeck.addCardToDeck(card);
             }
             receivedCardDeck.setX(200); receivedCardDeck.setY(200);
+            receivedCardDeck.setHidden(cardMessage.isHidden());
             mRenderablesInPlay.add(receivedCardDeck);
         }
 

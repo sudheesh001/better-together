@@ -150,7 +150,6 @@ public class MainFragment extends Fragment {
                 fanLayoutManager.collapseViews();
             }
         });
-
     }
 
     @android.support.annotation.RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
