@@ -94,6 +94,7 @@ public class PluginHostActivity extends BaseHotspotActivity implements PluginCli
 
 		String requestedHotspotUrl = intent.getStringExtra(EXTRA_HOTSPOT_URL);
 
+		//FIXME commented to bypass connection
 		if (TextUtils.isEmpty(requestedHotspotUrl)) {
 			Log.e(TAG, "NO PLUGIN SPECIFIED"); // TODO: fix this - show a Toast?
 			finish();
@@ -165,7 +166,9 @@ public class PluginHostActivity extends BaseHotspotActivity implements PluginCli
 		mPluginViewAdapter.clearPlugins();
 		mPluginActivityViewAdapter.clearActivities();
 
+//		FIXME For connection shortcut
 		final String currentPluginPackage = ConnectionOptions.getPackageFromHotspotUrl(getHotspotUrl());
+//		final String currentPluginPackage = "ac.robinson.bettertogether.plugin.base.cardgame";
 		boolean currentPluginFound = false;
 
 		for (Plugin plugin : plugins.values()) {
@@ -255,7 +258,7 @@ public class PluginHostActivity extends BaseHotspotActivity implements PluginCli
 				break;
 
 			case HotspotManagerService.EVENT_LOCAL_CLIENT_ERROR:
-			case HotspotManagerService.EVENT_DEVICE_DISCONNECTED:
+			case HotspotManagerService.EVENT_DEVICE_DISCONNECTED: //FIXME For connection shortcircuit
 				if (!isFinishing()) {
 					Intent intent = new Intent(PluginHostActivity.this, ConnectionSetupActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

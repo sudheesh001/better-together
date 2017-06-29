@@ -48,11 +48,13 @@ public class PluginFinder {
 	// @formatter:off
 	public static final Set<String> INTERNAL_PLUGIN_PACKAGES =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{
 		"ac.robinson.bettertogether.plugin.base.video",
-		"ac.robinson.bettertogether.plugin.base.shopping"
+		"ac.robinson.bettertogether.plugin.base.shopping",
+			"ac.robinson.bettertogether.plugin.base.cardgame"
 	})));
 	private static final Set<String> OVERRIDE_PLUGIN_PACKAGES =  Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{
 		"ac.robinson.bettertogether.plugin.video",
-		"ac.robinson.bettertogether.plugin.shopping"
+		"ac.robinson.bettertogether.plugin.shopping",
+			"ac.robinson.bettertogether.plugin.cardgame"
 	})));
 	// @formatter:on
 
