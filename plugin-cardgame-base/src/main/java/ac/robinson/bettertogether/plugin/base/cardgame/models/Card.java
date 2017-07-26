@@ -131,6 +131,7 @@ public class Card extends Renderable{
 
     @Override
     public List<Card> handleDoubleTap(MotionEvent event) {
+        if (!canBeMadeVisible && isHidden()) { return null; }
         this.toggleHidden();
         return null;
     }
@@ -159,7 +160,7 @@ public class Card extends Renderable{
     }
 
     private void toggleHidden() {
-        this.hidden = !this.hidden;
+        setHidden(!this.hidden);
     }
 
     public void setFrontBitmapUrl(String frontBitmapUrl) {

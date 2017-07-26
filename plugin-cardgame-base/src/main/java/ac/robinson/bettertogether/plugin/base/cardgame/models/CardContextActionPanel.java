@@ -214,12 +214,14 @@ public class CardContextActionPanel extends Renderable {
     
     private void handleReverse(int x, int y) {
         if (forRenderable instanceof Card) {
+            if (!forRenderable.canBeMadeVisible && forRenderable.isHidden()) { return; }
             forRenderable.setHidden(!forRenderable.isHidden());
         } else if (forRenderable instanceof CardDeck) {
             CardDeck deck = (CardDeck) forRenderable;
             boolean toggledHidden = !deck.isHidden();
             deck.setHidden(toggledHidden);
             for(Card card: deck.getmCards()) {
+                if (!card.canBeMadeVisible && card.isHidden()) continue;
                 card.setHidden(toggledHidden);
             }
         }

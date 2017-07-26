@@ -19,6 +19,7 @@ package ac.robinson.bettertogether.plugin.base.cardgame.player;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
@@ -34,6 +35,7 @@ import com.google.gson.Gson;
 import com.orhanobut.hawk.Hawk;
 
 import java.util.HashSet;
+import java.util.Random;
 
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;

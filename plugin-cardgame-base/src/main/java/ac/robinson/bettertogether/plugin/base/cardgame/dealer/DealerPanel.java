@@ -82,6 +82,8 @@ public class DealerPanel extends PlayerPanel {
                     PULL_CARD_BUTTON_MARGIN+PULL_CARD_BUTTON_RADIUS,
                     TEXT_PAINT);
         }
+
+        drawClock(canvas);
     }
 
     @Override

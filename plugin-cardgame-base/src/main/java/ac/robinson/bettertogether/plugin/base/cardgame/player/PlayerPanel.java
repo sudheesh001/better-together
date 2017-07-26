@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -31,6 +32,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardContextActionPanel;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Gesture;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.MagicCard;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
@@ -49,8 +51,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     protected static final int PULL_CARD_BUTTON_MARGIN = 30;
     protected static final int PULL_CARD_BUTTON_RADIUS = 60;
-    protected static final Paint TEXT_PAINT;
-    protected static final Paint DEBUG_TEXT_PAINT;
+    public static final Paint TEXT_PAINT;
+    public static final Paint DEBUG_TEXT_PAINT;
     private static final int DEBUG_TEXT_PAINT_SIZE = 24;
     static {
         TEXT_PAINT = new Paint();
@@ -90,12 +92,16 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
 
         for(String cardName: item.getCards()) {
-            Card card = new Card();
+            MagicCard card = new MagicCard();
             card.setmContext(mContext);
             card.setName(cardName);
             card.setHidden(addToPanelAsHidden);
             card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardName));
             card.setBackBitmapUrl(backgroundCardUrl);
+
+            card.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.TTL, 20, 20, null));
+            card.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.ACTIVATE, 5, 15, null));
+
             mAllCardsRes.put(card.getName(), card);
 
             if (addToPanel) {
@@ -310,8 +316,65 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         }
     }
 
+
+    private final Paint CLOCK_PAINT = new Paint();
+    private long baseTime = 0;
+    boolean usePlayerThreadForTime = false;
+    private boolean clockDrawInit = false;
+    protected void drawClock(Canvas canvas) {
+        if (!clockDrawInit) {
+            Typeface clockFontface = Typeface.create(
+                    Typeface.createFromAsset(mContext.getAssets(), "digital-7.ttf"),
+                    Typeface.BOLD);
+            CLOCK_PAINT.setTypeface(clockFontface);
+            CLOCK_PAINT.setColor(Color.RED);
+            CLOCK_PAINT.setTextSize(64f);
+
+            if (Thread.currentThread() instanceof PlayerThread) {
+                baseTime = PlayerThread.CURRENT_TIME;
+                usePlayerThreadForTime = true;
+            } else if (Thread.currentThread() instanceof DealerThread) {
+                baseTime = DealerThread.CURRENT_TIME;
+                usePlayerThreadForTime = false;
+            } else {
+                Log.e("WTF", "draw: which thread is this??  " + Thread.currentThread().getName());
+            }
+            clockDrawInit = true;
+        }
+
+        long currentTimeStep = usePlayerThreadForTime ? PlayerThread.CURRENT_TIME : DealerThread.CURRENT_TIME;
+        currentTimeStep -= baseTime;
+
+        String minutes = Long.toString(currentTimeStep/60);
+        String seconds = Long.toString(currentTimeStep % 60);
+        if (minutes.length() == 1) minutes = "0" + minutes;
+        if (seconds.length() == 1) seconds = "0" + seconds;
+
+        String time = minutes + ":" + seconds;
+        canvas.drawText(
+                time,
+                canvas.getWidth() - 160,
+                0 + 64, // border
+                CLOCK_PAINT
+        );
+    }
+
     public void render(Canvas canvas, boolean isPlayerThread) {
-        canvas.drawColor(Color.BLACK);
+        canvas.drawBitmap(PANEL_BACKGROUND, 0, 0, null);
+
+        List<Renderable> toDelete = null;
+        for(int i = 0; i < mRenderablesInPlay.size(); i++) {
+            Renderable renderable = mRenderablesInPlay.get(i);
+            if (renderable.safeToDelete) {
+                if (toDelete == null) toDelete = new ArrayList<>();
+                toDelete.add(renderable);
+            }
+        }
+
+        if (toDelete != null && toDelete.size() > 0) {
+            mRenderablesInPlay.removeAll(toDelete);
+        }
+
         if (BaseCardGameActivity.IS_DEBUG_MODE) {
             setupPanel(canvas);
         }
@@ -542,7 +605,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         List<String> receivedCards = cardMessage.getCards();
         if (receivedCards.size() == 0) return;
         if (receivedCards.size() == 1) {
-            Card receivedCard = mAllCardsRes.get(receivedCards.get(0));
+            // TODO: check for magic card and apply attributes if still active.
+            Card receivedCard;
+            try {
+                receivedCard = (Card) mAllCardsRes.get(receivedCards.get(0)).clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+                return;
+            }
             receivedCard.randomizeScreenLocation(200, 200);
             receivedCard.setHidden(cardMessage.isHidden());
             mRenderablesInPlay.add(receivedCard);
@@ -551,7 +621,16 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         else {
             CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden());
             for(String cardId: receivedCards) {
-                receivedCardDeck.addCardToDeck(mAllCardsRes.get(cardId));
+                Card card;
+                try {
+                    // TODO: check for magic card and apply attributes if still active.
+                    card = (Card) mAllCardsRes.get(cardId).clone();
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                card.setHidden(cardMessage.isHidden());
+                receivedCardDeck.addCardToDeck(card);
             }
             receivedCardDeck.setX(200); receivedCardDeck.setY(200);
             mRenderablesInPlay.add(receivedCardDeck);

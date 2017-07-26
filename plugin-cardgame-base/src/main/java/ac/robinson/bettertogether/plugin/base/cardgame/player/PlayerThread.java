@@ -15,6 +15,8 @@ public class PlayerThread extends Thread {
     private PlayerPanel gamePanel;
     private boolean running;
 
+    public static long CURRENT_TIME = 0;
+
     public void setRunning(boolean running) {
         this.running = running;
     }
@@ -38,6 +40,7 @@ public class PlayerThread extends Thread {
                 synchronized (surfaceHolder) {
                     // render state to the screen
                     // draws the canvas on the panel
+                    CURRENT_TIME = System.currentTimeMillis() / 1000;
                     if( canvas != null)
                         this.gamePanel.render(canvas, true);
                 }

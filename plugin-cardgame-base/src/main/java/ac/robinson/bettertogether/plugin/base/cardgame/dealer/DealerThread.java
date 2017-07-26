@@ -13,10 +13,12 @@ public class DealerThread extends Thread {
     private static final String TAG = DealerThread.class.getSimpleName();
 
     // Surface holder that can access the physical surface
-    private SurfaceHolder surfaceHolder;
+    private final SurfaceHolder surfaceHolder;
     // The actual view that handles inputs
     // and draws to the surface
     private DealerPanel gamePanel;
+
+    public static long CURRENT_TIME = 0;
 
     // flag to hold game state
     private boolean running;
@@ -43,6 +45,7 @@ public class DealerThread extends Thread {
                 synchronized (surfaceHolder) {
                     // render state to the screen
                     // draws the canvas on the panel
+                    CURRENT_TIME = System.currentTimeMillis() / 1000;
                     if( canvas != null)
                         this.gamePanel.render(canvas);
                 }

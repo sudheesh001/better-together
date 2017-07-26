@@ -27,6 +27,7 @@ public abstract class Renderable implements Cloneable{
     public boolean safeToDelete = false;
 
     protected String name;
+    protected boolean canBeMadeVisible = true; // this could be managed in the Magic cards.
 
     protected boolean hidden;
     protected static final Paint GLOW_PAINT = new Paint();

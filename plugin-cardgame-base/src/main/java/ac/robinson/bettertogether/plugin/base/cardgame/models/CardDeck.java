@@ -112,7 +112,8 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     @Override
     public boolean drawCardFromDeck(Card card) {
         for (Card localCard: getmCards()) {
-            if(localCard.getName().equals(card.getName())) { // assuming name is uuid
+//            if(localCard.getName().equals(card.getName())) { // assuming name is uuid
+            if(localCard == card) { // This'll work if everything is happening by pass by reference.
                 removeCardFromDeck(card);
                 return true;
             }
@@ -208,7 +209,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
             moveCardToTheRightOfDeck(topCard);
             return Arrays.asList(topCard, bottomCard);
         }
-        return Arrays.asList(mCards.get(0));
+        return Collections.singletonList(mCards.get(0));
     }
 
     @Override
@@ -241,6 +242,5 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
             setTouched(false);
         }
         return Gesture.NONE;
-
     }
 }
