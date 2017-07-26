@@ -202,7 +202,7 @@ public class ConnectionSetupActivity extends BaseHotspotActivity implements Plug
 
 			createHotspot();
 
-			launchPluginAndFinish(getHotspotUrl(), true);
+//			launchPluginAndFinish(getHotspotUrl(), true);
 		}
 	}
 

@@ -1,9 +1,13 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.player;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v4.view.GestureDetectorCompat;
@@ -15,6 +19,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.orhanobut.hawk.Hawk;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.BaseCardGameActivity;
+import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
@@ -37,6 +44,8 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Renderable;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
 
+import static ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity.SELECTED_CARD_DECK;
+
 /**
  * Created by t-sus on 4/5/2017.
  */
@@ -49,6 +58,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     private static final int FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD = (Renderable.scaledHeight/2); //  mid point
     private static final String TAG = PlayerPanel.class.getSimpleName();
 
+    private final Bitmap PANEL_BACKGROUND;
     protected static final int PULL_CARD_BUTTON_MARGIN = 30;
     protected static final int PULL_CARD_BUTTON_RADIUS = 60;
     public static final Paint TEXT_PAINT;
@@ -91,6 +101,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         String backgroundCardUrl = APIClient.getBaseURL().concat(item.getBackground_card());
         CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
 
+        mAllCardsRes = new HashMap<>();
         for(String cardName: item.getCards()) {
             MagicCard card = new MagicCard();
             card.setmContext(mContext);
@@ -107,6 +118,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             if (addToPanel) {
                 cardDeck.addCardToDeck(card);
             }
+            card.warmBitmapCache();
         }
 
         if (addToPanel) {
@@ -166,6 +178,28 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         SCREEN_WIDTH = metrics.widthPixels;
         SCREEN_HEIGHT = metrics.heightPixels;
+
+        Bitmap resBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.green_panel_background);
+        PANEL_BACKGROUND = Bitmap.createScaledBitmap(
+                getRotatedBackgroundBitmap(resBitmap),
+                SCREEN_WIDTH,
+                SCREEN_HEIGHT,
+                false
+        );
+
+        if (SELECTED_CARD_DECK != -1 && Hawk.contains(Integer.toString(SELECTED_CARD_DECK))) {
+            MarketplaceItem selectedDeck = Hawk.get(Integer.toString(SELECTED_CARD_DECK));
+            setCurrentlyPlayingCardDeck(selectedDeck, false, false);
+        }
+    }
+
+    private Bitmap getRotatedBackgroundBitmap(Bitmap bitmap) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            return bitmap;
+        }
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     protected void removeCardFromList(Renderable card) {
@@ -219,9 +253,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     private void setupPanel(Canvas canvas) {
         // right now just providing assisting lines on the screen to demarcate regions.
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        int screenWidth = (metrics.widthPixels);
-        int screenHeight = ((int) (metrics.heightPixels * 0.9)) + 80;
+        int screenWidth = SCREEN_WIDTH;
+        int screenHeight = ((int) (SCREEN_HEIGHT * 0.9)) + 80;
         //  Set paint options
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -417,7 +450,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 !BasePlayerActivity.isRequestCardHolder &&
                 !BasePlayerActivity.requestingCardActively &&
                 x <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_RADIUS) &&
-                y <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_MARGIN)
+                y <= (PULL_CARD_BUTTON_MARGIN+2*PULL_CARD_BUTTON_RADIUS)
             ) {
             BasePlayerActivity.requestingCardActively = true;
             ((BasePlayerActivity) mContext).sendRequestDrawCardMessage(MessageType.REQUEST_DRAW_CARD);
@@ -633,6 +666,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 receivedCardDeck.addCardToDeck(card);
             }
             receivedCardDeck.setX(200); receivedCardDeck.setY(200);
+            receivedCardDeck.setHidden(cardMessage.isHidden());
             mRenderablesInPlay.add(receivedCardDeck);
         }
 

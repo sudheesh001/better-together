@@ -69,7 +69,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
     DealerPanel mDealerPanel;
     public static String requestedPlayerId = null;
-    public static int SELECTED_CARD_DECK;
+    public static int SELECTED_CARD_DECK = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,12 +100,11 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
                 // Set player type based on the activity & get player id from sharedpreferences and send discovery protocol.
                 SharedPreferences prefs = that.getSharedPreferences("Details", MODE_PRIVATE);
-                String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForDealer");
-                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+                final String mName = prefs.getString(Constants.USER_ANDROID_ID, "NoNameFoundForDealer");
+                final MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
                 // Now that we have name and type. Send discovery protocol
                 messageHelper.getConnectionMap().put(mName, mPlayerType);
                 that.sendMessage(messageHelper.Discovery(mName, mPlayerType));
-
                 Log.d(TAG, "View added");
             }
 
@@ -236,7 +235,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
         // once you get a DR ..
         // pass it to messaga helper to parse and update the connection map
         // if you get a action type then pass to MHelper to parse and do appropriate action.
-        MessageHelper m = MessageHelper.getInstance(mContext);
+        final MessageHelper m = MessageHelper.getInstance(mContext);
         if (message.getType() == MessageType.DISCOVER) {
             // This is the discover protocol message received.
             // 1. Update connectionMap and broadcast again.
@@ -244,12 +243,12 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
             if( response ){
                 SharedPreferences prefs = getSharedPreferences("Details", MODE_PRIVATE);
-                String mName = prefs.getString(Constants.USER_ANDROID_ID, null);
-                MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
+                final String mName = prefs.getString(Constants.USER_ANDROID_ID, null);
+                final MessageHelper.PlayerType mPlayerType = MessageHelper.PlayerType.DEALER;
 
                 sendMessage(m.Discovery(mName, mPlayerType));
-                // TODO: Will this cause a network flood?
                 sendMessage(m.UseSelectedCardDeckMessage(SELECTED_CARD_DECK));
+                // TODO: Will this cause a network flood?
             }
 
         }
@@ -277,8 +276,8 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 //            messageHelper.PlayerReceivedMessage();
 //            m.parse(message);
 //            m.ServerReceivedMessage();
+            Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
 

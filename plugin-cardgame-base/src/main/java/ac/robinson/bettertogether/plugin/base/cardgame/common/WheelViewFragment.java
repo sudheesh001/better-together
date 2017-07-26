@@ -155,6 +155,7 @@ public class WheelViewFragment extends Fragment {
                     return;
                 }
                 if (renderable == null) return;
+                if (position >= playerNames.size()) return;
 
                 WheelViewDrawable drawable = ((WheelViewDrawable)((LayerDrawable)wheelView.getCacheItem(position).mDrawable).getDrawable(1));
                 drawable.count++;
@@ -165,6 +166,7 @@ public class WheelViewFragment extends Fragment {
                 } else {
                     cardToAdd = (Card) renderable;
                 }
+
                 String playerId = playerNames.get(position);
                 if (!cardDistributionSequence.containsKey(playerId)) {
                     cardDistributionSequence.put(playerId, new ArrayList<Card>());
