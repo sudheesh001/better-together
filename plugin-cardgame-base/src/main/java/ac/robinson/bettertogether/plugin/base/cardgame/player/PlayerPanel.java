@@ -112,14 +112,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 card = new MagicCard();
                 MagicCard ref = (MagicCard) card;
                 if (cardItem.type == MarketplaceItem.CardType.TTL) {
-                    int ttlTime = (Integer) cardItem.extraAttrs.get("time");
+                    int ttlTime = (Integer) cardItem.extra.get("time");
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.TTL, 0, ttlTime, null));
                 } else if (cardItem.type == MarketplaceItem.CardType.ACTIVATE) {
-                    int activateTime = (int) cardItem.extraAttrs.get("time");
+                    int activateTime = (int) cardItem.extra.get("time");
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.ACTIVATE, activateTime, 0, null));
                 } else if (cardItem.type == MarketplaceItem.CardType.RANDOM) {
-                    int randomizeTime = (int) cardItem.extraAttrs.get("time");
-                    List<String> cardNames = (List<String>) cardItem.extraAttrs.get("list");
+                    int randomizeTime = ((Double) cardItem.extra.get("time")).intValue();
+                    List<String> cardNames = (List<String>) cardItem.extra.get("list");
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.RANDOM, randomizeTime, 0, cardNames));
                 }
             }

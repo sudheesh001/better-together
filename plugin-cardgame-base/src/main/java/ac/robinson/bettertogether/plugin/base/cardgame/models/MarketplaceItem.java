@@ -21,7 +21,7 @@ public class MarketplaceItem {
         public String uuid;
         public String path;
         public CardType type;
-        public HashMap<String, Object> extraAttrs;
+        public HashMap<String, Object> extra;
 
         public String getUuid() {
             return uuid;
@@ -47,12 +47,12 @@ public class MarketplaceItem {
             this.type = type;
         }
 
-        public HashMap<String, Object> getExtraAttrs() {
-            return extraAttrs;
+        public HashMap<String, Object> getExtra() {
+            return extra;
         }
 
-        public void setExtraAttrs(HashMap<String, Object> extraAttrs) {
-            this.extraAttrs = extraAttrs;
+        public void setExtra(HashMap<String, Object> extra) {
+            this.extra = extra;
         }
     }
 
