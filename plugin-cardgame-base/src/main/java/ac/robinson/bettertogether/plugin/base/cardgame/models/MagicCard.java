@@ -57,6 +57,7 @@ public class MagicCard extends Card {
         for(String cardName: tempRandomCardNames) {
             randomCardRef.add(referenceCards.get(cardName));
         }
+        randomCardRef.add(this);
         Collections.shuffle(randomCardRef);
         tempRandomCardNames = null;
     }
