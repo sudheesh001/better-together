@@ -1,5 +1,6 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -7,6 +8,50 @@ import java.util.List;
  */
 
 public class MarketplaceItem {
+
+    public static class CardItem {
+        public String uuid;
+        public String url;
+        public CardType type;
+        public HashMap<String, Object> extraAttrs;
+
+        public String getUuid() {
+            return uuid;
+        }
+
+        public void setUuid(String uuid) {
+            this.uuid = uuid;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public CardType getType() {
+            return type;
+        }
+
+        public void setType(CardType type) {
+            this.type = type;
+        }
+
+        public HashMap<String, Object> getExtraAttrs() {
+            return extraAttrs;
+        }
+
+        public void setExtraAttrs(HashMap<String, Object> extraAttrs) {
+            this.extraAttrs = extraAttrs;
+        }
+    }
+
+    public enum CardType {
+        NORMAL, TTL, ACTIVATE, RANDOM
+    }
+
     private String background_card;
     private String created_by;
     private String description;
@@ -14,7 +59,7 @@ public class MarketplaceItem {
     private Integer number_of_cards;
     private Integer id;
     private String rules;
-    private List<String> cards;
+    private List<CardItem> cards;
 
     public String getBackground_card() {
         return background_card;
@@ -72,11 +117,11 @@ public class MarketplaceItem {
         this.rules = rules;
     }
 
-    public List<String> getCards() {
+    public List<CardItem> getCards() {
         return cards;
     }
 
-    public void setCards(List<String> cards) {
+    public void setCards(List<CardItem> cards) {
         this.cards = cards;
     }
 }

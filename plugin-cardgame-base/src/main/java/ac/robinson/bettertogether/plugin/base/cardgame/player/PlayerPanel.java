@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -102,16 +103,30 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
 
         mAllCardsRes = new HashMap<>();
-        for(String cardName: item.getCards()) {
-            MagicCard card = new MagicCard();
+        for(MarketplaceItem.CardItem cardItem: item.getCards()) {
+            Card card;
+            if (cardItem.type == MarketplaceItem.CardType.NORMAL) {
+                card = new Card();
+            } else {
+                card = new MagicCard();
+                MagicCard ref = (MagicCard) card;
+                if (cardItem.type == MarketplaceItem.CardType.TTL) {
+                    int ttlTime = (Integer) cardItem.extraAttrs.get("time");
+                    ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.TTL, 0, ttlTime, null));
+                } else if (cardItem.type == MarketplaceItem.CardType.ACTIVATE) {
+                    int activateTime = (int) cardItem.extraAttrs.get("time");
+                    ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.ACTIVATE, activateTime, 0, null));
+                } else if (cardItem.type == MarketplaceItem.CardType.RANDOM) {
+                    int randomizeTime = (int) cardItem.extraAttrs.get("time");
+                    List<String> cardNames = (List<String>) cardItem.extraAttrs.get("list");
+                    ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.RANDOM, randomizeTime, 0, cardNames));
+                }
+            }
             card.setmContext(mContext);
-            card.setName(cardName);
+            card.setName(cardItem.uuid);
             card.setHidden(addToPanelAsHidden);
-            card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardName));
+            card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardItem.url));
             card.setBackBitmapUrl(backgroundCardUrl);
-
-            card.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.TTL, 20, 20, null));
-            card.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.ACTIVATE, 5, 15, null));
 
             mAllCardsRes.put(card.getName(), card);
 
@@ -206,7 +221,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         mRenderablesInPlay.remove(card);
     }
 
-    private void mergeRenderables(Renderable r1, Renderable r2) {
+    private void mergeRenderables(@NonNull Renderable r1, @NonNull Renderable r2) {
         if (r1.isHidden() == r2.isHidden()) {
             Card c1, c2;
             CardDeck cd1, cd2;

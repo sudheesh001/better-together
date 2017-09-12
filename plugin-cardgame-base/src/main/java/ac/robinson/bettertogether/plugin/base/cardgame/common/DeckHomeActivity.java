@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.orhanobut.hawk.Hawk;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +75,12 @@ public class DeckHomeActivity extends AppCompatActivity {
                         downloadSet.add(item.getId());
                         Hawk.put(Constants.DOWNLOADED_ITEMS_ID_KEY, downloadSet);
 
-                        downloadImagesWithPicasso(item.getCards(), item.getBackground_card());
+                        List<String> cardUrls = new ArrayList<>();
+                        for(MarketplaceItem.CardItem cardItem: item.getCards()) {
+                            cardUrls.add(cardItem.url);
+                        }
+
+                        downloadImagesWithPicasso(cardUrls, item.getBackground_card());
 
                         Hawk.put(item.getId().toString(),item);
 

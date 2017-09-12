@@ -55,72 +55,76 @@ public class MagicCard extends Card {
 
     @Override
     public void draw(Canvas canvas) {
-        if (!activeCompleted || !randomCompleted || !ttlCompleted) {
-            // before: only start the magic when the card becomes visible
-            if (!activatedMagic) { // && !hidden) {
-                activatedMagic = true;
-                if (Thread.currentThread() instanceof PlayerThread) {
-                    timeInPlayStarted = PlayerThread.CURRENT_TIME;
-                    usePlayerThreadForTime = true;
-                } else if (Thread.currentThread() instanceof DealerThread) {
-                    timeInPlayStarted = DealerThread.CURRENT_TIME;
-                    usePlayerThreadForTime = false;
-                } else {
-                    Log.e("WTF", "draw: which thread is this??  " + Thread.currentThread().getName());
+
+        if (Thread.currentThread() instanceof PlayerThread) {
+
+            if (!activeCompleted || !randomCompleted || !ttlCompleted) {
+                // before: only start the magic when the card becomes visible
+                if (!activatedMagic) { // && !hidden) {
+                    activatedMagic = true;
+                    if (Thread.currentThread() instanceof PlayerThread) {
+                        timeInPlayStarted = PlayerThread.CURRENT_TIME;
+                        usePlayerThreadForTime = true;
+                    } else if (Thread.currentThread() instanceof DealerThread) {
+                        timeInPlayStarted = DealerThread.CURRENT_TIME;
+                        usePlayerThreadForTime = false;
+                    } else {
+                        Log.e("WTF", "draw: which thread is this??  " + Thread.currentThread().getName());
+                    }
                 }
             }
-        }
 
-        long currentTimeStep = usePlayerThreadForTime ? PlayerThread.CURRENT_TIME : DealerThread.CURRENT_TIME;
-        currentTimeStep -= timeInPlayStarted;
+            long currentTimeStep = usePlayerThreadForTime ? PlayerThread.CURRENT_TIME : DealerThread.CURRENT_TIME;
+            currentTimeStep -= timeInPlayStarted;
 
-        if (activatedMagic && (!ttlCompleted || !activeCompleted || !randomCompleted)) {
-            applyMagic(currentTimeStep);
-        }
+            if (activatedMagic && (!ttlCompleted || !activeCompleted || !randomCompleted)) {
+                applyMagic(currentTimeStep);
+            }
 
-        if (activatedMagic) {
-            int height = 0;
-            for(int i = 0; i < attributes.size(); i++) {
+            if (activatedMagic) {
+                int height = 0;
+                for (int i = 0; i < attributes.size(); i++) {
 
-                Paint textPaint = new Paint(PlayerPanel.TEXT_PAINT);
-                textPaint.setTextSize(12f);
+                    Paint textPaint = new Paint(PlayerPanel.TEXT_PAINT);
+                    textPaint.setTextSize(12f);
 
-                MagicAttributes attr = attributes.get(i);
-                String description = attr.type.toString() + " ";
-                String extra = "";
-                switch (attr.type) {
-                    case ACTIVATE:
-                        if (activeCompleted) continue;
-                        extra = "" + (attr.startTime - currentTimeStep);
-                        if (attr.startTime - currentTimeStep < 10) {
-                            textPaint.setColor(Color.GREEN);
-                        }
-                        height++;
-                        break;
-                    case RANDOM:
-                        if (randomCompleted) continue;
-                        extra = "" + (attr.startTime - currentTimeStep);
-                        if (attr.startTime - currentTimeStep < 10) {
-                            textPaint.setColor(Color.RED);
-                        }
-                        height++;
-                        break;
-                    case TTL:
-                        if (ttlCompleted) continue;
-                        extra = "" + (attr.endTime - currentTimeStep);
-                        if (attr.endTime - currentTimeStep < 5) {
-                            textPaint.setColor(Color.RED);
-                        }
-                        height++;
-                        break;
+                    MagicAttributes attr = attributes.get(i);
+                    String description = attr.type.toString() + " ";
+                    String extra = "";
+                    switch (attr.type) {
+                        case ACTIVATE:
+                            if (activeCompleted) continue;
+                            extra = "" + (attr.startTime - currentTimeStep);
+                            if (attr.startTime - currentTimeStep < 10) {
+                                textPaint.setColor(Color.GREEN);
+                            }
+                            height++;
+                            break;
+                        case RANDOM:
+                            if (randomCompleted) continue;
+                            extra = "" + (attr.startTime - currentTimeStep);
+                            if (attr.startTime - currentTimeStep < 10) {
+                                textPaint.setColor(Color.RED);
+                            }
+                            height++;
+                            break;
+                        case TTL:
+                            if (ttlCompleted) continue;
+                            extra = "" + (attr.endTime - currentTimeStep);
+                            if (attr.endTime - currentTimeStep < 5) {
+                                textPaint.setColor(Color.RED);
+                            }
+                            height++;
+                            break;
+                    }
+                    description += extra;
+
+                    canvas.drawText(
+                            description,
+                            getX(),
+                            getY() - 18 * height,
+                            textPaint);
                 }
-                description += extra;
-
-                canvas.drawText(
-                        description,
-                        getX(),
-                        getY() - 18*height,
-                        textPaint);
             }
         }
 
