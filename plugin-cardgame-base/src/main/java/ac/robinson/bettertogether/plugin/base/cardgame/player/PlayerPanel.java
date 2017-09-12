@@ -103,7 +103,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
 
         mAllCardsRes = new HashMap<>();
-        for(MarketplaceItem.CardItem cardItem: item.getCards()) {
+        for(String cardUuid: item.getCards().keySet()) {
+            MarketplaceItem.CardItem cardItem = item.getCards().get(cardUuid);
             Card card;
             if (cardItem.type == MarketplaceItem.CardType.NORMAL) {
                 card = new Card();
@@ -125,7 +126,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             card.setmContext(mContext);
             card.setName(cardItem.uuid);
             card.setHidden(addToPanelAsHidden);
-            card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardItem.url));
+            card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardItem.path));
             card.setBackBitmapUrl(backgroundCardUrl);
 
             mAllCardsRes.put(card.getName(), card);

@@ -76,8 +76,10 @@ public class DeckHomeActivity extends AppCompatActivity {
                         Hawk.put(Constants.DOWNLOADED_ITEMS_ID_KEY, downloadSet);
 
                         List<String> cardUrls = new ArrayList<>();
-                        for(MarketplaceItem.CardItem cardItem: item.getCards()) {
-                            cardUrls.add(cardItem.url);
+                        for (String cardName: item.getCards().keySet()) {
+                            MarketplaceItem.CardItem cardItem = item.getCards().get(cardName);
+                            cardItem.setUuid(cardName);
+                            cardUrls.add(cardItem.path);
                         }
 
                         downloadImagesWithPicasso(cardUrls, item.getBackground_card());

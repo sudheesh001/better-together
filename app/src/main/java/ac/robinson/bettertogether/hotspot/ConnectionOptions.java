@@ -45,7 +45,7 @@ public class ConnectionOptions {
 	public boolean mUseBluetooth = true;
 
 	public String getHotspotUrl() {
-		// reverse the package string so it can be used as a url if scanned normally
+		// reverse the package string so it can be used as a path if scanned normally
 		return formatHotspotUrl(DEFAULT_HOTSPOT_URL_FORMAT, BetterTogetherUtils.reversePackageString(mPluginPackage), mName,
 				mPassword);
 	}

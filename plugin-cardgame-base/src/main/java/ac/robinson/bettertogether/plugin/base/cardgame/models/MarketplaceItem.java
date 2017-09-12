@@ -1,7 +1,7 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by t-sus on 5/29/2017.
@@ -9,9 +9,17 @@ import java.util.List;
 
 public class MarketplaceItem {
 
+    public Map<String, CardItem> getCards() {
+        return cards;
+    }
+
+    public void setCards(Map<String, CardItem> cards) {
+        this.cards = cards;
+    }
+
     public static class CardItem {
         public String uuid;
-        public String url;
+        public String path;
         public CardType type;
         public HashMap<String, Object> extraAttrs;
 
@@ -23,12 +31,12 @@ public class MarketplaceItem {
             this.uuid = uuid;
         }
 
-        public String getUrl() {
-            return url;
+        public String getPath() {
+            return path;
         }
 
-        public void setUrl(String url) {
-            this.url = url;
+        public void setPath(String path) {
+            this.path = path;
         }
 
         public CardType getType() {
@@ -59,7 +67,7 @@ public class MarketplaceItem {
     private Integer number_of_cards;
     private Integer id;
     private String rules;
-    private List<CardItem> cards;
+    private Map<String, CardItem> cards;
 
     public String getBackground_card() {
         return background_card;
@@ -117,11 +125,5 @@ public class MarketplaceItem {
         this.rules = rules;
     }
 
-    public List<CardItem> getCards() {
-        return cards;
-    }
 
-    public void setCards(List<CardItem> cards) {
-        this.cards = cards;
-    }
 }
