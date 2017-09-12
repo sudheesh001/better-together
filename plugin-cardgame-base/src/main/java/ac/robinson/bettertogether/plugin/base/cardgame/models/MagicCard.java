@@ -7,7 +7,9 @@ import android.graphics.Paint;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import ac.robinson.bettertogether.plugin.base.cardgame.dealer.DealerThread;
 import ac.robinson.bettertogether.plugin.base.cardgame.player.PlayerPanel;
@@ -24,6 +26,8 @@ public class MagicCard extends Card {
     boolean usePlayerThreadForTime = false;
     boolean activeCompleted = true;
     boolean randomCompleted = true;
+    List<String> tempRandomCardNames = new ArrayList<>();
+    public List<Card> randomCardRef = new ArrayList<>();
     boolean ttlCompleted = true;
 
     List<MagicAttributes> attributes = new ArrayList<>();
@@ -41,11 +45,20 @@ public class MagicCard extends Card {
                 break;
             case RANDOM:
                 randomCompleted = false;
+                tempRandomCardNames.addAll(magicAttribute.newCardIds);
                 break;
             case TTL:
                 ttlCompleted = false;
                 break;
         }
+    }
+
+    public void prepare(Map<String, Card> referenceCards) {
+        for(String cardName: tempRandomCardNames) {
+            randomCardRef.add(referenceCards.get(cardName));
+        }
+        Collections.shuffle(randomCardRef);
+        tempRandomCardNames = null;
     }
 
     public static boolean canBeSent(Renderable renderable) {
@@ -89,14 +102,13 @@ public class MagicCard extends Card {
 
     @Override
     public void draw(Canvas canvas) {
-
         if (Thread.currentThread() instanceof PlayerThread) {
 
             if (!activeCompleted || !randomCompleted || !ttlCompleted) {
                 // before: only start the magic when the card becomes visible
                 if (!activatedMagic) { // && !hidden) {
-                    activatedMagic = true;
                     if (Thread.currentThread() instanceof PlayerThread) {
+                        activatedMagic = true;
                         timeInPlayStarted = PlayerThread.CURRENT_TIME;
                         usePlayerThreadForTime = true;
                     } else if (Thread.currentThread() instanceof DealerThread) {
@@ -144,7 +156,7 @@ public class MagicCard extends Card {
                             break;
                         case TTL:
                             if (ttlCompleted) continue;
-                            extra = "" + (attr.endTime - currentTimeStep);
+                            extra = "" + (attr.endTime - currentTimeStep) % attr.endTime;
                             if (attr.endTime - currentTimeStep < 5) {
                                 textPaint.setColor(Color.RED);
                             }
@@ -180,6 +192,22 @@ public class MagicCard extends Card {
     }
 
 
+    public int randomCurrIdx;
+    private int randomTimeCycle = 1;
+    private static void applyRandom(MagicCard card) {
+        List<Card> cards = card.randomCardRef;
+        int next_idx = card.randomCurrIdx + 1;
+        next_idx = next_idx % cards.size();
+        card.randomCurrIdx = next_idx;
+
+        Card proxyCard = cards.get(next_idx);
+        Log.i("Magic", "Switching card face" + proxyCard + card);
+        card.setBitmap(
+                proxyCard.getOpenBitmap(), proxyCard.getHiddenBitmap()
+        );
+    }
+
+
     public enum MAGIC_TYPE {
         TTL,
         ACTIVATE, // inverse of TTL
@@ -188,19 +216,23 @@ public class MagicCard extends Card {
 
         void apply(MagicAttributes attributes, long timeStep, MagicCard card) {
             if (this == TTL) {
-                if (timeStep > attributes.endTime) {
+                if (timeStep > attributes.endTime && !card.ttlCompleted) {
                     card.safeToDelete = true;
                     card.ttlCompleted = true;
+                    Log.i("Magic", "Deleting card" + card);
                 }
             } else if (this == ACTIVATE) {
-                if (timeStep > attributes.startTime) {
+                if (timeStep > attributes.startTime && !card.activeCompleted) {
                     card.canBePlayed = true;
                     card.activeCompleted = true;
+                    Log.i("Magic", "Activating card properties " + card);
+
                 }
             } else if (this == RANDOM) {
-                if (timeStep > attributes.startTime) {
-
-                    card.randomCompleted = true;
+                if (timeStep > card.randomTimeCycle * attributes.startTime) {
+                    applyRandom(card);
+//                    card.randomCompleted = true;
+                    card.randomTimeCycle += 1;
                 }
             }
         }

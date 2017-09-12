@@ -26,6 +26,7 @@ public abstract class Renderable implements Cloneable{
     private Bitmap hiddenBitmap = null;
     public boolean safeToDelete = false;
 
+
     protected String name;
     protected boolean canBePlayed = true; // this could be managed in the Magic cards.
 
@@ -96,6 +97,14 @@ public abstract class Renderable implements Cloneable{
     public abstract boolean isTouched();
 
     public abstract void setTouched(boolean touched);
+
+    public Bitmap getOpenBitmap() {
+        return openBitmap;
+    }
+
+    public Bitmap getHiddenBitmap() {
+        return hiddenBitmap;
+    }
 
     public boolean isOverlapping(Renderable image) {
         Bitmap imBmp = image.getBitmap();

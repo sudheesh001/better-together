@@ -105,6 +105,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         CardDeck cardDeck = new CardDeck(mContext, addToPanelAsHidden);
 
         mAllCardsRes = new HashMap<>();
+        List<MagicCard> magicRandomCards = new ArrayList<>();
         for(String cardUuid: item.getCards().keySet()) {
             MarketplaceItem.CardItem cardItem = item.getCards().get(cardUuid);
             Card card;
@@ -124,6 +125,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     int randomizeTime = ((Double) cardItem.extra.get("time")).intValue();
                     List<String> cardNames = (List<String>) cardItem.extra.get("list");
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.RANDOM, randomizeTime, 0, cardNames));
+                    magicRandomCards.add(ref);
                 }
             }
             card.setmContext(mContext);
@@ -138,6 +140,10 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 cardDeck.addCardToDeck(card);
             }
             card.warmBitmapCache();
+        }
+
+        for(MagicCard card: magicRandomCards) {
+            card.prepare(mAllCardsRes);
         }
 
         if (addToPanel) {
