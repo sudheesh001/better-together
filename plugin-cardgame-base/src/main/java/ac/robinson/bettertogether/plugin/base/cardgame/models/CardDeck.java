@@ -232,6 +232,7 @@ public class CardDeck extends Renderable implements CardActions, Serializable{
     @SuppressWarnings("JavadocReference")
     public Gesture handleActionDown(int eventX, int eventY) {
         Bitmap bitmap = getBitmap();
+        Log.d(TAG, "handleActionDown: Bitmap" +  bitmap + getX() + " " + getY());
         if (eventX >= (getX()) && (eventX <= (getX() + bitmap.getWidth()))) {
             if (eventY >= (getY()) && (eventY <= (getY() + bitmap.getHeight() ))) {
                 setTouched(true);

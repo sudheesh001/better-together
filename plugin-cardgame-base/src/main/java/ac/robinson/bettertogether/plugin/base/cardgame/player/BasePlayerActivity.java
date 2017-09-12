@@ -199,7 +199,7 @@ public class BasePlayerActivity extends BasePluginActivity implements CardPanelC
     public void inflateCardFanView(CardDeck cardDeck){
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck))
+                    .add(parentFrame.getId(), mainFragment = MainFragment.newInstance(cardDeck, playerPanel))
                     .commit();
     }
 

@@ -461,6 +461,9 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             mRenderablesInPlay.add(cardDeck.getTopCardFromDeck());
             mRenderablesInPlay.remove(cardDeck);
         }
+        else if (cardDeck.getmCards().size() == 0) {
+            mRenderablesInPlay.remove(cardDeck);
+        }
         return true;
     }
 
@@ -503,7 +506,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         Log.d(TAG, "onFling: Sending " + flungRenderable  + " to Dealer Panel");
         if (!MagicCard.canBeSent(flungRenderable)) return;
 
-        // Prepare broadcast message
+            // Prepare broadcast message
         BroadcastCardMessage message = new BroadcastCardMessage();
         message.setCardAction(Action.play);
         if( flungRenderable instanceof Card) {

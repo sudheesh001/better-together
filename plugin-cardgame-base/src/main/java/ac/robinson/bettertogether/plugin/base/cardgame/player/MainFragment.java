@@ -22,6 +22,7 @@ import ac.robinson.bettertogether.plugin.base.cardgame.R;
 import ac.robinson.bettertogether.plugin.base.cardgame.dealer.BaseDealerActivity;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
 import ac.robinson.bettertogether.plugin.base.cardgame.models.CardDeck;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.MagicCard;
 
 /**
  * Created by t-apmehr on 6/6/2017.
@@ -36,10 +37,12 @@ public class MainFragment extends Fragment {
 
     private CardsAdapter adapter;
     private static CardDeck cardDeck;
+    private static PlayerPanel panelInstance;
 
-    public static MainFragment newInstance(CardDeck deck) {
+    public static MainFragment newInstance(CardDeck deck, PlayerPanel panel) {
 
         cardDeck = deck;
+        panelInstance = panel;
 
         Bundle args = new Bundle();
         MainFragment fragment = new MainFragment();
@@ -130,7 +133,42 @@ public class MainFragment extends Fragment {
                     @Override
                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                         //do things
-                        Log.d(TAG, "Swipe Dir = " + direction);
+
+                        Log.d(TAG, "Swipe Dir = " + direction + "  " + Thread.currentThread());
+                        assert Thread.currentThread() instanceof PlayerThread;
+
+                        int pos = viewHolder.getAdapterPosition();
+                        Card cardToSend = adapter.getModelByPos(pos);
+                        Log.d(TAG, "onSwiped: Sending card " + cardToSend);
+                        if (MagicCard.canBeSent(cardToSend)) {
+                            panelInstance.handleFling(cardToSend); // It'll try to remove the card from mRenderablesInPlay as well, however that will fail because this card is explicity not in that list, the cardDeck as a whole is.
+                            adapter.removeCard(cardToSend);
+                            cardDeck.removeCardFromDeck(cardToSend);
+                        }
+
+                        if (adapter.getItemCount() == 1) {
+                            Card topCard = adapter.getModelByPos(0);
+                            ((BasePlayerActivity)getActivity()).getSelectedCard(cardDeck, topCard);
+                            exit();
+                        }
+                    }
+
+                    @Override
+                    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                        int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                        int swipeFlags = 0; // disable swipe on dealer panel
+                        if (panelInstance != null && panelInstance instanceof PlayerPanel) {
+                            swipeFlags =
+                                    ItemTouchHelper.UP
+//                                            | ItemTouchHelper.DOWN
+//                                            | ItemTouchHelper.LEFT
+//                                            | ItemTouchHelper.RIGHT
+//                                            | ItemTouchHelper.START
+//                                            | ItemTouchHelper.END
+                            ;
+
+                        }
+                        return makeMovementFlags(dragFlags, swipeFlags);
                     }
 
                     @Override
@@ -185,12 +223,19 @@ public class MainFragment extends Fragment {
     }
 
     public void onClick(int pos) {
-//        FullInfoTabFragment fragment = FullInfoTabFragment.newInstance(adapter.getModelByPos(pos));
-//        getActivity().getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.root, fragment)
-//                .addToBackStack(null)
-//                .commit();
+        Card card = adapter.getModelByPos(pos);
+
+        if (getActivity() instanceof BasePlayerActivity) {
+            ((BasePlayerActivity)getActivity()).getSelectedCard(cardDeck, card);
+        } else {
+            ((BaseDealerActivity) getActivity()).getSelectedCard(cardDeck, card);
+        }
+        // FIXME send a local broadcast to surface view
+
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .remove(this)
+                .commit();
     }
 
     public boolean deselectIfSelected() {
@@ -200,6 +245,13 @@ public class MainFragment extends Fragment {
         } else {
             return false;
         }
+    }
+
+    void exit(){
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .remove(this)
+                .commit();
     }
 }
 

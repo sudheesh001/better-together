@@ -46,6 +46,11 @@ class CardsAdapter extends RecyclerView.Adapter<CardsAdapter.CardViewHolder> {
         return isAdded;
     }
 
+    public void removeCard(Card card) {
+        boolean removed = mItems.remove(card);
+        if (removed) notifyDataSetChanged();
+    }
+
     public void clear() {
         mItems.clear();
         notifyDataSetChanged();
@@ -60,7 +65,8 @@ class CardsAdapter extends RecyclerView.Adapter<CardsAdapter.CardViewHolder> {
     @Override
     public void onBindViewHolder(final CardViewHolder holder, int position) {
         Card item = mItems.get(position);
-        holder.cardImage.setImageBitmap(item.getBitmap(true));
+        holder.cardImage.setImageBitmap(item.getBitmap(true)); // to force load all bitmaps in cache.
+        holder.cardImage.setImageBitmap(item.getOpenBitmap()); // always show the front of the card.
 
         ((CardView) holder.itemView).setCardBackgroundColor(Color.BLACK);
 
