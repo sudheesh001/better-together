@@ -138,7 +138,7 @@ public class Card extends Renderable{
 
     @Override
     public List<Card> handleDoubleTap(MotionEvent event) {
-        if (!canBeMadeVisible && isHidden()) { return null; }
+//        if (!canBePlayed && isHidden()) { return null; }
         this.toggleHidden();
         return null;
     }

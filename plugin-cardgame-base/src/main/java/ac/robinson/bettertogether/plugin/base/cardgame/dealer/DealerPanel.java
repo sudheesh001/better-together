@@ -95,13 +95,14 @@ public class DealerPanel extends PlayerPanel {
 
     @Override
     protected void handleSingleTapOnRenderable(Renderable r) {
-        if (r instanceof Card) {
-            CardContextActionPanel
-                    .getInstance(mContext)
-                    .show(r, CardContextActionPanel.SHOW_TRANSFER | CardContextActionPanel.SHOW_REVERSE);
-        } else if (r instanceof CardDeck) {
+//        if (r instanceof Card) {
+//            CardContextActionPanel
+//                    .getInstance(mContext);
+//                    .show(r, CardContextActionPanel.SHOW_TRANSFER | CardContextActionPanel.SHOW_REVERSE);
+//        } else
+        if (r instanceof CardDeck) {
             CardContextActionPanel.getInstance(mContext).show(r,
-                    CardContextActionPanel.SHOW_TRANSFER |
+//                    CardContextActionPanel.SHOW_TRANSFER |
                             CardContextActionPanel.SHOW_REVERSE |
                             CardContextActionPanel.SHOW_DISTRIBUTE |
                             CardContextActionPanel.SHOW_SHUFFLE);

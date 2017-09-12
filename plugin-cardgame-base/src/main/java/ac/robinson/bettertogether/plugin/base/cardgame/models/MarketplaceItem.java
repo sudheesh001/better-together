@@ -57,7 +57,7 @@ public class MarketplaceItem {
     }
 
     public enum CardType {
-        NORMAL, TTL, ACTIVATE, RANDOM
+        NORMAL, TTL, TIMED, RANDOM
     }
 
     private String background_card;

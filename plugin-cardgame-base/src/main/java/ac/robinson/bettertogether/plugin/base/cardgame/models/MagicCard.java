@@ -1,5 +1,6 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.models;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -35,7 +36,7 @@ public class MagicCard extends Card {
 
         switch (magicAttribute.type) {
             case ACTIVATE:
-                canBeMadeVisible = false;
+                canBePlayed = false;
                 activeCompleted = false;
                 break;
             case RANDOM:
@@ -46,6 +47,39 @@ public class MagicCard extends Card {
                 break;
         }
     }
+
+    public static boolean canBeSent(Renderable renderable) {
+        if (renderable instanceof MagicCard) {
+            return ((MagicCard) renderable).canBePlayed;
+        } else if (renderable instanceof CardDeck) {
+            for (Card card: ((CardDeck) renderable).getmCards()) {
+                if (card instanceof MagicCard) {
+                    if (!((MagicCard) card).canBePlayed) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static Renderable filterCanBeSent(Renderable renderable, Context mContext) {
+        if (renderable instanceof MagicCard) {
+            if (((MagicCard) renderable).canBePlayed) {
+                return renderable;
+            }
+            return null;
+        } else if (renderable instanceof CardDeck) {
+            CardDeck filtered = new CardDeck(mContext, false);
+            for (Card card: ((CardDeck) renderable).getmCards()) {
+                if (card instanceof MagicCard) {
+                    if (((MagicCard) card).canBePlayed) filtered.addCardToDeck(card);
+                }
+            }
+
+            return filtered;
+        }
+        return renderable;
+    }
+
 
     private void applyMagic(long currentTimeStep) {
         for (MagicAttributes attribute: attributes) {
@@ -160,7 +194,7 @@ public class MagicCard extends Card {
                 }
             } else if (this == ACTIVATE) {
                 if (timeStep > attributes.startTime) {
-                    card.canBeMadeVisible = true;
+                    card.canBePlayed = true;
                     card.activeCompleted = true;
                 }
             } else if (this == RANDOM) {

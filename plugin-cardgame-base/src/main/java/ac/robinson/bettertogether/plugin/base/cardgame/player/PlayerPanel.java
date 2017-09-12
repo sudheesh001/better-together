@@ -25,6 +25,7 @@ import com.orhanobut.hawk.Hawk;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -81,6 +82,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     private PlayerThread playerThread;
     protected HashMap<String, Card> mAllCardsRes= new HashMap<>();  // Map of card_name -> Card.
+    protected HashSet<String> mAllMagicCards = new HashSet<>();
     protected List<Renderable> mRenderablesInPlay = new ArrayList<>();  // List of renderables currently on screen.
     protected Renderable mLastCardTouched = null; // for detecting the card being flung.
 
@@ -111,11 +113,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             } else {
                 card = new MagicCard();
                 MagicCard ref = (MagicCard) card;
+                if (cardItem.type == MarketplaceItem.CardType.NORMAL) {}
                 if (cardItem.type == MarketplaceItem.CardType.TTL) {
-                    int ttlTime = (Integer) cardItem.extra.get("time");
+                    int ttlTime = ((Double) cardItem.extra.get("time")).intValue();
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.TTL, 0, ttlTime, null));
-                } else if (cardItem.type == MarketplaceItem.CardType.ACTIVATE) {
-                    int activateTime = (int) cardItem.extra.get("time");
+                } else if (cardItem.type == MarketplaceItem.CardType.TIMED) {
+                    int activateTime = ((Double) cardItem.extra.get("time")).intValue();
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.ACTIVATE, activateTime, 0, null));
                 } else if (cardItem.type == MarketplaceItem.CardType.RANDOM) {
                     int randomizeTime = ((Double) cardItem.extra.get("time")).intValue();
@@ -492,11 +495,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     protected void handleFling(Renderable flungRenderable) {
         Log.d(TAG, "onFling: Sending " + flungRenderable  + " to Dealer Panel");
+        if (!MagicCard.canBeSent(flungRenderable)) return;
 
         // Prepare broadcast message
         BroadcastCardMessage message = new BroadcastCardMessage();
         message.setCardAction(Action.play);
-        if( flungRenderable instanceof Card){
+        if( flungRenderable instanceof Card) {
             List<String> cards = new ArrayList<>();
             cards.add(flungRenderable.getName());
             message.setCards(cards);
@@ -624,13 +628,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     protected void handleSingleTapOnRenderable(Renderable r) {
-        if (r instanceof Card) {
-            CardContextActionPanel
-                    .getInstance(mContext)
-                    .show(r, CardContextActionPanel.SHOW_TRANSFER | CardContextActionPanel.SHOW_REVERSE);
-        } else if (r instanceof CardDeck){
+//        if (r instanceof Card) {
+//            CardContextActionPanel
+//                    .getInstance(mContext);
+//                    .show(r, CardContextActionPanel.SHOW_TRANSFER | CardContextActionPanel.SHOW_REVERSE);
+//        } else
+        if (r instanceof CardDeck){
             CardContextActionPanel.getInstance(mContext).show(r,
-                            CardContextActionPanel.SHOW_TRANSFER |
+//                            CardContextActionPanel.SHOW_TRANSFER |
                             CardContextActionPanel.SHOW_REVERSE |
                             CardContextActionPanel.SHOW_SHUFFLE);
         }
@@ -654,10 +659,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         List<String> receivedCards = cardMessage.getCards();
         if (receivedCards.size() == 0) return;
         if (receivedCards.size() == 1) {
-            // TODO: check for magic card and apply attributes if still active.
             Card receivedCard;
             try {
                 receivedCard = (Card) mAllCardsRes.get(receivedCards.get(0)).clone();
+                if (mAllMagicCards.contains(receivedCard.getName())) {
+                    receivedCard = (MagicCard) mAllCardsRes.get(receivedCards.get(0)).clone();
+                }
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
                 return;
@@ -672,8 +679,10 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             for(String cardId: receivedCards) {
                 Card card;
                 try {
-                    // TODO: check for magic card and apply attributes if still active.
                     card = (Card) mAllCardsRes.get(cardId).clone();
+                    if (mAllMagicCards.contains(card.getName())) {
+                        card = (MagicCard) mAllCardsRes.get(cardId).clone();
+                    }
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();
                     continue;

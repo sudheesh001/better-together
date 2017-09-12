@@ -205,7 +205,13 @@ public class CardContextActionPanel extends Renderable {
         Log.d(TAG, "handleDistribute: ");
         try {
             if (dealerActivityContext != null) {
-                ((BaseDealerActivity) dealerActivityContext).inflateWheelView((Renderable) Renderable.selectedRenderableForContext.clone(), true);
+//                Renderable renderableToDistribute = MagicCard.filterCanBeSent(Renderable.selectedRenderableForContext, mContext);
+                Renderable renderableToDistribute = Renderable.selectedRenderableForContext;
+//                if (renderableToDistribute == null ||
+//                        (renderableToDistribute instanceof CardDeck && ((CardDeck) renderableToDistribute).getmCards().size() == 0))
+//                    return;
+
+                ((BaseDealerActivity) dealerActivityContext).inflateWheelView((Renderable) renderableToDistribute.clone(), true);
             }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -214,14 +220,14 @@ public class CardContextActionPanel extends Renderable {
     
     private void handleReverse(int x, int y) {
         if (forRenderable instanceof Card) {
-            if (!forRenderable.canBeMadeVisible && forRenderable.isHidden()) { return; }
+//            if (!forRenderable.canBePlayed && forRenderable.isHidden()) { return; }
             forRenderable.setHidden(!forRenderable.isHidden());
         } else if (forRenderable instanceof CardDeck) {
             CardDeck deck = (CardDeck) forRenderable;
             boolean toggledHidden = !deck.isHidden();
             deck.setHidden(toggledHidden);
             for(Card card: deck.getmCards()) {
-                if (!card.canBeMadeVisible && card.isHidden()) continue;
+//                if (!card.canBePlayed && card.isHidden()) continue;
                 card.setHidden(toggledHidden);
             }
         }
