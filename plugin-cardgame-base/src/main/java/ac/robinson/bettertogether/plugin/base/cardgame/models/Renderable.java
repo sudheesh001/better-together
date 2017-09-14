@@ -126,7 +126,7 @@ public abstract class Renderable implements Cloneable{
         );
 
         int intArea = MathUtils.rectangleIntersectionArea(imRect, selfRect);
-        Log.d(TAG, "isOverlapping: " + intArea);
+//        Log.d(TAG, "isOverlapping: " + intArea);
         return intArea >= OVERLAP_THRESHOLD_LIMIT;
     }
 

@@ -57,8 +57,8 @@ public class MagicCard extends Card {
         for(String cardName: tempRandomCardNames) {
             randomCardRef.add(referenceCards.get(cardName));
         }
-        randomCardRef.add(this);
         Collections.shuffle(randomCardRef);
+        randomCardRef.add(0, this);
         tempRandomCardNames = null;
     }
 
@@ -149,7 +149,7 @@ public class MagicCard extends Card {
                             break;
                         case RANDOM:
                             if (randomCompleted) continue;
-                            extra = "" + (attr.startTime - currentTimeStep);
+                            extra = "" + (attr.startTime - currentTimeStep) % attr.startTime;
                             if (attr.startTime - currentTimeStep < 10) {
                                 textPaint.setColor(Color.RED);
                             }
@@ -157,7 +157,7 @@ public class MagicCard extends Card {
                             break;
                         case TTL:
                             if (ttlCompleted) continue;
-                            extra = "" + (attr.endTime - currentTimeStep) % attr.endTime;
+                            extra = "" + (attr.endTime - currentTimeStep);
                             if (attr.endTime - currentTimeStep < 5) {
                                 textPaint.setColor(Color.RED);
                             }
@@ -193,19 +193,26 @@ public class MagicCard extends Card {
     }
 
 
-    public int randomCurrIdx;
+    private int randomCurrIdx = 0;
     private int randomTimeCycle = 1;
-    private static void applyRandom(MagicCard card) {
-        List<Card> cards = card.randomCardRef;
-        int next_idx = card.randomCurrIdx + 1;
-        next_idx = next_idx % cards.size();
-        card.randomCurrIdx = next_idx;
 
-        Card proxyCard = cards.get(next_idx);
-        Log.i("Magic", "Switching card face" + proxyCard + card);
-        card.setBitmap(
+    public void setRandomCurrIdx(int x) {
+        randomCurrIdx = x;
+        Card proxyCard = randomCardRef.get(randomCurrIdx);
+        Log.i("Magic", "Switching card face" + proxyCard + this);
+        setBitmap(
                 proxyCard.getOpenBitmap(), proxyCard.getHiddenBitmap()
         );
+    }
+
+    public int getRandomCurrIdx() {
+        return randomCurrIdx;
+    }
+
+    private static void applyRandom(MagicCard card) {
+        Log.w("Changing card app.", "applyingRandom: " + card.getName() + " " + card.randomCurrIdx);
+        List<Card> cards = card.randomCardRef;
+        card.setRandomCurrIdx((card.randomCurrIdx + 1) % cards.size());
     }
 
 

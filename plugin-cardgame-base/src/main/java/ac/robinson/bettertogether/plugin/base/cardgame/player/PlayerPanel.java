@@ -113,8 +113,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                 card = new Card();
             } else {
                 card = new MagicCard();
+                card.setName(cardItem.getUuid());
                 MagicCard ref = (MagicCard) card;
-                if (cardItem.type == MarketplaceItem.CardType.NORMAL) {}
                 if (cardItem.type == MarketplaceItem.CardType.TTL) {
                     int ttlTime = ((Double) cardItem.extra.get("time")).intValue();
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.TTL, 0, ttlTime, null));
@@ -127,6 +127,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     ref.addMagicAttribute(new MagicCard.MagicAttributes(MagicCard.MAGIC_TYPE.RANDOM, randomizeTime, 0, cardNames));
                     magicRandomCards.add(ref);
                 }
+                mAllMagicCards.add(card.getName());
+//                Log.d("MAGIC CARD", "setCurrentlyPlayingCardDeck: Adding magic card" + card.getName());
             }
             card.setmContext(mContext);
             card.setName(cardItem.uuid);
@@ -149,6 +151,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         if (addToPanel) {
             mRenderablesInPlay.add(cardDeck);
         }
+//        Log.d("MAGIC CARD", "setCurrentlyPlayingCardDeck: Magic cards " + mAllMagicCards);
     }
 
     public PlayerPanel(Context context) {
@@ -469,7 +472,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     @Override
     public boolean onDown(MotionEvent event) {
-        Log.d(TAG, "onDown: " + event.toString());
+//        Log.d(TAG, "onDown: " + event.toString());
         mLastCardTouched = null;
 
         float x = event.getX(); float y = event.getY();
@@ -502,7 +505,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         return true;
     }
 
-    protected void handleFling(Renderable flungRenderable) {
+    protected void handleFling (@NonNull  Renderable flungRenderable) {
         Log.d(TAG, "onFling: Sending " + flungRenderable  + " to Dealer Panel");
         if (!MagicCard.canBeSent(flungRenderable)) return;
 
@@ -510,15 +513,11 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
         BroadcastCardMessage message = new BroadcastCardMessage();
         message.setCardAction(Action.play);
         if( flungRenderable instanceof Card) {
-            List<String> cards = new ArrayList<>();
-            cards.add(flungRenderable.getName());
-            message.setCards(cards);
+            message.addCard((Card) flungRenderable);
         }else if( flungRenderable instanceof CardDeck){
-            List<String> cards = new ArrayList<>();
             for (Card card: ((CardDeck) flungRenderable).getmCards()) {
-                cards.add(card.getName());
+                message.addCard(card);
             }
-            message.setCards(cards);
         }
         message.setHidden(flungRenderable.isHidden());
         ((BasePlayerActivity)getContext()).prepareMessage(message);
@@ -530,8 +529,8 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                            float velocityX, float velocityY) {
         if (mLastCardTouched != null) {
             Log.d(TAG, "Flinged " + mLastCardTouched.getName() + " to Coords: x=" + event1.getX() + ", y=" + event1.getY());
-            Log.d(TAG, "Flinged E2" + mLastCardTouched.getName() + " to Coords: x=" + event2.getX() + ", y=" + event2.getY());
-            Log.d(TAG, "onFling: velocity " + velocityX + " " + velocityY);
+//            Log.d(TAG, "Flinged E2" + mLastCardTouched.getName() + " to Coords: x=" + event2.getX() + ", y=" + event2.getY());
+//            Log.d(TAG, "onFling: velocity " + velocityX + " " + velocityY);
             if ((Math.abs(velocityX) + Math.abs(velocityY) >= FLING_CARD_OUTSIDE_VELOCITY_THRESHOLD)
                     && event2.getY() <= FLING_CARD_DISTANCE_FROM_EDGE_THRESHOLD) {
                 handleFling(mLastCardTouched);
@@ -562,12 +561,12 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     @Override
     public void onLongPress(MotionEvent event) {
-        Log.d(TAG, "onLongPress: " + event.toString());
+//        Log.d(TAG, "onLongPress: " + event.toString());
         for(int i = 0; i < mRenderablesInPlay.size(); i++) {
             Renderable r = mRenderablesInPlay.get(i);
             if ((r instanceof CardDeck) && r.isTouched()) {
                 // make sure it works only for deck and
-                Log.d(TAG, "Long pressed " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
+//                Log.d(TAG, "Long pressed " + r.getName() + " to Coords: x=" + event.getX() + ",y=" + event.getY());
                 handleLongPress((CardDeck) r);
                 break; // only moce the top card
             }
@@ -577,14 +576,14 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        Log.d(TAG, "onScroll: " + e1.toString() + e2.toString());
+//        Log.d(TAG, "onScroll: " + e1.toString() + e2.toString());
 
-        Log.d(TAG, "Move: x=" + e2.getX() + ",y=" + e2.getY());
+//        Log.d(TAG, "Move: x=" + e2.getX() + ",y=" + e2.getY());
 //                // the gestures
         for (Renderable r : mRenderablesInPlay) {
             if (r.isTouched()) {
                 // the image was picked up and is being dragged
-                Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + e2.getX() + ",y=" + e2.getY());
+//                Log.d(TAG, "Moving " + r.getName() + " to Coords: x=" + e2.getX() + ",y=" + e2.getY());
                 r.displaceX((int) -distanceX);
                 r.displaceY((int) -distanceY);
 
@@ -606,7 +605,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     @Override
     public boolean onDoubleTap(MotionEvent event) {
-        Log.d(TAG, "onDoubleTap: " + event.toString());
+//        Log.d(TAG, "onDoubleTap: " + event.toString());
         List<Card> cards = null;
         for (int i = 0; i < mRenderablesInPlay.size(); i++) {
             Renderable r = mRenderablesInPlay.get(i);
@@ -619,7 +618,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
                     mRenderablesInPlay.remove(r);
                 }
 
-                Log.d(TAG, " Double tap on card " + r.getName());
+//                Log.d(TAG, " Double tap on card " + r.getName());
                 break;
             }
         }
@@ -652,7 +651,7 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent event) {
-        Log.d(TAG, "onSingleTapConfirmed: " + event.toString());
+//        Log.d(TAG, "onSingleTapConfirmed: " + event.toString());
         for(Renderable r: mRenderablesInPlay) {
             if (r.handleActionDown((int) event.getX(), (int) event.getY()).equals(Gesture.TOUCHED)) {
                 r.setTouched(false);
@@ -672,7 +671,15 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
             try {
                 receivedCard = (Card) mAllCardsRes.get(receivedCards.get(0)).clone();
                 if (mAllMagicCards.contains(receivedCard.getName())) {
-                    receivedCard = (MagicCard) mAllCardsRes.get(receivedCards.get(0)).clone();
+                    MagicCard magicRef = (MagicCard) mAllCardsRes.get(receivedCards.get(0)).clone();
+                    receivedCard = magicRef;
+                    String randomCardNameRef = cardMessage.getCurrentRandomRefCard().get(0);
+                    if (randomCardNameRef != null) {
+                        List<String> randomCardRefNames = new ArrayList<>();
+                        for(Card c: magicRef.randomCardRef)
+                            randomCardRefNames.add(c.getName());
+                        magicRef.setRandomCurrIdx(randomCardRefNames.indexOf(randomCardNameRef));
+                    }
                 }
             } catch (CloneNotSupportedException e) {
                 e.printStackTrace();
@@ -685,12 +692,21 @@ public class PlayerPanel extends SurfaceView implements SurfaceHolder.Callback, 
 
         else {
             CardDeck receivedCardDeck = new CardDeck(mContext, cardMessage.isHidden());
-            for(String cardId: receivedCards) {
+            for(int i = 0; i < receivedCards.size(); i++) {
+                String cardId = receivedCards.get(i);
                 Card card;
                 try {
                     card = (Card) mAllCardsRes.get(cardId).clone();
                     if (mAllMagicCards.contains(card.getName())) {
-                        card = (MagicCard) mAllCardsRes.get(cardId).clone();
+                        MagicCard magicRef = (MagicCard) mAllCardsRes.get(cardId).clone();
+                        card = magicRef;
+                        String randomCardNameRef = cardMessage.getCurrentRandomRefCard().get(i);
+                        if (randomCardNameRef != null) {
+                            List<String> randomCardRefNames = new ArrayList<>();
+                            for(Card c: magicRef.randomCardRef)
+                                randomCardRefNames.add(c.getName());
+                            magicRef.setRandomCurrIdx(randomCardRefNames.indexOf(randomCardNameRef));
+                        }
                     }
                 } catch (CloneNotSupportedException e) {
                     e.printStackTrace();

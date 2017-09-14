@@ -126,7 +126,7 @@ public class MainFragment extends Fragment {
                     @Override
                     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
                                           RecyclerView.ViewHolder target) {
-                        Log.d(TAG, "onMove " +  target);
+//                        Log.d(TAG, "onMove " +  target);
                         return false;
                     }
 
@@ -134,16 +134,18 @@ public class MainFragment extends Fragment {
                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                         //do things
 
-                        Log.d(TAG, "Swipe Dir = " + direction + "  " + Thread.currentThread());
+//                        Log.d(TAG, "Swipe Dir = " + direction + "  " + Thread.currentThread());
                         assert Thread.currentThread() instanceof PlayerThread;
 
                         int pos = viewHolder.getAdapterPosition();
                         Card cardToSend = adapter.getModelByPos(pos);
-                        Log.d(TAG, "onSwiped: Sending card " + cardToSend);
+//                        Log.d(TAG, "onSwiped: Sending card " + cardToSend);
                         if (MagicCard.canBeSent(cardToSend)) {
                             panelInstance.handleFling(cardToSend); // It'll try to remove the card from mRenderablesInPlay as well, however that will fail because this card is explicity not in that list, the cardDeck as a whole is.
                             adapter.removeCard(cardToSend);
                             cardDeck.removeCardFromDeck(cardToSend);
+                        } else {
+                            ((BasePlayerActivity)getActivity()).getSelectedCard(cardDeck, cardToSend);
                         }
 
                         if (adapter.getItemCount() == 1) {

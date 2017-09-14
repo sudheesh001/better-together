@@ -171,19 +171,18 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 
     public void handleCardDistribution(Map<String, List<Card>> distribution, Renderable renderable) {
         for(String playerId: distribution.keySet()) {
-            List<String> cardsToSend = new ArrayList<>();
+            BroadcastCardMessage message = new BroadcastCardMessage();
             for(Card card: distribution.get(playerId)) {
-                cardsToSend.add(card.getName());
+                message.addCard(card);
             }
 
-            if (cardsToSend.size() > 0) {
-                BroadcastCardMessage message = new BroadcastCardMessage();
+            if (message.getCards().size() > 0) {
                 message.setCardAction(Action.draw);
-                message.setCards(cardsToSend);
                 message.setHidden(renderable.isHidden());
                 message.setCardFrom(messageHelper.getmUser());
                 message.setCardTo(playerId);
                 Log.d(TAG, "handleCardDistribution: Sending message " + message + " from" + messageHelper.getmUser() + " to " + playerId);
+
                 sendMessage(messageHelper.DealerToPlayerMessage(message));
             }
         }

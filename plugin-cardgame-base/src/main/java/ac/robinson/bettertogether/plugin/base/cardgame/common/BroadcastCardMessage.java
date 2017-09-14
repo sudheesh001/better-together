@@ -1,6 +1,10 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.common;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import ac.robinson.bettertogether.plugin.base.cardgame.models.Card;
+import ac.robinson.bettertogether.plugin.base.cardgame.models.MagicCard;
 
 /**
  * Created by t-sus on 4/8/2017.
@@ -12,7 +16,13 @@ public class BroadcastCardMessage {
     private Action cardAction;
 
     private List<String> Cards;
+    private List<String> currentRandomRefCard;
     private boolean isHidden;
+
+    public BroadcastCardMessage() {
+        Cards = new ArrayList<>();
+        currentRandomRefCard = new ArrayList<>();
+    }
 
     public String getCardFrom() {
         // Get string from PlaySession AndroidID
@@ -44,8 +54,20 @@ public class BroadcastCardMessage {
         return Cards;
     }
 
-    public void setCards(List<String> cards) {
-        this.Cards = cards;
+    public List<String> getCurrentRandomRefCard() {
+        return currentRandomRefCard;
+    }
+
+    public void addCard(Card card) {
+        Cards.add(card.getName());
+        if (card instanceof MagicCard &&
+                ((MagicCard) card).randomCardRef != null &&
+                ((MagicCard) card).randomCardRef.size() > 0) {
+            Card currentCardRef = ((MagicCard) card).randomCardRef.get(((MagicCard) card).getRandomCurrIdx());
+            currentRandomRefCard.add(currentCardRef.getName());
+        } else {
+            currentRandomRefCard.add(null);
+        }
     }
 
     public boolean isHidden() {
