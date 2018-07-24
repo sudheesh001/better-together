@@ -15,11 +15,11 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.3.0'
+    api 'com.android.support:appcompat-v7:25.3.0'
 
-    compile 'com.amitshekhar.android:android-networking:0.4.0' // for http requests (built on OKHttp)
-    compile files('libs/YouTubeAndroidPlayerApi.jar')
+    api 'com.amitshekhar.android:android-networking:0.4.0' // for http requests (built on OKHttp)
+    api files('libs/YouTubeAndroidPlayerApi.jar')
     // compile 'com.google.apis:google-api-services-youtube:v3-rev164-1.21.0' // much larger resulting APK size than .jar above
 
-    compile 'ac.robinson.bettertogether:api:1.0.0' // the Better Together communication API
+    api 'ac.robinson.bettertogether:api:1.0.0' // the Better Together communication API
 }

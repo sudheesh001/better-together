@@ -20,11 +20,15 @@
     <uses-sdk tools:overrideLibrary="jp.wasabeef.recyclerview" />
 
     <application>
-        <activity android:name=".dealer.BaseDealerActivity"
-            android:screenOrientation="landscape"/>
-        <activity android:name=".player.BasePlayerActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".common.DeckHomeActivity"></activity>
+        <activity
+            android:name=".dealer.BaseDealerActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".player.BasePlayerActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".common.DeckHomeActivity" />
+        <activity
+            android:name=".accessibleplayer.BaseAccessiblePlayerActivity" />
     </application>
 
 </manifest>

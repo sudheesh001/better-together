@@ -15,10 +15,10 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.android.support:recyclerview-v7:25.3.0'
+    api 'com.android.support:appcompat-v7:25.3.0'
+    api 'com.android.support:recyclerview-v7:25.3.0'
 
-    compile 'jp.wasabeef:recyclerview-animators:2.0.0' // for animating adding/removing RecyclerView items
+    api 'jp.wasabeef:recyclerview-animators:2.0.0' // for animating adding/removing RecyclerView items
 
-    compile 'ac.robinson.bettertogether:api:1.0.0' // the Better Together communication API
+    api 'ac.robinson.bettertogether:api:1.0.0' // the Better Together communication API
 }

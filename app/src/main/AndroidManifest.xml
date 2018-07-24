@@ -340,6 +340,35 @@
 			</intent-filter>
 
 		</activity>
+
+		<activity
+			android:name="ac.robinson.bettertogether.plugin.base.cardgame.accessibleplayer.BaseAccessiblePlayerActivity"
+			android:exported="true"
+			android:icon="@mipmap/ic_player"
+			android:label="@string/accessible_player_plugin_name"
+			android:theme="@style/BetterTogether.PluginStyle.deep_purple">
+
+			<meta-data
+				android:name="ac.robinson.bettertogether.intent.extra.PLUGIN_PACKAGE"
+				android:value="ac.robinson.bettertogether.plugin.base.cardgame"/>
+
+			<meta-data
+				android:name="ac.robinson.bettertogether.intent.extra.PLUGIN_THEME"
+				android:value="deep_purple"/>
+
+			<meta-data
+				android:name="ac.robinson.bettertogether.intent.extra.PLUGIN_ICON"
+				android:resource="@mipmap/ic_card_launcher"/>
+
+			<meta-data
+				android:name="ac.robinson.bettertogether.intent.extra.PLUGIN_LABEL"
+				android:resource="@string/accessible_player_plugin_name"/>
+
+			<intent-filter>
+				<action android:name="ac.robinson.bettertogether.intent.action.LAUNCH_PLUGIN"/>
+			</intent-filter>
+
+		</activity>
 	</application>
 
 </manifest>
