@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.squareup.picasso.Picasso;
@@ -65,6 +66,8 @@ public class Card extends Renderable{
             @Override
             public void run() {
                 try {
+                    Log.d("IMAGEDOWNLOAD", frontBitmapUrl);
+                    Log.d("IMAGEDOWNLOAD", backBitmapUrl);
                     setBitmap(
                             Picasso.with(mContext).load(frontBitmapUrl).resize(cardHeight, cardHeight).centerInside().get(),
                             Picasso.with(mContext).load(backBitmapUrl).get()

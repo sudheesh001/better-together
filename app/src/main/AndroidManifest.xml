@@ -346,7 +346,7 @@
 			android:exported="true"
 			android:icon="@mipmap/ic_player"
 			android:label="@string/accessible_player_plugin_name"
-			android:theme="@style/BetterTogether.PluginStyle.deep_purple">
+			android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
 			<meta-data
 				android:name="ac.robinson.bettertogether.intent.extra.PLUGIN_PACKAGE"

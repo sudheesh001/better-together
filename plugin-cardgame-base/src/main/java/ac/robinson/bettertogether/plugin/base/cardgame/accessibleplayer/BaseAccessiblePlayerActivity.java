@@ -1,6 +1,5 @@
 package ac.robinson.bettertogether.plugin.base.cardgame.accessibleplayer;
 
-import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import ac.robinson.bettertogether.api.BasePluginActivity;
 import ac.robinson.bettertogether.api.messaging.BroadcastMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.R;
+import ac.robinson.bettertogether.plugin.base.cardgame.common.Action;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.BroadcastCardMessage;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageHelper;
 import ac.robinson.bettertogether.plugin.base.cardgame.common.MessageType;
@@ -34,12 +35,12 @@ import ac.robinson.bettertogether.plugin.base.cardgame.models.MarketplaceItem;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.APIClient;
 import ac.robinson.bettertogether.plugin.base.cardgame.utils.Constants;
 
-public class BaseAccessiblePlayerActivity extends BasePluginActivity {
+public class BaseAccessiblePlayerActivity extends BasePluginActivity implements CardSendButtonPressedHandler{
 
     private static final String TAG = BaseAccessiblePlayerActivity.class.getSimpleName();
     private Context mContext;
 
-    final ActionBar actionBar = getActionBar();
+    ActionBar actionBar;
     private ActionBar.TabListener actionBarTabListener;
     DeckPagerAdapter deckPagerAdapter;
     ViewPager deckPager;
@@ -66,7 +67,7 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity {
         mDecks = new ArrayList<>();
 
         initDeckTabs();
-        debugInfo();
+        // debugInfo();
     }
 
     void debugInfo() {
@@ -78,7 +79,7 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity {
 
             for (String player: players) {
                 playersText.append(player);
-                playersText.append(' ');
+                playersText.append('\n');
             }
             debugInfo.setText(playersText);
         }
@@ -88,27 +89,45 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity {
     }
 
     private void initDeckTabs() {
-        if (actionBar == null) return;
+        actionBar = getSupportActionBar();
+        if (actionBar == null) throw new RuntimeException("Action bar is null");
 
         deckPagerAdapter = new DeckPagerAdapter(getSupportFragmentManager());
+        deckPagerAdapter.setCardSendButtonPressedHandler(this);
         deckPager = (ViewPager) findViewById(R.id.pager);
         deckPager.setAdapter(deckPagerAdapter);
 
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         actionBarTabListener = new ActionBar.TabListener() {
-            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // show the given tab
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, android.support.v4.app.FragmentTransaction ft) {
+                deckPager.setCurrentItem(tab.getPosition());
             }
 
-            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) { }
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, android.support.v4.app.FragmentTransaction ft) { }
 
-            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) { }
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, android.support.v4.app.FragmentTransaction ft) { }
         };
+        deckPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+
+            @Override
+            public void onPageSelected(int position) {
+                actionBar.setSelectedNavigationItem(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) { }
+        });
     }
 
     void clearAllDecks() {
         mDecks.clear();
+        deckPagerAdapter.notifyDataSetChanged();
     }
 
     void addCardToDeck(CardDeck deck, Card card) {
@@ -117,8 +136,9 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity {
 
     void addDeckToView(CardDeck cardDeck) {
         mDecks.add(cardDeck);
+        deckPagerAdapter.notifyDataSetChanged();
 
-        if (actionBar == null) return;
+        if (actionBar == null) throw new RuntimeException("Action bar is null");
         actionBar.addTab(actionBar
                         .newTab()
                         .setText("Deck " + cardDeck.getName())
@@ -144,7 +164,7 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity {
 
                 sendMessage(messageHelper.Discovery(mName, mPlayerType)); // TODO: Will this cause a network flood?
             }
-            debugInfo();
+//            debugInfo();
         } else if (message.getType() == MessageType.DEALER_TO_PLAYER) {
             if (message.getMessage() != null && !message.getMessage().isEmpty()) {
                 BroadcastCardMessage receivedMessage = new Gson().fromJson(message.getMessage(), BroadcastCardMessage.class);
@@ -224,10 +244,22 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity {
             card.setBackBitmapUrl(backgroundCardUrl);
 
             mAllCardsRes.put(card.getName(), card);
-            singleCardDecks.addCardToDeck(card);
-            card.warmBitmapCache();
+//            card.warmBitmapCache();
         }
 
-        addDeckToView(singleCardDecks);
+//        addDeckToView(singleCardDecks);
+    }
+
+    @Override
+    public void handleCardSendToDeck(Card card) {
+        BroadcastCardMessage message = new BroadcastCardMessage();
+        message.setCardAction(Action.play);
+        message.addCard(card);
+        message.setHidden(false);
+
+        message.setCardFrom(messageHelper.getmUser());
+        message.setCardTo(messageHelper.getDealerFromMap());
+        Log.d(TAG, "Sending card to dealer " + card);
+        sendMessage(messageHelper.PlayerToDealerMessage(message));
     }
 }

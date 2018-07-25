@@ -16,9 +16,15 @@ public class DeckPagerAdapter extends FragmentStatePagerAdapter {
         super(fm);
     }
 
+    CardSendButtonPressedHandler handler;
+    public void setCardSendButtonPressedHandler(CardSendButtonPressedHandler handler) {
+        this.handler = handler;
+    }
+
     @Override
     public Fragment getItem(int i) {
-        Fragment fragment = new DeckTabFragment();
+        DeckTabFragment fragment = new DeckTabFragment();
+        fragment.setCardSendButtonPressedHandler(handler);
         Bundle args = new Bundle();
         args.putInt("deck_idx", i);
         fragment.setArguments(args);
