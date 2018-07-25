@@ -275,7 +275,7 @@ public class BaseDealerActivity extends BasePluginActivity implements WheelViewF
 //            messageHelper.PlayerReceivedMessage();
 //            m.parse(message);
 //            m.ServerReceivedMessage();
-            Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

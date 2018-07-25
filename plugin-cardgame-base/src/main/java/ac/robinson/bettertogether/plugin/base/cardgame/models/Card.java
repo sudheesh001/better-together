@@ -54,6 +54,15 @@ public class Card extends Renderable{
         this.name = name;
     }
 
+    String title;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
     public void warmBitmapCache() {
         startLoadBitmapThread();
     }

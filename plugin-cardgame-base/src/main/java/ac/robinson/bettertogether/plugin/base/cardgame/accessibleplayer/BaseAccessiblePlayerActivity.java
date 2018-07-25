@@ -188,7 +188,7 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity implements 
 
         else {
             Log.e(TAG, "onMessageReceived: Ignoring message that I don't know how to handle " + message + " " + message.getMessage() + " " + message.getType());
-            Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "Player message." + message.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -239,6 +239,7 @@ public class BaseAccessiblePlayerActivity extends BasePluginActivity implements 
             Card card = new Card();
             card.setmContext(mContext);
             card.setName(cardItem.uuid);
+            card.setTitle(cardItem.title);
             card.setHidden(false);
             card.setFrontBitmapUrl(APIClient.getBaseURL().concat(cardItem.path));
             card.setBackBitmapUrl(backgroundCardUrl);

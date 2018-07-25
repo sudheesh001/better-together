@@ -105,7 +105,7 @@ class CardListAdapter extends ArrayAdapter<Card> {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.row_card_layout, parent, false);
 
-        ((TextView)rowView.findViewById(R.id.card_name)).setText("" + position);
+        ((TextView)rowView.findViewById(R.id.card_name)).setText(card.getTitle());
         final Button deckButton = (Button) rowView.findViewById(R.id.button_send_to_deck);
         deckButton.setOnClickListener(new View.OnClickListener() {
             @Override
